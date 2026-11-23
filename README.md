@@ -22,7 +22,12 @@ Als App installieren:
 - **Android/Chrome:** Menü ⋮ → „App installieren“ bzw. „Zum Startbildschirm hinzufügen“
 - **iPhone/Safari:** Teilen-Symbol → „Zum Home-Bildschirm“
 
-### Lokal auf dem Laptop
+### Direkt aus dem Ordner
+
+`index.html` per Doppelklick im Browser öffnen genügt (Internet nötig für Karten und Bibliotheken).
+Ohne Server gibt es keinen Offline-Start und keine Installation als App; Daten, Analyse und Klimacheck funktionieren.
+
+### Lokal auf dem Laptop (mit Server)
 
 Im Projektordner (Python 3 genügt, kein Build-Schritt):
 
@@ -46,7 +51,7 @@ python -m http.server 8080 --bind 0.0.0.0
 | Formular | Name (optional), Typ, Baupotenzial, Grünpotenzial, Risiko Wasser, Risiko Hitze (je 1–5), Notiz, Foto. Die Klasse wird live berechnet. Ohne Namen heißt die Fläche „Typ #Nr“. |
 | Fläche antippen | Öffnet den **Steckbrief** mit Klasse, Bewertung und **Klimacheck** (Richtwerte, Anforderungen, Maßnahmen je Ebene). Dort auch **Umbenennen**, **Bearbeiten** und **Löschen**. |
 | **Flächen** | Alle Flächen mit Namen, Filter nach Klasse, Anzahl und m² je Klasse, Export und Import. Eine Fläche antippen öffnet ihren Steckbrief (dort umbenennen). |
-| **Beispiele** | 16 Beispielflächen im Plangebiet einblenden bzw. wieder entfernen: Umrisse real (BGT/BAG), Bewertungen fiktiv. Die App startet ohne Beispiele. Die Schilder „Beispiel“ erscheinen ab Zoomstufe 18. |
+| **Analyse** | Lückenlose Kartierung des Plangebiets (69 Flächen) ein- bzw. ausblenden. Beim ersten Einblenden werden die Flächen gespeichert; Änderungen daran (Umbenennen, Bewertung) bleiben erhalten, Ausblenden versteckt sie nur. Die App startet ohne Analyse. |
 | **Plangebiet** | Zoomt auf das Planungsgebiet Selzerbeek |
 | **Karte / Luftbild / Grundstücke** | Amtliche Karte (NL: PDOK, DE: basemap.de), PDOK-Luftbild oder graue Karte mit Flurstücksgrenzen (NL: Kadaster, DE: ALKIS NRW, ab Zoomstufe 17). Auch während des Zeichnens umschaltbar. Lädt das Luftbild nicht, schaltet die App automatisch auf die Karte zurück. |
 | **NL / DE** | Sprache umschalten |
@@ -62,7 +67,9 @@ python -m http.server 8080 --bind 0.0.0.0
 - **Import GeoJSON:** Punkte und (Multi-)Polygone in WGS84. Eigene Exporte werden anhand der `id` aktualisiert statt verdoppelt. Eigene Flächentypen eines anderen Geräts werden mit ihrem Namen (`typ_name`) übernommen. Features in anderen Koordinatensystemen (z. B. RD New) werden übersprungen.
 - **Fotos** bleiben im Browser und sind nicht im Export enthalten. Das Feld `foto` zeigt nur, ob eines vorhanden ist.
 
-**Attribute im Export:** `id, nr, name, typ, typ_name, klasse, klasse_name, bau, gruen, wasser, hitze, flaeche_m2, notiz, foto, gps_genauigkeit_m, beispiel, erstellt, geaendert`
+**Attribute im Export:** `id, nr, name, typ, typ_name, klasse, klasse_name, bau, gruen, wasser, hitze, flaeche_m2, notiz, foto, gps_genauigkeit_m, analyse, erstellt, geaendert`
+
+Export und Liste umfassen die sichtbaren Flächen; bei ausgeblendeter Analyse nur die eigenen.
 
 ---
 
@@ -92,7 +99,10 @@ Verfügbar sind `f.typ`, `f.bau`, `f.gruen`, `f.wasser`, `f.hitze`. Jede Regel h
 Namen, Farben und Kurzbeschreibungen der Klassen stehen unter `klassen`, die Flächentypen unter `typen` (Parkplatz, Brache, Baulücke, Flachdach, Satteldach, Innenhof, Wohnbau, Industriebau, Straßenraum, Grünfläche, Sport, Spielfläche), die Menüfarbe unter `menuFarbe`.
 Nach dem Speichern die Seite neu laden.
 
-### Maßnahmenkatalog → `data/massnahmen.json` (Entwurf)
+### Maßnahmenkatalog → `data/massnahmen.js` (Entwurf)
+
+Der Inhalt ist JSON hinter `window.SENSERSCAN_MASSNAHMEN =`; beim Bearbeiten auf Anführungszeichen und Kommas achten.
+
 
 - `richtwerte`: die vier Richtwerte (70 mm in 1 h, 40 mm auf privatem Grund, ≤ 0,20 m auf der Straße, kühler Grünort ≤ 300 m)
 - `anforderungen`: Anforderungen je Fläche
@@ -113,11 +123,15 @@ Der Katalog ist ein **KI-generierter Entwurf** und muss fachlich überarbeitet w
 ### Weitere Dateien
 
 - **Oberflächentexte DE/NL:** `i18n.js`
-- **Beispielflächen:** `data/beispielflaechen.geojson`, 16 benannte Flächen im Plangebiet. Sie werden über den Menüpunkt „Beispiele“ geladen und wieder entfernt.
-  Die Umrisse stammen aus BGT (Straßenräume, Parkplätze, Grün, Brache) und BAG (Gebäude), abgerufen über PDOK am 23.11.2026; Straßenräume und Innenhof sind daraus zusammengesetzt. Die Bewertungen sind fiktiv.
-- **Gebiete:** `data/vaals_gebiete_wgs84.geojson`; Name, Stil und Planungsgebiet-ID in `config.js` unter `gebiete`
+- **Analyse des Plangebiets:** `data/analyse.js` (GeoJSON hinter `window.SENSERSCAN_ANALYSE =`), 69 Flächen, die das Plangebiet lückenlos abdecken (Abdeckung 99,98 %; Rest sind Zentimeter-Säume durch das Vereinfachen der Umrisse).
+  - Umrisse: NL aus BGT (Straßen, Grün, Wasser, Höfe), BAG (Gebäude) und BRK (Flurstücke, für die Zusammenfassung von Haus und Garten); DE aus ALKIS NRW (tatsächliche Nutzung, Flurstücke). Abgerufen über PDOK und Geobasis NRW am 23.11.2026.
+  - Wohngrundstücke sind zu Baublöcken zusammengefasst, Straßenbegleitgrün und kleine Restflächen dem Nachbarn zugeschlagen.
+  - Bewertung (KI-Ersteinschätzung, vor Ort zu prüfen): Risiko Hitze aus dem Versiegelungsgrad (BGT-/ALKIS-Art), Risiko Wasser aus dem Abstand zum Senserbach (≤ 10 m: 5, ≤ 40 m: 4, ≤ 90 m: 3, sonst 2; Straßen +1 als Notwasserweg), Baupotenzial nach Typ. Die Werte stehen in der Notiz jeder Fläche.
+  - Ein neuer Stand (`stand` im Datensatz) ergänzt auf Geräten mit geladener Analyse einmalig die fehlenden Flächen.
+- **Gebiete:** `data/gebiete.js` (Kopie von `data/vaals_gebiete_wgs84.geojson` als Skript; beide gleich halten); Name, Stil und Planungsgebiet-ID in `config.js` unter `gebiete`
+- Daten liegen als `.js` statt `.json` vor, weil Browser über `file://` kein `fetch()` erlauben.
 - **Offline-Cache:** `sw.js`. Wenn neue Dateien hinzukommen, in die Liste eintragen und `VERSION` erhöhen.
-  Bei einer neuen App-Version die Endung `?v=…` von `style.css`, `config.js`, `i18n.js` und `app.js` in `index.html` **und** `sw.js` gleich anpassen, damit kein Gerät alte und neue Dateien mischt.
+  Bei einer neuen App-Version die Endung `?v=…` aller Skripte und Daten in `index.html` **und** `sw.js` gleich anpassen, damit kein Gerät alte und neue Dateien mischt.
 
 ---
 
@@ -144,6 +158,7 @@ Der Katalog ist ein **KI-generierter Entwurf** und muss fachlich überarbeitet w
   - Kartenkacheln werden nicht gespeichert; offline erscheinen Gebiete und Flächen auf grauem Grund.
 - Getestet im Chromium-Browser bei 390 × 844 und 1280 × 800: Zeichnen, Bewerten, Klassen, Steckbrief, Liste, Export/Import, Offline-Start, Ausfall des PDOK-Luftbilds.
   Version 0.3 zusätzlich bei 375 × 812 und 1280 × 800: Beispiele, Umbenennen, eigene Typen (Anlegen, Umbenennen, Löschsperre, Export/Import), Grundstücke-Ansicht, NL-Texte.
+  Version 0.4: Start direkt aus dem Ordner (`file://`, Chrome headless), Analyse ein-/ausblenden, Übernahme eines 0.3-Stands (umbenannte Fläche bleibt, alte Beispiele entfallen).
   Der Export wurde gegen RFC 7946 geprüft. In QGIS selbst wurde er nicht geöffnet (dort nicht installiert). Safari/iOS ist nicht getestet.
 
 ## Bekannte Grenzen
@@ -159,8 +174,8 @@ KI-generiert (Claude Code, Claude Opus 5.5, 23.11.2026):
 
 - gesamter Programmcode: `index.html`, `app.js`, `style.css`, `config.js`, `i18n.js`, `sw.js`, `manifest.json`
 - Umsetzung der Klassifikationsregeln in `config.js` (die Regeln selbst stammen aus der Aufgabenstellung)
-- Maßnahmenkatalog und Anforderungen in `data/massnahmen.json` (**Entwurf**)
-- Beispielflächen in `data/beispielflaechen.geojson`: Auswahl, Namen, Notizen und Bewertungen (fiktiv, als „Beispiel“ gekennzeichnet); die Umrisse sind aus BGT/BAG übernommen bzw. abgeleitet
+- Maßnahmenkatalog und Anforderungen in `data/massnahmen.js` (**Entwurf**)
+- Analyse des Plangebiets in `data/analyse.js`: Abgrenzung und Zusammenfassung der Flächen, Namen, Typen, Notizen und Bewertungen (**Ersteinschätzung, vor Ort zu prüfen**); die Umrisse sind aus BGT/BAG/BRK und ALKIS übernommen bzw. abgeleitet
 - niederländische Übersetzung aller Texte
 - App-Icons in `icons/`
 - diese README
@@ -170,4 +185,4 @@ KI-generiert (Claude Code, Claude Opus 5.5, 23.11.2026):
 - Gebietsgrenzen in `data/vaals_gebiete_wgs84.geojson` (Shapefile Lehrstuhl, EPSG:25832, umprojiziert nach WGS84)
 - Klassifikationsregeln a–d und Richtwerte (Vorgabe aus der Aufgabenstellung)
 - Kartengrundlagen: Karte PDOK / © Kadaster (NL) und © GeoBasis-DE / BKG (2026), CC BY 4.0 (DE); Luftbild: PDOK / Beeldmateriaal Nederland; Grundstücke: Kadastrale kaart, PDOK / © Kadaster (NL) und ALKIS, © Geobasis NRW, dl-de/zero-2-0 (DE)
-- Umrisse der Beispielflächen: BGT und BAG (PDOK / Kadaster)
+- Umrisse der Analyseflächen: BGT, BAG, BRK (PDOK / Kadaster) und ALKIS NRW (© Geobasis NRW, dl-de/zero-2-0)
