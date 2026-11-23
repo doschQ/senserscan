@@ -52,14 +52,14 @@
       }
     },
     {
-      "id": "A2", "typen": ["parkplatz", "brache", "bauluecke", "flachdach", "innenhof"], "risiko": ["wasser"],
+      "id": "A2", "typen": ["parkplatz", "brache", "bauluecke", "flachdach", "innenhof", "satteldach", "wohnbau", "industriebau", "sport"], "risiko": ["wasser"],
       "text": {
         "de": "Auf dem Grundstück 40 mm Niederschlag zurückhalten (speichern, versickern, verdunsten); Abfluss gegenüber dem Bestand nicht erhöhen.",
         "nl": "Op eigen terrein 40 mm neerslag vasthouden (bergen, infiltreren, verdampen); afvoer niet verhogen ten opzichte van de bestaande situatie."
       }
     },
     {
-      "id": "A3", "typen": ["parkplatz", "brache", "bauluecke"], "risiko": ["wasser"],
+      "id": "A3", "typen": ["parkplatz", "brache", "bauluecke", "wohnbau", "industriebau"], "risiko": ["wasser"],
       "text": {
         "de": "Erdgeschoss, Eingänge und Tiefgaragenzufahrten mindestens 0,20 m über Straßenniveau.",
         "nl": "Begane grond, entrees en hellingbanen minstens 0,20 m boven straatniveau."
@@ -128,7 +128,7 @@
       }
     },
     {
-      "id": "Q4", "ebene": "quartier", "typen": ["brache", "bauluecke", "parkplatz", "gruenflaeche"], "risiko": ["hitze"],
+      "id": "Q4", "ebene": "quartier", "typen": ["brache", "bauluecke", "parkplatz", "gruenflaeche", "sport", "spielflaeche"], "risiko": ["hitze"],
       "titel": { "de": "Kaltluftbahnen freihalten", "nl": "Koele-luchtbanen vrijhouden" },
       "text": {
         "de": "Hangabwärts gerichtete Luftleitbahnen von Querriegeln freihalten; Baukörper parallel zur Strömungsrichtung stellen.",
@@ -145,7 +145,7 @@
     },
 
     {
-      "id": "G1", "ebene": "gebaeude", "typen": ["flachdach", "bauluecke", "brache", "parkplatz", "innenhof"], "risiko": [],
+      "id": "G1", "ebene": "gebaeude", "typen": ["flachdach", "bauluecke", "brache", "parkplatz", "innenhof", "industriebau"], "risiko": [],
       "titel": { "de": "Retentionsgründach", "nl": "Groen retentiedak" },
       "text": {
         "de": "Gründach mit Wasserspeicher: hält Regen zurück, verdunstet und kühlt; Beitrag zu 40 mm auf privatem Grund.",
@@ -153,7 +153,7 @@
       }
     },
     {
-      "id": "G2", "ebene": "gebaeude", "typen": ["flachdach", "bauluecke", "brache", "parkplatz", "innenhof", "strassenraum"], "risiko": ["hitze"],
+      "id": "G2", "ebene": "gebaeude", "typen": ["flachdach", "bauluecke", "brache", "parkplatz", "innenhof", "strassenraum", "wohnbau", "industriebau"], "risiko": ["hitze"],
       "titel": { "de": "Fassadenbegrünung und Verschattung", "nl": "Gevelgroen en zonwering" },
       "text": {
         "de": "Bodengebundenes Fassadengrün und außenliegender Sonnenschutz senken Oberflächen- und Innentemperaturen.",
@@ -161,7 +161,7 @@
       }
     },
     {
-      "id": "G3", "ebene": "gebaeude", "typen": ["bauluecke", "brache", "parkplatz"], "risiko": ["wasser"],
+      "id": "G3", "ebene": "gebaeude", "typen": ["bauluecke", "brache", "parkplatz", "wohnbau", "industriebau"], "risiko": ["wasser"],
       "titel": { "de": "Wasserrobust bauen", "nl": "Waterrobuust bouwen" },
       "text": {
         "de": "Erdgeschoss und Eingänge mindestens 0,20 m über Straßenniveau; Lichtschächte und Kellerzugänge gegen Oberflächenwasser sichern; Rückstausicherung.",
@@ -169,7 +169,7 @@
       }
     },
     {
-      "id": "G4", "ebene": "gebaeude", "typen": ["flachdach", "bauluecke", "brache", "parkplatz", "innenhof"], "risiko": ["wasser"],
+      "id": "G4", "ebene": "gebaeude", "typen": ["flachdach", "bauluecke", "brache", "parkplatz", "innenhof", "satteldach", "wohnbau", "industriebau"], "risiko": ["wasser"],
       "titel": { "de": "Regenwasser speichern und nutzen", "nl": "Regenwater opvangen en hergebruiken" },
       "text": {
         "de": "Zisterne für Bewässerung und Toilettenspülung; Überlauf in eine Versickerungsmulde.",
@@ -177,7 +177,7 @@
       }
     },
     {
-      "id": "G5", "ebene": "gebaeude", "typen": ["flachdach", "bauluecke", "brache", "parkplatz"], "risiko": ["hitze"],
+      "id": "G5", "ebene": "gebaeude", "typen": ["flachdach", "bauluecke", "brache", "parkplatz", "satteldach", "wohnbau", "industriebau"], "risiko": ["hitze"],
       "titel": { "de": "Helle Oberflächen und Hitzeschutz", "nl": "Lichte oppervlakken en hittebescherming" },
       "text": {
         "de": "Helle Dach- und Fassadenmaterialien, Querlüftung und Nachtauskühlung; keine dunklen, unverschatteten Flächen.",
@@ -186,7 +186,7 @@
     },
 
     {
-      "id": "F1", "ebene": "freiraum", "typen": ["parkplatz", "strassenraum", "innenhof", "brache"], "risiko": [],
+      "id": "F1", "ebene": "freiraum", "typen": ["parkplatz", "strassenraum", "innenhof", "brache", "industriebau", "spielflaeche"], "risiko": [],
       "titel": { "de": "Entsiegeln", "nl": "Ontharden" },
       "text": {
         "de": "Asphalt und Pflaster entfernen oder durch versickerungsfähige Beläge ersetzen; offenen Boden schaffen.",
@@ -194,7 +194,7 @@
       }
     },
     {
-      "id": "F2", "ebene": "freiraum", "typen": ["parkplatz", "brache", "bauluecke", "innenhof", "strassenraum", "gruenflaeche"], "risiko": ["wasser"],
+      "id": "F2", "ebene": "freiraum", "typen": ["parkplatz", "brache", "bauluecke", "innenhof", "strassenraum", "gruenflaeche", "wohnbau", "industriebau", "sport", "spielflaeche"], "risiko": ["wasser"],
       "titel": { "de": "Mulden, Rigolen, Regengärten", "nl": "Wadi's en regentuinen" },
       "text": {
         "de": "Flache Mulden und Regengärten nehmen Dachwasser und Oberflächenabfluss auf und lassen es versickern.",
@@ -202,7 +202,7 @@
       }
     },
     {
-      "id": "F3", "ebene": "freiraum", "typen": ["strassenraum", "parkplatz", "innenhof", "gruenflaeche", "brache"], "risiko": ["hitze", "wasser"],
+      "id": "F3", "ebene": "freiraum", "typen": ["strassenraum", "parkplatz", "innenhof", "gruenflaeche", "brache", "wohnbau", "sport", "spielflaeche"], "risiko": ["hitze", "wasser"],
       "titel": { "de": "Großkronige Bäume mit Baumrigole", "nl": "Bomen met grote kroon en waterbuffer" },
       "text": {
         "de": "Schattenspendende Bäume mit großem Wurzelraum, der Regenwasser speichert (Schwammstadt-Prinzip).",
@@ -210,7 +210,7 @@
       }
     },
     {
-      "id": "F4", "ebene": "freiraum", "typen": ["gruenflaeche", "innenhof", "strassenraum", "parkplatz"], "risiko": ["wasser"], "ab": 4,
+      "id": "F4", "ebene": "freiraum", "typen": ["gruenflaeche", "innenhof", "strassenraum", "parkplatz", "sport", "spielflaeche"], "risiko": ["wasser"], "ab": 4,
       "titel": { "de": "Temporäre Wasserflächen", "nl": "Waterplein" },
       "text": {
         "de": "Tiefer liegende Platz- oder Grünflächen, die bei Starkregen kurzzeitig geflutet werden dürfen.",
@@ -218,7 +218,7 @@
       }
     },
     {
-      "id": "F5", "ebene": "freiraum", "typen": ["gruenflaeche", "innenhof", "strassenraum", "flachdach"], "risiko": ["hitze"],
+      "id": "F5", "ebene": "freiraum", "typen": ["gruenflaeche", "innenhof", "strassenraum", "flachdach", "sport", "spielflaeche"], "risiko": ["hitze"],
       "titel": { "de": "Kühler Aufenthaltsort", "nl": "Koele verblijfsplek" },
       "text": {
         "de": "Schattige Sitzplätze, Trinkwasserstelle und artenreiche Wiese statt Rasen; auf Flachdächern als Dachgarten.",
