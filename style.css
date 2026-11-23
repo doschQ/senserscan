@@ -108,18 +108,22 @@ main { position: relative; flex: 1 1 auto; min-height: 0; }
   pointer-events: none;
 }
 .gebiet-label.analyse span { color: #343a40; }
+.gebiet-label.oben span { transform: translate(-50%, calc(-100% - 4px)); }
 
-/* Beschriftung der Beispielflächen */
-.leaflet-tooltip.beispiel-label {
+/* Beschriftung der Beispielflächen (Schild über der Fläche) */
+.beispiel-label span {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 3px));
+  white-space: nowrap;
+  padding: 1px 6px;
+  border-radius: 5px;
   background: var(--warn-bg);
   border: 1px solid var(--warn-line);
   color: var(--warn-ink);
+  font-size: 11px;
   font-weight: 700;
-  font-size: 12px;
-  padding: 2px 6px;
-  box-shadow: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
 }
-.leaflet-tooltip.beispiel-label::before { display: none; }
 
 /* ---------- Legende ---------- */
 .legende {

@@ -143,16 +143,17 @@
         style: istPlan ? CFG.gebiete.stilPlanung : CFG.gebiete.stilAnalyse
       }).addTo(gebieteLayer);
       const b = layer.getBounds();
-      // Planungsgebiet: Beschriftung in der Mitte; Analyseraum: am Nordrand
+      // Planungsgebiet: Beschriftung über der Nordspitze (Flächen darin bleiben frei);
+      // Analyseraum: innen am Nordrand
       const pos = istPlan
-        ? b.getCenter()
+        ? nordpunkt(f.geometry)
         : L.latLng(b.getNorth() - (b.getNorth() - b.getSouth()) * 0.07, b.getCenter().lng);
       const ha = f.properties.flaeche_ha ? ' · ' + fmtNum(f.properties.flaeche_ha, 2) + ' ha' : '';
       L.marker(pos, {
         interactive: false,
         keyboard: false,
         icon: L.divIcon({
-          className: 'gebiet-label' + (istPlan ? '' : ' analyse'),
+          className: 'gebiet-label' + (istPlan ? ' oben' : ' analyse'),
           html: '<span>' + esc(gebietName(f) + ha) + '</span>',
           iconSize: null
         })
@@ -323,12 +324,24 @@
           color: sel ? '#111' : kl.farbe, weight: sel ? 4 : 3, fillColor: kl.farbe, fillOpacity: 0.45
         });
       }
-      if (f.beispiel) {
-        layer.bindTooltip(t('beispielErsetzen'), { permanent: true, direction: 'center', className: 'beispiel-label' });
-      }
       layer.on('click', () => { if (!zeichnen) openSteckbrief(f.id); });
       layer.addTo(flaechenLayer);
+      // Beispielflächen: Schild über dem nördlichsten Punkt, damit die Fläche sichtbar bleibt
+      if (f.beispiel) {
+        L.marker(nordpunkt(f.geometry), {
+          keyboard: false,
+          icon: L.divIcon({ className: 'beispiel-label', html: '<span>' + esc(t('beispielErsetzen')) + '</span>', iconSize: null })
+        }).on('click', () => { if (!zeichnen) openSteckbrief(f.id); }).addTo(flaechenLayer);
+      }
     });
+  }
+
+  function nordpunkt(g) {
+    if (g.type === 'Point') return L.latLng(g.coordinates[1], g.coordinates[0]);
+    const ringe = g.type === 'Polygon' ? [g.coordinates[0]] : g.coordinates.map(p => p[0]);
+    let best = ringe[0][0];
+    ringe.forEach(r => r.forEach(c => { if (c[1] > best[1]) best = c; }));
+    return L.latLng(best[1], best[0]);
   }
 
   async function ladeFlaechen() {
@@ -339,7 +352,46 @@
       flaechen = [];
       toast(t('speicherFehler'), 6000);
     }
+    await ladeBeispiele();
     renderFlaechen();
+  }
+
+  // Beim allerersten Start die Beispielflächen übernehmen (danach nie wieder,
+  // auch wenn sie gelöscht wurden).
+  async function ladeBeispiele() {
+    let geladen = false;
+    try { geladen = !!(await metaGet('beispieleGeladen')); } catch (e) { /* ohne DB trotzdem zeigen */ }
+    if (geladen) return;
+    try {
+      const res = await fetch('data/beispielflaechen.geojson');
+      if (!res.ok) throw new Error(res.status);
+      const gj = await res.json();
+      const jetzt = new Date().toISOString();
+      const neu = [];
+      gj.features.forEach(ft => {
+        const p = ft.properties;
+        if (byId(p.id)) return;
+        const rec = {
+          id: p.id,
+          nr: flaechen.some(f => f.nr === p.nr) ? naechsteNr() : p.nr,
+          typ: p.typ, bau: p.bau, gruen: p.gruen, wasser: p.wasser, hitze: p.hitze,
+          notiz: p.notiz || '',
+          foto: null,
+          geometry: ft.geometry,
+          flaeche_m2: Math.round(geomArea(ft.geometry) * 10) / 10,
+          gps_genauigkeit_m: null,
+          beispiel: true,
+          erstellt: p.erstellt || jetzt,
+          geaendert: jetzt
+        };
+        flaechen.push(rec);
+        neu.push(rec);
+      });
+      await persistieren(neu);
+      await metaSet('beispieleGeladen', true);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   // Karte so ausrichten, dass die Geometrie neben/über dem Panel sichtbar ist
@@ -906,6 +958,23 @@
   }
 
   // ================================================================
+  // Info-Seite
+  // ================================================================
+  function openInfo() {
+    const I = CFG.info;
+    const liste = arr => '<ul class="plain">' + arr.map(s => '<li>' + esc(s) + '</li>').join('') + '</ul>';
+    const html =
+      '<p>' + esc(t('infoIntro')) + '</p>' +
+      '<div class="entwurf">' + esc(t('infoKi', { werkzeug: I.werkzeug, modell: I.modell, datum: I.datum })) + '</div>' +
+      '<h3>' + esc(t('kiTeileTitel')) + '</h3>' + liste(I18N[lang].kiTeile) +
+      '<h3>' + esc(t('nichtKiTitel')) + '</h3>' + liste(I18N[lang].nichtKi) +
+      '<p class="muted">' + esc(t('datenschutz')) + '</p>' +
+      '<p class="muted">' + esc(t('version', { v: CFG.version })) + '</p>';
+    oeffnePanel(t('infoTitel'), html);
+    ansicht = openInfo;
+  }
+
+  // ================================================================
   // Sprache umschalten
   // ================================================================
   function setLang(l) {
@@ -933,6 +1002,7 @@
     $('#btn-zeichnen').addEventListener('click', zeichnenStart);
     $('#btn-gps').addEventListener('click', gpsPunkt);
     $('#btn-liste').addEventListener('click', openListe);
+    $('#btn-info').addEventListener('click', openInfo);
     $('#btn-undo').addEventListener('click', zeichnenPunktZurueck);
     $('#btn-cancel').addEventListener('click', zeichnenAbbrechen);
     $('#btn-finish').addEventListener('click', zeichnenFertig);

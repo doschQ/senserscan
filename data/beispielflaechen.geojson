@@ -1,0 +1,259 @@
+{
+ "type": "FeatureCollection",
+ "name": "beispielflaechen",
+ "_hinweis": "Beispielflaechen fuer die Demo (KI-generiert). Lage und Bewertung fiktiv – ersetzen.",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "f-beispiel-1",
+    "nr": 1,
+    "typ": "parkplatz",
+    "bau": 4,
+    "gruen": 3,
+    "wasser": 4,
+    "hitze": 4,
+    "notiz": "Beispiel – ersetzen. Fiktive Lage und Bewertung, keine reale Nutzung.",
+    "beispiel": true,
+    "erstellt": "2026-11-23T00:00:00Z"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       6.0219464,
+       50.7746163
+      ],
+      [
+       6.0225639,
+       50.7747216
+      ],
+      [
+       6.0224536,
+       50.7749837
+      ],
+      [
+       6.0218361,
+       50.7748784
+      ],
+      [
+       6.0219464,
+       50.7746163
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "f-beispiel-2",
+    "nr": 2,
+    "typ": "brache",
+    "bau": 5,
+    "gruen": 2,
+    "wasser": 2,
+    "hitze": 3,
+    "notiz": "Beispiel – ersetzen. Fiktive Lage und Bewertung, keine reale Nutzung.",
+    "beispiel": true,
+    "erstellt": "2026-11-23T00:00:00Z"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       6.023277,
+       50.7758755
+      ],
+      [
+       6.0238366,
+       50.7758127
+      ],
+      [
+       6.023923,
+       50.7761245
+      ],
+      [
+       6.0233634,
+       50.7761873
+      ],
+      [
+       6.023277,
+       50.7758755
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "f-beispiel-3",
+    "nr": 3,
+    "typ": "gruenflaeche",
+    "bau": 1,
+    "gruen": 4,
+    "wasser": 3,
+    "hitze": 2,
+    "notiz": "Beispiel – ersetzen. Fiktive Lage und Bewertung, keine reale Nutzung.",
+    "beispiel": true,
+    "erstellt": "2026-11-23T00:00:00Z"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       6.0197982,
+       50.7769405
+      ],
+      [
+       6.0204419,
+       50.7771316
+      ],
+      [
+       6.0202018,
+       50.7774595
+      ],
+      [
+       6.0195581,
+       50.7772684
+      ],
+      [
+       6.0197982,
+       50.7769405
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "f-beispiel-4",
+    "nr": 4,
+    "typ": "innenhof",
+    "bau": 2,
+    "gruen": 5,
+    "wasser": 3,
+    "hitze": 4,
+    "notiz": "Beispiel – ersetzen. Fiktive Lage und Bewertung, keine reale Nutzung.",
+    "beispiel": true,
+    "erstellt": "2026-11-23T00:00:00Z"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       6.0190869,
+       50.775687
+      ],
+      [
+       6.0195131,
+       50.775687
+      ],
+      [
+       6.0195131,
+       50.775913
+      ],
+      [
+       6.0190869,
+       50.775913
+      ],
+      [
+       6.0190869,
+       50.775687
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "f-beispiel-5",
+    "nr": 5,
+    "typ": "flachdach",
+    "bau": 4,
+    "gruen": 4,
+    "wasser": 2,
+    "hitze": 3,
+    "notiz": "Beispiel – ersetzen. Fiktive Lage und Bewertung, keine reale Nutzung.",
+    "beispiel": true,
+    "erstellt": "2026-11-23T00:00:00Z"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       6.0226498,
+       50.7766913
+      ],
+      [
+       6.0229995,
+       50.7767306
+      ],
+      [
+       6.0229502,
+       50.7769087
+      ],
+      [
+       6.0226005,
+       50.7768694
+      ],
+      [
+       6.0226498,
+       50.7766913
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "f-beispiel-6",
+    "nr": 6,
+    "typ": "strassenraum",
+    "bau": 1,
+    "gruen": 4,
+    "wasser": 5,
+    "hitze": 4,
+    "notiz": "Beispiel – ersetzen. Fiktive Lage und Bewertung, keine reale Nutzung.",
+    "beispiel": true,
+    "erstellt": "2026-11-23T00:00:00Z"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       6.0241195,
+       50.7747259
+      ],
+      [
+       6.0249901,
+       50.775191
+      ],
+      [
+       6.0248805,
+       50.7752741
+      ],
+      [
+       6.0240099,
+       50.774809
+      ],
+      [
+       6.0241195,
+       50.7747259
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}
