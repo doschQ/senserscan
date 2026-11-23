@@ -76,9 +76,9 @@ button:focus-visible, input:focus-visible { outline: 3px solid #f59f00; outline-
   font-weight: 600; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .szenarien button[aria-selected="true"] { background: #fff; color: var(--ink); }
-.szenarien button.plus { flex: 0 0 38px; padding: 0; font-size: 1.3rem; line-height: 1; }
+.szenarien button.plus { flex: 0 0 38px; padding: 0; display: grid; place-items: center; }
+.szenarien button.plus svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; }
 .szenarien { overflow-x: auto; scrollbar-width: none; }
-.entfernen { margin: 0 0 8px; }
 .szenarien button .warn { color: #ffd43b; }
 .szenarien button[aria-selected="true"] .warn { color: var(--rot); }
 
@@ -229,6 +229,8 @@ button:focus-visible, input:focus-visible { outline: 3px solid #f59f00; outline-
 .btn.hell { background: #fff; color: var(--ink); border-color: var(--line); }
 .btn.klein { padding: 5px 10px; min-height: 34px; font-size: .85rem; background: #fff; color: var(--ink); border-color: var(--line); margin-top: 8px; }
 .btn-reihe { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.leiste-knoepfe { flex-wrap: nowrap; }
+.leiste-knoepfe .btn.klein { margin-top: 0; flex: 1 1 0; min-width: 0; padding: 5px 6px; font-size: .8rem; line-height: 1.2; }
 .segment { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-left: auto; }
 .segment button { border: 0; background: #fff; color: var(--ink); padding: 5px 10px; font-size: .85rem; font-weight: 600; cursor: pointer; }
 .segment button + button { border-left: 1px solid var(--line); }

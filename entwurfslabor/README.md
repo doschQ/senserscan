@@ -28,7 +28,7 @@ python -m http.server 8081 --bind 0.0.0.0
 | Element | Funktion |
 |---|---|
 | **Bestand / Variante A / Variante B** | Szenario umschalten. Der Name ist im Feld „Name des Szenarios“ änderbar. |
-| **+** (rechts neben den Szenarien) | neue Variante als Kopie des gewählten Szenarios („Variante C“, „Variante D“ …), bis zu fünf Varianten. **Variante entfernen** in der Szenario-Leiste löscht sie wieder (nicht beim Bestand). |
+| **+** (rechts neben den Szenarien) | neue Variante als Kopie des gewählten Szenarios („Variante C“, „Variante D“ …), bis zu fünf Varianten. **Variante löschen** unten in der Szenario-Leiste, neben „Eingaben zurücksetzen“, löscht die gewählte Variante (nicht beim Bestand). |
 | **Szenario** (Leiste links) | Regler: Anteil begrünter Dachflächen, Anteil entsiegelter Parkplätze, neue Bäume × Kronenfläche, Retentionsvolumen der Aue, Neubau-BGF, Anteil Wohnen, BGF je Wohneinheit. Zahl auch direkt eintippen. Gilt auch für den Bestand; er bleibt die Vergleichsbasis der Ampel. |
 | **Kennzahlen** | Niederschlag, Abfluss, Speicher, Retentionsbilanz ΔV, ψm, Versiegelungsgrad, Baumkronenanteil, BGF, GFZ, Wohneinheiten – mit Ampel und Differenz zum Bestand |
 | **Vergleich der Szenarien** | Balkendiagramm aller drei Szenarien: **Wasser** (N, Q, S, ΔV), **Hitze** (Versiegelung, ψm, Baumkronen mit Ziellinie 30 %), **Flächen** (gestapelte Flächenbilanz) |

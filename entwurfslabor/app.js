@@ -56,8 +56,8 @@
       hBaeume: 'neue Baumkrone: {n} × {k} m² = {m2} m²',
       hAue: 'geht direkt in den Speicher',
       hBgf: 'GFZ {gfz}', hWohnen: '{wbgf} m² BGF Wohnen', hBgfWe: '{we} Wohneinheiten',
-      plusTitel: 'Variante hinzufügen (Kopie des gewählten Szenarios)', entfernen: 'Variante entfernen',
-      entfernenFrage: '„{name}“ entfernen?',
+      plusTitel: 'Variante hinzufügen (Kopie des gewählten Szenarios)', entfernen: 'Variante löschen',
+      entfernenFrage: '„{name}“ löschen?',
       reglerFuss: 'Startwerte der Regler in den Varianten: Annahme – anpassen. Regler und Flächenbilanz sind nicht gekoppelt: Die Neubau-BGF ändert keine Flächen; neue Dächer gehören in die Flächenbilanz der Variante.',
       zuruecksetzen: 'Eingaben zurücksetzen', resetFrage: 'Alle Eingaben auf die Werte aus config.js zurücksetzen?',
       resetOk: 'Eingaben zurückgesetzt.',
@@ -569,7 +569,7 @@
       (erg[i].summeOk ? '' : ' title="' + esc(t('tabWarn')) + '"') + '>' +
       (erg[i].summeOk ? '' : '<span class="warn">⚠ </span>') + esc(szName(i)) + '</button>').join('') +
       (state.szenarien.length < MAX_SZ
-        ? '<button type="button" class="plus" data-plus title="' + esc(t('plusTitel')) + '" aria-label="' + esc(t('plusTitel')) + '">+</button>'
+        ? '<button type="button" class="plus" data-plus title="' + esc(t('plusTitel')) + '" aria-label="' + esc(t('plusTitel')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>'
         : '');
     // passt die Leiste nicht, den gewählten Tab ins Bild schieben
     const a = nav.querySelector('[aria-selected="true"]');
