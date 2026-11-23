@@ -105,7 +105,7 @@
     }
   });
 
-  function setBasemap(name) {
+  function setBasemap(name, leise) {
     if (!basemaps[name] || name === basemapAktiv) return;
     if (basemapAktiv) map.removeLayer(basemaps[basemapAktiv]);
     basemaps[name].addTo(map).bringToBack();
@@ -114,7 +114,7 @@
     $$('.basemap-switch button').forEach(b => b.classList.toggle('active', b.dataset.basemap === name));
     if (name === 'luftbild') {
       lbStatus.ok = 0; lbStatus.err = 0; lbStatus.gewarnt = false;
-      toast(t('luftbildHinweis'));
+      if (!leise) toast(t('luftbildHinweis'));
     }
   }
 
@@ -596,6 +596,66 @@
   }
 
   // ================================================================
+  // Klimacheck (Katalog: data/massnahmen.json)
+  // ================================================================
+  let katalog = null;   // null = lädt noch, false = Fehler
+
+  async function ladeKatalog() {
+    try {
+      const res = await fetch('data/massnahmen.json');
+      if (!res.ok) throw new Error(res.status);
+      katalog = await res.json();
+    } catch (e) {
+      console.error(e);
+      katalog = false;
+    }
+    if (ansicht) ansicht();
+  }
+
+  function risikoErhoeht(f, r, ab) { return (f[r] || 0) >= (ab != null ? ab : katalog.schwelle); }
+
+  // Passt ein Katalogeintrag zu Typ, Klasse und Risiko der Fläche?
+  function passt(e, f, k) {
+    const typOk = !e.typen || !e.typen.length || e.typen.includes('alle') || e.typen.includes(f.typ);
+    const klasseOk = !e.klassen || !e.klassen.length || e.klassen.includes(k);
+    const risikoOk = !e.risiko || !e.risiko.length || e.risiko.some(r => risikoErhoeht(f, r, e.ab));
+    return typOk && klasseOk && risikoOk;
+  }
+  // Begründung, warum ein Eintrag erscheint (z. B. "Risiko Wasser 5")
+  function grund(e, f) {
+    const r = (e.risiko || []).filter(x => risikoErhoeht(f, x, e.ab)).map(x => t(x) + ' ' + f[x]);
+    return esc(e.id) + (r.length ? ' · ' + esc(r.join(', ')) : '');
+  }
+
+  function klimacheckHTML(f) {
+    if (katalog === null) return '';
+    if (katalog === false) return '<h3>' + esc(t('klimacheck')) + '</h3><p class="muted">' + esc(t('katalogFehler')) + '</p>';
+    const k = klasseVon(f);
+    const leer = '<p class="muted">' + esc(t('keineEintraege')) + '</p>';
+    let h = '<h3>' + esc(t('klimacheck')) + '</h3>' +
+      '<div class="entwurf">' + esc(tx(katalog.status)) + '</div>' +
+      '<h4>' + esc(t('richtwerte')) + '</h4><div class="richtwerte">' +
+      katalog.richtwerte.map(r => {
+        const rel = risikoErhoeht(f, r.risiko);
+        return '<div class="richtwert' + (rel ? ' relevant' : '') + '"><strong>' + esc(r.wert) + '</strong>' +
+          esc(tx(r.text)) + (rel ? '<br><span class="tag">' + esc(t('relevant')) + '</span>' : '') + '</div>';
+      }).join('') +
+      '</div><p class="muted">' + esc(tx(katalog.quelle_richtwerte)) + '</p>';
+
+    const anf = katalog.anforderungen.filter(e => passt(e, f, k));
+    h += '<h4>' + esc(t('anforderungen')) + '</h4>' + (anf.length ? anf.map(e =>
+      '<div class="anforderung">' + esc(tx(e.text)) + '<br><small>' + grund(e, f) + '</small></div>').join('') : leer);
+
+    ['quartier', 'gebaeude', 'freiraum'].forEach(ebene => {
+      const m = katalog.massnahmen.filter(e => e.ebene === ebene && passt(e, f, k));
+      h += '<h4>' + esc(t('massnahmen')) + ' · ' + esc(t('ebene_' + ebene)) + '</h4>' + (m.length ? m.map(e =>
+        '<div class="massnahme"><strong>' + esc(tx(e.titel)) + '</strong>' + esc(tx(e.text)) +
+        '<br><small>' + grund(e, f) + '</small></div>').join('') : leer);
+    });
+    return h;
+  }
+
+  // ================================================================
   // Steckbrief
   // ================================================================
   function ratingsHTML(f) {
@@ -619,6 +679,7 @@
       '<h3>' + esc(t('bewertung')) + '</h3>' + ratingsHTML(f) +
       (f.notiz ? '<h3>' + esc(t('notiz')) + '</h3><p>' + esc(f.notiz).replace(/\n/g, '<br>') + '</p>' : '') +
       (f.foto ? '<img class="foto-sb" src="' + f.foto + '" alt="' + esc(t('foto')) + '">' : '') +
+      klimacheckHTML(f) +
       '<div class="btn-row">' +
       '<button type="button" class="btn" id="sb-karte">' + esc(t('aufKarte')) + '</button>' +
       '<button type="button" class="btn" id="sb-edit">' + esc(t('bearbeiten')) + '</button>' +
@@ -652,7 +713,7 @@
   // ================================================================
   function init() {
     applyStaticTexts();
-    setBasemap(storageGet('basemap') === 'luftbild' ? 'luftbild' : 'osm');
+    setBasemap(storageGet('basemap') === 'luftbild' ? 'luftbild' : 'osm', true);
     renderLegende();
 
     $$('.basemap-switch button').forEach(b => b.addEventListener('click', () => setBasemap(b.dataset.basemap)));
@@ -673,6 +734,7 @@
 
     ladeGebiete();
     ladeFlaechen();
+    ladeKatalog();
   }
 
   init();
