@@ -1,5 +1,5 @@
 /*
- * SenserScan – Service Worker
+ * Klima Chancen – Service Worker
  * Hält die App-Oberfläche offline verfügbar.
  *  - eigene Dateien: erst Netz (damit Änderungen sofort ankommen), sonst Cache
  *  - Leaflet/Geoman vom CDN (feste Versionen): erst Cache, sonst Netz

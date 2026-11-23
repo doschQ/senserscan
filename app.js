@@ -1,5 +1,5 @@
 /*
- * SenserScan – App-Logik
+ * Klima Chancen – App-Logik
  * KI-generiert (Claude Code, Claude Opus 5.5), Prototyp.
  * Fachliche Einstellungen: config.js · Texte: i18n.js · Katalog: data/massnahmen.json
  */
@@ -787,7 +787,7 @@
           '<span class="main"><strong>' + esc(titel(f)) + '</strong><span>' + esc(tx(kl.name)) + ' · ' + esc(typName(f.typ)) + '</span></span>' +
           '<span class="area">' + (f.geometry.type === 'Point' ? esc(t('punkt')) : esc(fmtM2(m2Von(f)))) + '</span></button></li>';
       }).join('') + '</ul>' : '<p class="muted">' + esc(t('leer')) + '</p>') +
-      '<h3>' + esc(t('daten')) + '</h3><p class="muted">' + esc(t('speicherHinweis')) + '</p>' +
+      '<h3>' + esc(t('daten')) + '</h3>' +
       '<div class="btn-row"><button type="button" class="btn" id="ex-geojson">' + esc(t('exportGeojson')) + '</button>' +
       '<button type="button" class="btn" id="ex-csv">' + esc(t('exportCsv')) + '</button></div>' +
       '<div class="btn-row"><label class="btn btn-file">' + esc(t('importGeojson')) +
@@ -872,10 +872,10 @@
     if (!flaechen.length) { toast(t('exportLeer')); return; }
     const fc = {
       type: 'FeatureCollection',
-      name: 'senserscan_flaechen',
+      name: 'klimachancen_flaechen',
       features: sortiert().map(f => ({ type: 'Feature', properties: exportProps(f), geometry: exportGeom(f.geometry) }))
     };
-    download('senserscan_flaechen_' + datumStempel() + '.geojson', JSON.stringify(fc, null, 1), 'application/geo+json');
+    download('klimachancen_flaechen_' + datumStempel() + '.geojson', JSON.stringify(fc, null, 1), 'application/geo+json');
   }
 
   function wkt(g) {
@@ -895,7 +895,7 @@
     const rows = sortiert().map(f => Object.assign(exportProps(f), { wkt: wkt(exportGeom(f.geometry)) }));
     const cols = Object.keys(rows[0]);
     const lines = [cols.join(',')].concat(rows.map(r => cols.map(c => csvZelle(r[c])).join(',')));
-    download('senserscan_flaechen_' + datumStempel() + '.csv', '﻿' + lines.join('\r\n') + '\r\n', 'text/csv;charset=utf-8');
+    download('klimachancen_flaechen_' + datumStempel() + '.csv', '﻿' + lines.join('\r\n') + '\r\n', 'text/csv;charset=utf-8');
   }
 
   function typAus(v) {
@@ -961,14 +961,9 @@
   // Info-Seite
   // ================================================================
   function openInfo() {
-    const I = CFG.info;
     const liste = arr => '<ul class="plain">' + arr.map(s => '<li>' + esc(s) + '</li>').join('') + '</ul>';
     const html =
-      '<p>' + esc(t('infoIntro')) + '</p>' +
-      '<div class="entwurf">' + esc(t('infoKi', { werkzeug: I.werkzeug, modell: I.modell, datum: I.datum })) + '</div>' +
-      '<h3>' + esc(t('kiTeileTitel')) + '</h3>' + liste(I18N[lang].kiTeile) +
-      '<h3>' + esc(t('nichtKiTitel')) + '</h3>' + liste(I18N[lang].nichtKi) +
-      '<p class="muted">' + esc(t('datenschutz')) + '</p>' +
+      '<h3>' + esc(t('quellenTitel')) + '</h3>' + liste(I18N[lang].quellen) +
       '<p class="muted">' + esc(t('version', { v: CFG.version })) + '</p>';
     oeffnePanel(t('infoTitel'), html);
     ansicht = openInfo;

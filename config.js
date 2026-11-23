@@ -1,5 +1,5 @@
 /*
- * SenserScan – Konfiguration
+ * Klima Chancen – Konfiguration
  * ---------------------------------------------------------------
  * Hier stehen alle fachlichen Einstellungen, die ohne Programmier-
  * kenntnisse geändert werden können:
@@ -13,14 +13,7 @@
  * Der Maßnahmenkatalog steht in data/massnahmen.json.
  */
 window.SENSERSCAN_CONFIG = {
-  version: '0.1.0',
-
-  // Angaben für die Info-Seite
-  info: {
-    werkzeug: 'Claude Code',
-    modell: 'Claude Opus 5.5 (claude-opus-5-5)',
-    datum: '23.11.2026'
-  },
+  version: '0.2.0',
 
   // Typen der Potenzialflächen. Schlüssel (links) nicht ändern,
   // wenn schon Flächen erfasst sind; Bezeichnungen frei änderbar.

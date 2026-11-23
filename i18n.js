@@ -1,5 +1,5 @@
 /*
- * SenserScan – Oberflächentexte Deutsch / Niederländisch
+ * Klima Chancen – Oberflächentexte Deutsch / Niederländisch
  * Die niederländischen Texte sind KI-übersetzt und sollten geprüft werden.
  * Platzhalter in geschweiften Klammern ({n}, {m} …) nicht übersetzen.
  */
@@ -82,31 +82,17 @@ window.SENSERSCAN_I18N = {
     importFehler: 'Die Datei ist kein gültiges GeoJSON.',
     exportLeer: 'Keine Flächen zum Exportieren.',
     exportOk: 'Datei {name} erstellt.',
-    speicherHinweis: 'Daten werden nur lokal in diesem Browser gespeichert (IndexedDB). Regelmäßig exportieren!',
     offline: 'Offline – die App läuft weiter, Kartenkacheln fehlen ggf.',
     gebieteFehler: 'Gebietsgrenzen konnten nicht geladen werden.',
-    infoTitel: 'Über SenserScan',
-    infoIntro: 'Prototyp zur Masterthesis „Klimaresilient und wassersensibel: Vaals am Senserbach“ (Stadtplanung, RWTH Aachen). Mit der App werden Potenzialflächen für doppelte Innenentwicklung erfasst und bewertet: bauliche Verdichtung bei gleichzeitiger Sicherung und Aufwertung von Grün.',
-    infoKi: 'Prototyp erstellt mit {werkzeug}, Modell: {modell}, Datum: {datum}. KI-generiert.',
-    kiTeileTitel: 'KI-generierte Teile',
-    kiTeile: [
-      'Gesamter Programmcode (index.html, app.js, style.css, config.js, i18n.js, sw.js, manifest.json)',
-      'Umsetzung der Klassifikationsregeln in config.js',
-      'Maßnahmenkatalog und Anforderungen in data/massnahmen.json (Entwurf)',
-      'Sechs Beispielflächen in data/beispielflaechen.geojson (Lage und Bewertung fiktiv)',
-      'Niederländische Übersetzung aller Texte',
-      'App-Icons',
-      'README.md'
-    ],
-    nichtKiTitel: 'Nicht KI-generiert / Quellen',
-    nichtKi: [
+    infoTitel: 'Über Klima Chancen',
+    quellenTitel: 'Quellen',
+    quellen: [
       'Gebietsgrenzen Analyseraum und Planungsgebiet: Shapefile Lehrstuhl (EPSG:25832), umprojiziert nach WGS84',
       'Klassifikationsregeln a–d: Vorgabe aus der Aufgabenstellung',
-      'Richtwerte (70 mm in 1 h, 40 mm, 0,20 m, 300 m): Vorgabe aus der Aufgabenstellung – Quelle in der Thesis ergänzen',
+      'Richtwerte (70 mm in 1 h, 40 mm, 0,20 m, 300 m): Vorgabe aus der Aufgabenstellung',
       'Hintergrundkarten: © OpenStreetMap-Mitwirkende; Luftbild: PDOK / Beeldmateriaal Nederland',
       'Bibliotheken: Leaflet 1.9.4, Leaflet-Geoman free 2.17.0 (MIT-Lizenz)'
     ],
-    datenschutz: 'Alle erfassten Daten bleiben lokal in diesem Browser und werden nicht übertragen.',
     version: 'Version {v}'
   },
 
@@ -188,31 +174,17 @@ window.SENSERSCAN_I18N = {
     importFehler: 'Het bestand is geen geldige GeoJSON.',
     exportLeer: 'Geen locaties om te exporteren.',
     exportOk: 'Bestand {name} aangemaakt.',
-    speicherHinweis: 'Gegevens worden alleen lokaal in deze browser opgeslagen (IndexedDB). Exporteer regelmatig!',
     offline: 'Offline – de app werkt verder, kaarttegels kunnen ontbreken.',
     gebieteFehler: 'Gebiedsgrenzen konden niet worden geladen.',
-    infoTitel: 'Over SenserScan',
-    infoIntro: 'Prototype bij de masterthesis „Klimaresilient und wassersensibel: Vaals am Senserbach” (stedenbouw, RWTH Aachen). Met de app worden potentiële locaties voor dubbele binnenstedelijke ontwikkeling vastgelegd en beoordeeld: verdichting met tegelijk behoud en versterking van groen.',
-    infoKi: 'Prototype gemaakt met {werkzeug}, model: {modell}, datum: {datum}. AI-gegenereerd.',
-    kiTeileTitel: 'AI-gegenereerde onderdelen',
-    kiTeile: [
-      'Volledige programmacode (index.html, app.js, style.css, config.js, i18n.js, sw.js, manifest.json)',
-      'Uitwerking van de classificatieregels in config.js',
-      'Maatregelencatalogus en eisen in data/massnahmen.json (concept)',
-      'Zes voorbeeldlocaties in data/beispielflaechen.geojson (ligging en beoordeling fictief)',
-      'Nederlandse vertaling van alle teksten',
-      'App-iconen',
-      'README.md'
-    ],
-    nichtKiTitel: 'Niet AI-gegenereerd / bronnen',
-    nichtKi: [
+    infoTitel: 'Over Klima Chancen',
+    quellenTitel: 'Bronnen',
+    quellen: [
       'Gebiedsgrenzen analysegebied en plangebied: shapefile leerstoel (EPSG:25832), omgezet naar WGS84',
       'Classificatieregels a–d: uit de opdracht',
-      'Richtwaarden (70 mm in 1 uur, 40 mm, 0,20 m, 300 m): uit de opdracht – bron in de thesis aanvullen',
+      'Richtwaarden (70 mm in 1 uur, 40 mm, 0,20 m, 300 m): uit de opdracht',
       'Achtergrondkaarten: © OpenStreetMap-bijdragers; luchtfoto: PDOK / Beeldmateriaal Nederland',
       'Bibliotheken: Leaflet 1.9.4, Leaflet-Geoman free 2.17.0 (MIT-licentie)'
     ],
-    datenschutz: 'Alle vastgelegde gegevens blijven lokaal in deze browser en worden niet verzonden.',
     version: 'Versie {v}'
   }
 };

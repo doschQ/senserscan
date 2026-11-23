@@ -1,8 +1,8 @@
 {
   "titel": { "de": "Maßnahmenkatalog Klimacheck", "nl": "Maatregelencatalogus klimaatcheck" },
   "status": {
-    "de": "ENTWURF – KI-generiert, fachlich zu überarbeiten",
-    "nl": "CONCEPT – AI-gegenereerd, inhoudelijk te herzien"
+    "de": "ENTWURF – zu überarbeiten",
+    "nl": "CONCEPT – te herzien"
   },
   "stand": "2026-11-23",
   "_anleitung": "Ein Eintrag erscheint im Steckbrief, wenn alle angegebenen Bedingungen passen: 'typen' (Typ-Schlüssel aus config.js oder 'alle'), 'klassen' (optional, Klassen-Schlüssel aus config.js), 'risiko' (Liste aus 'wasser'/'hitze'; leere Liste = unabhängig vom Risiko). Ein Risiko gilt als erhöht ab dem Wert 'ab' des Eintrags, sonst ab 'schwelle'. Ebenen der Maßnahmen: quartier, gebaeude, freiraum.",
