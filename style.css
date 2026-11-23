@@ -53,7 +53,16 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   z-index: 1300;
 }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.brand img { border-radius: 8px; flex: 0 0 auto; }
+.brand .logo {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 30;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 .brand strong { display: block; font-size: 17px; letter-spacing: .2px; }
 .brand span { display: block; font-size: 12px; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .topbar-actions { display: flex; gap: 8px; flex: 0 0 auto; }
