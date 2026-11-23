@@ -1233,6 +1233,12 @@
 
     window.addEventListener('offline', () => toast(t('offline'), 5000));
 
+    // Pfeil zurück zur Startseite „Klima Wandel Stadt“ – nur wenn die App von dort geöffnet wurde
+    try {
+      const start = sessionStorage.getItem('kws.start');
+      if (start) { $('#btn-start').href = start; $('#btn-start').hidden = false; }
+    } catch (e) { /* kein sessionStorage */ }
+
     // Service Worker: App-Oberfläche offline (nur über HTTPS oder localhost möglich)
     if ('serviceWorker' in navigator && window.isSecureContext) {
       navigator.serviceWorker.register('sw.js').catch(e => console.warn('Service Worker:', e));

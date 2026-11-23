@@ -8,19 +8,19 @@
  * Bei einer neuen App-Version die Endung ?v=… hier UND in index.html anpassen,
  * damit Seite und Skripte immer zur selben Version gehören.
  */
-const VERSION = 'senserscan-v6';
+const VERSION = 'senserscan-v7';
 
 const LOKAL = [
   './',
   'index.html',
-  'style.css?v=0.4.0',
-  'config.js?v=0.4.0',
-  'i18n.js?v=0.4.0',
-  'app.js?v=0.4.0',
+  'style.css?v=0.4.1',
+  'config.js?v=0.4.1',
+  'i18n.js?v=0.4.1',
+  'app.js?v=0.4.1',
   'manifest.json',
-  'data/gebiete.js?v=0.4.0',
-  'data/massnahmen.js?v=0.4.0',
-  'data/analyse.js?v=0.4.0',
+  'data/gebiete.js?v=0.4.1',
+  'data/massnahmen.js?v=0.4.1',
+  'data/analyse.js?v=0.4.1',
   'icons/icon.svg',
   'icons/icon-192.png',
   'icons/icon-512.png',
@@ -46,7 +46,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k.startsWith('senserscan-') && k !== VERSION).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

@@ -19,7 +19,7 @@
  * Standard ("Standard wiederherstellen").
  */
 window.SENSERSCAN_CONFIG = {
-  version: '0.4.0',
+  version: '0.4.1',
 
   // Farbe von Kopfzeile und Bedienelementen (Vaals-Rot, wie vaals.nl)
   menuFarbe: '#e10a17',

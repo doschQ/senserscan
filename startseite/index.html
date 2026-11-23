@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f2f4f5">
+  <meta name="description" content="Klima Wandel Stadt – Vaals klimaresilient planen. Startseite mit den Apps des Projekts.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Klima Wandel Stadt">
+  <title>Klima Wandel Stadt</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <style>
+    :root {
+      --text: #1d1d1f;
+      --grau: #6e7378;
+      --rand: #d5dadf;
+      --wahl: 52, 180, 228;            /* Auswahl-Blau (Rahmen beim Antippen) */
+      --safe-t: env(safe-area-inset-top, 0px);
+      --safe-r: env(safe-area-inset-right, 0px);
+      --safe-b: env(safe-area-inset-bottom, 0px);
+      --safe-l: env(safe-area-inset-left, 0px);
+      color-scheme: light;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--text);
+      /* feine waagerechte Linien auf hellem Grund */
+      background:
+        repeating-linear-gradient(180deg, rgba(20, 30, 40, .022) 0 1px, transparent 1px 5px),
+        linear-gradient(180deg, #fbfcfc 0%, #eceff1 100%);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ---------- Titel ---------- */
+    .seite {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: calc(var(--safe-t) + 30px) calc(var(--safe-r) + 20px) calc(var(--safe-b) + 128px) calc(var(--safe-l) + 20px);
+      transition: opacity .2s ease .08s, transform .28s ease .08s;
+    }
+    .kopf { padding: 6px 4px 24px; }
+    .kopf h1 {
+      margin: 0;
+      font-size: clamp(30px, 8.4vw, 64px);
+      font-weight: 800;
+      letter-spacing: -.025em;
+      line-height: 1.04;
+    }
+    .kopf p {
+      margin: 8px 0 0;
+      font-size: clamp(16px, 4.4vw, 22px);
+      font-weight: 500;
+      letter-spacing: -.01em;
+      color: var(--grau);
+    }
+
+    /* ---------- Kacheln ---------- */
+    .raster {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .platz {
+      min-height: 152px;
+      border-radius: 22px;
+      border: 2px solid var(--rand);
+    }
+    .kanal {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding: 14px 14px 13px;
+      color: inherit;
+      text-decoration: none;
+      background:
+        radial-gradient(120% 90% at 100% 0%, rgba(var(--farbe), .10), transparent 60%),
+        linear-gradient(180deg, #ffffff 0%, #f3f5f6 100%);
+      box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(20, 30, 40, .06), 0 8px 20px rgba(20, 30, 40, .07);
+      transition: transform .18s cubic-bezier(.2, .8, .2, 1), border-color .18s, box-shadow .18s;
+      outline: none;
+    }
+    .symbol {
+      flex: 0 0 auto;
+      width: 36px;
+      height: 36px;
+      margin-bottom: auto;
+      filter: drop-shadow(0 1px 2px rgba(20, 30, 40, .18));
+    }
+    .symbol svg { display: block; width: 100%; height: 100%; }
+    .name {
+      display: block;
+      margin-top: 12px;
+      font-size: 19px;
+      font-weight: 650;
+      letter-spacing: -.015em;
+      line-height: 1.15;
+    }
+    .zweck {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      margin-top: 3px;
+      font-size: 12.5px;
+      line-height: 1.3;
+      color: var(--grau);
+    }
+    @media (hover: hover) {
+      .kanal:hover {
+        border-color: rgb(var(--wahl));
+        box-shadow: 0 0 0 4px rgba(var(--wahl), .22), 0 10px 24px rgba(20, 30, 40, .10);
+        transform: translateY(-2px);
+      }
+    }
+    .kanal:focus-visible {
+      border-color: rgb(var(--wahl));
+      box-shadow: 0 0 0 4px rgba(var(--wahl), .35);
+    }
+    .kanal:active { transform: scale(.97); }
+    .kanal.oeffnet {
+      z-index: 2;
+      border-color: rgb(var(--wahl));
+      box-shadow: 0 0 0 5px rgba(var(--wahl), .30), 0 18px 40px rgba(20, 30, 40, .18);
+      transform: scale(1.04);
+    }
+
+    /* leere Plätze für weitere Apps */
+    .leer {
+      border-color: #dde2e6;
+      background: linear-gradient(180deg, #eceff1 0%, #e4e8eb 100%);
+      box-shadow: inset 0 2px 5px rgba(20, 30, 40, .06), 0 1px 0 rgba(255, 255, 255, .9);
+    }
+    /* so viele leere Plätze, dass die Reihen voll sind: 2 × 3, 3 × 3, 4 × 3 */
+    .leer:nth-child(n+7) { display: none; }
+    @media (min-width: 640px) {
+      .raster { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+      .platz { min-height: 168px; }
+      .leer:nth-child(n+7) { display: block; }
+      .leer:nth-child(n+10) { display: none; }
+      .symbol { width: 40px; height: 40px; }
+      .name { font-size: 21px; }
+      .zweck { font-size: 13.5px; }
+    }
+    @media (min-width: 960px) {
+      .raster { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+      .platz { min-height: 178px; }
+      .leer:nth-child(n+10) { display: block; }
+    }
+    /* Handy quer: 4 × 2 */
+    @media (orientation: landscape) and (max-height: 520px) {
+      .seite { padding-top: calc(var(--safe-t) + 18px); }
+      .kopf { padding-bottom: 16px; }
+      .kopf h1 { font-size: 30px; }
+      .raster { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+      .platz { min-height: 136px; }
+      .leer:nth-child(n+7) { display: block; }
+      .leer:nth-child(n+9) { display: none; }
+    }
+
+    /* ---------- Leiste mit Uhr ---------- */
+    .leiste {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: 52px 1fr 52px;
+      align-items: center;
+      padding: 12px calc(var(--safe-r) + 22px) calc(var(--safe-b) + 12px) calc(var(--safe-l) + 22px);
+      border-top: 1px solid rgba(20, 30, 40, .08);
+      border-radius: 28px 28px 0 0;
+      background: rgba(244, 246, 247, .74);
+      -webkit-backdrop-filter: saturate(1.6) blur(20px);
+      backdrop-filter: saturate(1.6) blur(20px);
+      box-shadow: 0 -6px 24px rgba(20, 30, 40, .06);
+      transition: opacity .2s ease .08s;
+    }
+    .rund {
+      display: grid;
+      place-items: center;
+      width: 52px;
+      height: 52px;
+      padding: 0;
+      border-radius: 50%;
+      border: 2px solid var(--rand);
+      background: linear-gradient(180deg, #ffffff 0%, #eef1f3 100%);
+      box-shadow: inset 0 1px 0 #fff, 0 2px 6px rgba(20, 30, 40, .10);
+      color: #7a8086;
+      cursor: pointer;
+      transition: transform .15s, border-color .15s, color .15s;
+    }
+    .rund svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    .rund:active { transform: scale(.94); }
+    .rund:focus-visible { outline: none; border-color: rgb(var(--wahl)); box-shadow: 0 0 0 4px rgba(var(--wahl), .35); }
+    @media (hover: hover) { .rund:hover { border-color: rgb(var(--wahl)); color: rgb(var(--wahl)); } }
+    .uhr {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1;
+      color: #8a9096;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .zeit {
+      font-size: 34px;
+      font-weight: 300;
+      letter-spacing: .02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .doppelpunkt { animation: blinken 2s steps(1) infinite; }
+    @keyframes blinken { 50% { opacity: .15; } }
+    .datum { margin-top: 5px; font-size: 13px; font-weight: 500; color: #9aa0a6; }
+    @media (orientation: landscape) and (max-height: 520px) {
+      .leiste { padding-top: 8px; padding-bottom: calc(var(--safe-b) + 8px); }
+      .zeit { font-size: 28px; }
+    }
+
+    /* beim Öffnen einer App: Seite blendet aus, gewählte Kachel bleibt hervorgehoben */
+    body.geht .seite { opacity: 0; transform: scale(1.02); }
+    body.geht .leiste { opacity: 0; }
+
+    /* ---------- Info-Blatt ---------- */
+    .blatt {
+      width: min(560px, 100%);
+      max-width: 100%;
+      max-height: calc(100% - var(--safe-t) - 24px);
+      margin: auto auto 0;
+      padding: 0;
+      border: 0;
+      border-radius: 26px 26px 0 0;
+      background: #fff;
+      color: var(--text);
+      box-shadow: 0 -10px 40px rgba(20, 30, 40, .18);
+    }
+    .blatt[open] { animation: hoch .3s cubic-bezier(.2, .8, .2, 1); }
+    @keyframes hoch { from { transform: translateY(40px); opacity: 0; } }
+    .blatt::backdrop {
+      background: rgba(20, 30, 40, .28);
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+    }
+    @media (min-width: 640px) {
+      .blatt { margin: auto; border-radius: 26px; }
+    }
+    .blatt-innen { position: relative; padding: 10px 24px calc(var(--safe-b) + 24px); }
+    .griff { width: 40px; height: 5px; margin: 0 auto 14px; border-radius: 3px; background: #d5dadf; }
+    .blatt .rund { position: absolute; top: 14px; right: 14px; width: 38px; height: 38px; }
+    .blatt .rund svg { width: 18px; height: 18px; }
+    .blatt h2 { margin: 6px 48px 0 0; font-size: 26px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+    .blatt .unter { margin: 4px 0 0; color: var(--grau); font-weight: 500; }
+    .blatt h3 { margin: 22px 0 4px; font-size: 16px; font-weight: 650; }
+    .blatt p { margin: 0; font-size: 15px; line-height: 1.45; }
+    .blatt .version { margin-top: 22px; font-size: 13px; color: var(--grau); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="seite">
+    <header class="kopf">
+      <h1>Klima Wandel Stadt</h1>
+      <p>Vaals klimaresilient planen</p>
+    </header>
+
+    <!-- Neue App: Kachel kopieren, Link, Farbe (--farbe als R, G, B), Symbol und Texte anpassen. -->
+    <nav class="raster" aria-label="Apps">
+      <a class="platz kanal" href="klima-chancen/index.html" style="--farbe: 225, 10, 23">
+        <span class="symbol" aria-hidden="true"><svg viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#e10a17"/><g fill="none" stroke="#fff" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"><circle cx="166" cy="168" r="70"/><path d="M166 238v56M272 294V186l80-64 80 64v108M330 294v-56h44v56M80 354q29.5-24 59 0t59 0 59 0 59 0 59 0 59 0M80 406q29.5-24 59 0t59 0 59 0 59 0 59 0 59 0"/></g></svg></span>
+        <span class="name">Klima Chancen</span>
+        <span class="zweck">Potenzialflächen erfassen und bewerten</span>
+      </a>
+      <a class="platz kanal" href="entwurfslabor/index.html" style="--farbe: 25, 113, 194">
+        <span class="symbol" aria-hidden="true"><svg viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#1971c2"/><g fill="none" stroke="#fff" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"><path d="M166 98q-62 84-62 128a62 62 0 0 0 124 0q0-44-62-128zM290 294v-70M350 294v-150M410 294v-100M80 354q29.5-24 59 0t59 0 59 0 59 0 59 0 59 0M80 406q29.5-24 59 0t59 0 59 0 59 0 59 0 59 0"/></g></svg></span>
+        <span class="name">Vaals Entwurfslabor</span>
+        <span class="zweck">Szenarien für Wasser und Hitze</span>
+      </a>
+      <span class="platz leer" aria-hidden="true"></span>
+      <span class="platz leer" aria-hidden="true"></span>
+      <span class="platz leer" aria-hidden="true"></span>
+      <span class="platz leer" aria-hidden="true"></span>
+      <span class="platz leer" aria-hidden="true"></span>
+      <span class="platz leer" aria-hidden="true"></span>
+      <span class="platz leer" aria-hidden="true"></span>
+      <span class="platz leer" aria-hidden="true"></span>
+      <span class="platz leer" aria-hidden="true"></span>
+      <span class="platz leer" aria-hidden="true"></span>
+    </nav>
+  </main>
+
+  <footer class="leiste">
+    <button id="btn-info" class="rund" type="button" aria-label="Info" title="Info">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 11v7"/><circle cx="12" cy="6.8" r="1.4" fill="currentColor" stroke="none"/></svg>
+    </button>
+    <div class="uhr" aria-hidden="true">
+      <span class="zeit"><span id="std">--</span><span class="doppelpunkt">:</span><span id="min">--</span></span>
+      <span id="datum" class="datum"></span>
+    </div>
+    <span aria-hidden="true"></span>
+  </footer>
+
+  <dialog id="info" class="blatt" aria-labelledby="info-titel">
+    <div class="blatt-innen">
+      <div class="griff" aria-hidden="true"></div>
+      <form method="dialog">
+        <button class="rund" type="submit" aria-label="Schließen" title="Schließen">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </form>
+      <h2 id="info-titel">Klima Wandel Stadt</h2>
+      <p class="unter">Vaals klimaresilient planen</p>
+      <h3>Deine Daten bleiben auf diesem Gerät</h3>
+      <p>Jede App speichert deine Eingaben nur im Browser dieses Geräts. Kein Server empfängt oder speichert sie. Wenn du die Websitedaten des Browsers löschst, sind sie weg – sichere wichtige Stände über den Export der jeweiligen App.</p>
+      <h3>Auf den Home-Bildschirm legen</h3>
+      <p>iPhone: in Safari auf Teilen → „Zum Home-Bildschirm“. Android: im Chrome-Menü „Zum Startbildschirm hinzufügen“. Öffne die Apps danach immer über dieses Symbol – auf dem iPhone hat es einen eigenen Speicher, getrennt von Safari.</p>
+      <p class="version">Startseite · Version 0.1</p>
+    </div>
+  </dialog>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // Die Apps zeigen einen Pfeil „zurück zur Startseite“, solange dieser Eintrag existiert
+      // (sessionStorage gilt nur für diesen Tab bzw. diese Home-Bildschirm-App).
+      try { sessionStorage.setItem('kws.start', location.href.split('#')[0]); } catch (e) { /* egal */ }
+
+      // Uhr und Datum
+      const std = document.getElementById('std');
+      const min = document.getElementById('min');
+      const datum = document.getElementById('datum');
+      const fmtDatum = new Intl.DateTimeFormat('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
+      function uhr() {
+        const d = new Date();
+        std.textContent = String(d.getHours()).padStart(2, '0');
+        min.textContent = String(d.getMinutes()).padStart(2, '0');
+        datum.textContent = fmtDatum.format(d);
+      }
+      uhr();
+      setInterval(uhr, 1000);
+
+      // App öffnen: Kachel hebt sich, Seite blendet aus, dann Wechsel
+      const ruhig = window.matchMedia('(prefers-reduced-motion: reduce)');
+      document.querySelectorAll('a.kanal').forEach(a => a.addEventListener('click', e => {
+        if (ruhig.matches || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        e.preventDefault();
+        a.classList.add('oeffnet');
+        document.body.classList.add('geht');
+        setTimeout(() => { location.href = a.href; }, 260);
+      }));
+      // zurück (Wischgeste, Zurück-Taste): Seite wieder normal zeigen
+      window.addEventListener('pageshow', () => {
+        document.body.classList.remove('geht');
+        document.querySelectorAll('.oeffnet').forEach(a => a.classList.remove('oeffnet'));
+      });
+
+      // Info-Blatt (Tippen außerhalb schließt)
+      const info = document.getElementById('info');
+      document.getElementById('btn-info').addEventListener('click', () => info.showModal());
+      info.addEventListener('click', e => { if (e.target === info) info.close(); });
+
+      // Service Worker: Startseite offline (nur über HTTPS oder localhost möglich)
+      if ('serviceWorker' in navigator && window.isSecureContext) {
+        navigator.serviceWorker.register('sw.js').catch(e => console.warn('Service Worker:', e));
+      }
+    })();
+  </script>
+</body>
+</html>

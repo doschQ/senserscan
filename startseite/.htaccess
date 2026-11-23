@@ -1,0 +1,19 @@
+# Klima Wandel Stadt – Einstellungen für den Strato-Webspace (Apache)
+
+# Immer über HTTPS: nötig für GPS, Offline-Betrieb und „Zum Home-Bildschirm“.
+# Voraussetzung: Das SSL-Zertifikat ist im Strato-Kundenlogin für die Domain aktiviert.
+# Meldet der Browser „zu viele Weiterleitungen“, diesen Block löschen.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</IfModule>
+
+# Seiten, Skripte und Stile bei jedem Aufruf beim Server nachfragen,
+# damit hochgeladene Änderungen sofort auf den Geräten ankommen.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|js|css|json)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>

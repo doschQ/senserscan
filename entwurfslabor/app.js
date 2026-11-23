@@ -101,7 +101,7 @@
       impFehler: 'Datei nicht lesbar: kein GeoJSON.', impOk: '{n} Potenzialflächen im Planungsgebiet geladen.',
       hDachSenser: 'SenserScan: Flachdächer im Gebiet {m2} m²', nr: 'Nr.',
       // Info-Seite
-      sprache: 'Sprache: Niederländisch', info: 'Info, Formeln, Annahmen', schliessen: 'Schließen',
+      sprache: 'Sprache: Niederländisch', info: 'Info, Formeln, Annahmen', startseite: 'Zur Startseite', schliessen: 'Schließen',
       infoTitel: 'Über das Vaals Entwurfslabor',
       infoZweck: 'Szenario-Rechner für das Planungsgebiet Selzerbeek: Optimierung der Wasser- und Hitzeresilienz gegenüber dem Bestand.',
       infoFormelnTitel: 'Formeln',
@@ -212,7 +212,7 @@
       impParkOk: 'Parkeeroppervlak {m2} m² overgenomen: {namen}',
       impFehler: 'Bestand niet leesbaar: geen GeoJSON.', impOk: '{n} potentiële locaties in het plangebied geladen.',
       hDachSenser: 'SenserScan: platte daken in het gebied {m2} m²', nr: 'Nr.',
-      sprache: 'Taal: Duits', info: 'Info, formules, aannames', schliessen: 'Sluiten',
+      sprache: 'Taal: Duits', info: 'Info, formules, aannames', startseite: 'Naar de startpagina', schliessen: 'Sluiten',
       infoTitel: 'Over het Vaals Entwurfslabor',
       infoZweck: 'Scenariorekentool voor het plangebied Selzerbeek: optimalisatie van de water- en hitterobuustheid ten opzichte van de bestaande situatie.',
       infoFormelnTitel: 'Formules',
@@ -530,11 +530,17 @@
     document.documentElement.lang = state.sprache;
     farbeAnwenden();
     document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
-    [['#btn-einst', 'einstellungen'], ['#btn-png', 'pngExport'], ['#btn-csv', 'csvExport']].forEach(([s, k]) => {
+    [['#btn-start', 'startseite'], ['#btn-einst', 'einstellungen'], ['#btn-png', 'pngExport'], ['#btn-csv', 'csvExport']].forEach(([s, k]) => {
       $(s).title = t(k);
       $(s).setAttribute('aria-label', t(k));
     });
   });
+
+  // Pfeil zurück zur Startseite „Klima Wandel Stadt“ – nur wenn die App von dort geöffnet wurde
+  try {
+    const start = sessionStorage.getItem('kws.start');
+    if (start) { $('#btn-start').href = start; $('#btn-start').hidden = false; }
+  } catch (e) { /* kein sessionStorage */ }
 
   // Höhe der Kopfzeile für die feste Regler-Leiste
   const kopfEl = $('#kopf');

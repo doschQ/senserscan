@@ -63,6 +63,8 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+.btn-start { flex: 0 0 auto; display: grid; place-items: center; width: 24px; height: 44px; margin: 0 -10px 0 -6px; color: inherit; }
+.btn-start svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .brand strong { display: block; font-size: 17px; letter-spacing: .2px; }
 .brand span { display: block; font-size: 12px; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .topbar-actions { display: flex; gap: 8px; flex: 0 0 auto; }
