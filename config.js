@@ -10,7 +10,8 @@
  *
  * Nach einer Änderung die Seite neu laden. Läuft die App als
  * installierte PWA, ggf. zweimal neu laden (Offline-Cache).
- * Der Maßnahmenkatalog steht in data/massnahmen.json.
+ * Der Maßnahmenkatalog steht in data/massnahmen.js, die Analyse
+ * des Plangebiets in data/analyse.js.
  *
  * Menüfarbe, Klassen (Name, Farbe, Beschreibung) und Schwellenwerte
  * lassen sich auch in der App unter "Einstellungen" ändern, dort können
@@ -18,7 +19,7 @@
  * Standard ("Standard wiederherstellen").
  */
 window.SENSERSCAN_CONFIG = {
-  version: '0.3.0',
+  version: '0.4.0',
 
   // Farbe von Kopfzeile und Bedienelementen (Vaals-Rot, wie vaals.nl)
   menuFarbe: '#e10a17',
@@ -111,9 +112,9 @@ window.SENSERSCAN_CONFIG = {
       wenn: (f, s) => true }
   ],
 
-  // Gebietsgrenzen (GeoJSON in WGS84)
+  // Gebietsgrenzen (GeoJSON in WGS84) stehen in data/gebiete.js
+  // (Kopie von data/vaals_gebiete_wgs84.geojson als Skript)
   gebiete: {
-    datei: 'data/vaals_gebiete_wgs84.geojson',
     planungsgebietId: 2,
     analyseraumId: 4,
     namen: {

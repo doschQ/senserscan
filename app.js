@@ -76,10 +76,6 @@
   });
   L.control.zoom({ position: 'bottomright' }).addTo(map);
   L.control.scale({ position: 'bottomright', imperial: false }).addTo(map);
-  // Schilder der Beispielflächen erst nah herangezoomt zeigen, sonst überdecken sie sich
-  const nahZoom = () => map.getContainer().classList.toggle('zoom-nah', map.getZoom() >= 18);
-  map.on('zoomend', nahZoom);
-  nahZoom();
 
   // Kartenebene aus config.js: WMS (wms) oder Kacheln (url)
   function kartenEbene(k) {
@@ -177,17 +173,12 @@
     });
   }
 
-  async function ladeGebiete() {
-    try {
-      const res = await fetch(CFG.gebiete.datei);
-      if (!res.ok) throw new Error(res.status);
-      gebieteGeoJSON = await res.json();
-      renderGebiete();
-      zoomPlanungsgebiet();
-    } catch (e) {
-      console.error(e);
-      toast(t('gebieteFehler'), 5000);
-    }
+  // Gebietsgrenzen aus data/gebiete.js (Skript statt fetch, damit es auch über file:// geht)
+  function ladeGebiete() {
+    gebieteGeoJSON = window.SENSERSCAN_GEBIETE || null;
+    if (!gebieteGeoJSON) { toast(t('gebieteFehler'), 5000); return; }
+    renderGebiete();
+    zoomPlanungsgebiet();
   }
 
   function zoomPlanungsgebiet() {
@@ -264,8 +255,8 @@
     return '<span class="badge" style="--c:' + kl.farbe + ';--ci:' + inkFor(kl.farbe) + '">' + esc(tx(kl.name)) + '</span>';
   }
   function typName(key) { return tx(CFG.typen[key]) || key || '–'; }
-  // Name der Fläche; ohne eigenen Namen "Typ #Nr" bzw. "Beispiel Nr"
-  function standardTitel(f) { return f.beispiel ? t('beispiel') + ' ' + f.nr : typName(f.typ) + ' #' + f.nr; }
+  // Name der Fläche; ohne eigenen Namen "Typ #Nr"
+  function standardTitel(f) { return typName(f.typ) + ' #' + f.nr; }
   function titel(f) { return f.name || standardTitel(f); }
   function groesseText(f) {
     if (f.geometry.type === 'Point') {
@@ -326,7 +317,7 @@
 
   function renderFlaechen() {
     flaechenLayer.clearLayers();
-    flaechen.forEach(f => {
+    aktiv().forEach(f => {
       const kl = klasseInfo(klasseVon(f));
       const sel = f.id === auswahlId;
       let layer;
@@ -343,13 +334,6 @@
       }
       layer.on('click', () => { if (!zeichnen) openSteckbrief(f.id); });
       layer.addTo(flaechenLayer);
-      // Beispielflächen: Schild über dem nördlichsten Punkt, damit die Fläche sichtbar bleibt
-      if (f.beispiel) {
-        L.marker(nordpunkt(f.geometry), {
-          keyboard: false,
-          icon: L.divIcon({ className: 'beispiel-label', html: '<span>' + esc(t('beispiel')) + '</span>', iconSize: null })
-        }).on('click', () => { if (!zeichnen) openSteckbrief(f.id); }).addTo(flaechenLayer);
-      }
     });
   }
 
@@ -369,84 +353,108 @@
       flaechen = [];
       toast(t('speicherFehler'), 6000);
     }
-    // Bis Version 0.1 kamen die Beispiele beim ersten Start automatisch dazu.
-    // Jetzt startet die App leer: diese Beispiele einmalig entfernen.
     try {
-      if (await metaGet('beispieleGeladen')) {
-        await beispieleEntfernen();
-        await metaDel('beispieleGeladen');
-      }
-      // Bis Version 0.2 gab es sechs fiktive Beispiele (IDs "f-beispiel-…"); die neuen
-      // Beispiele (IDs "f-bsp-…") ersetzen sie. Alte Beispiele einmalig entfernen.
-      const alt = flaechen.filter(f => f.beispiel && /^f-beispiel-/.test(f.id));
-      if (alt.length) {
-        flaechen = flaechen.filter(f => !alt.includes(f));
-        await idb('flaechen', 'readwrite', s => { alt.forEach(f => s.delete(f.id)); });
-      }
+      await analyseAktualisieren();
     } catch (e) { console.error(e); }
     renderFlaechen();
-    beispielKnopf();
+    analyseKnopf();
   }
 
-  // Menüpunkt "Beispiele": Beispielflächen einblenden bzw. wieder entfernen
-  const beispieleDa = () => flaechen.some(f => f.beispiel);
-  function beispielKnopf() {
+  // ================================================================
+  // Analyse des Plangebiets (data/analyse.js): lückenlose Kartierung,
+  // über den Menüpunkt "Analyse" ein- und ausblenden. Einmal geladen,
+  // bleiben die Flächen gespeichert (auch Änderungen daran); ausblenden
+  // versteckt sie nur.
+  // ================================================================
+  const ANALYSE = window.SENSERSCAN_ANALYSE || null;
+  const analyseDa = () => flaechen.some(f => f.analyse);
+  const analyseSichtbar = () => storageGet('analyse') !== '0';
+  const sichtbar = f => !f.analyse || analyseSichtbar();
+  const aktiv = () => flaechen.filter(sichtbar);
+
+  function analyseKnopf() {
     // ?. – falls eine ältere, zwischengespeicherte index.html den Knopf noch nicht hat
-    $('#btn-beispiele')?.setAttribute('aria-pressed', String(beispieleDa()));
+    $('#btn-analyse')?.setAttribute('aria-pressed', String(analyseDa() && analyseSichtbar()));
   }
-  async function beispieleUmschalten() {
-    if (beispieleDa()) {
-      if (byId(auswahlId) && byId(auswahlId).beispiel) schliessePanel();
-      try { await beispieleEntfernen(); } catch (e) { console.error(e); toast(t('speicherFehler'), 6000); }
-      toast(t('beispieleAus'));
-    } else if (await beispieleLaden()) {
-      toast(t('beispieleAn'));
-      zoomPlanungsgebiet();
+  async function analyseUmschalten() {
+    if (analyseDa() && analyseSichtbar()) {
+      if (byId(auswahlId) && byId(auswahlId).analyse) schliessePanel();
+      storageSet('analyse', '0');
+      toast(t('analyseAus'));
     } else {
-      toast(t('beispieleFehler'), 5000);
+      if (!analyseDa() && !(await analyseLaden())) { toast(t('analyseFehler'), 5000); return; }
+      storageSet('analyse', '1');
+      toast(t('analyseAn'));
+      zoomPlanungsgebiet();
     }
     renderFlaechen();
-    beispielKnopf();
+    analyseKnopf();
     if (ansicht) ansicht();
   }
-  async function beispieleEntfernen() {
-    const weg = flaechen.filter(f => f.beispiel);
-    flaechen = flaechen.filter(f => !f.beispiel);
-    await idb('flaechen', 'readwrite', s => { weg.forEach(f => s.delete(f.id)); });
+  function analyseRecord(ft, jetzt) {
+    const p = ft.properties;
+    return {
+      id: p.id,
+      nr: flaechen.some(f => f.nr === p.nr) ? naechsteNr() : p.nr,
+      name: p.name || '',
+      typ: p.typ, bau: p.bau, gruen: p.gruen, wasser: p.wasser, hitze: p.hitze,
+      notiz: p.notiz || '',
+      foto: null,
+      geometry: ft.geometry,
+      flaeche_m2: Math.round(geomArea(ft.geometry) * 10) / 10,
+      gps_genauigkeit_m: null,
+      analyse: true,
+      erstellt: p.erstellt || jetzt,
+      geaendert: jetzt
+    };
   }
-  async function beispieleLaden() {
-    try {
-      const res = await fetch('data/beispielflaechen.geojson');
-      if (!res.ok) throw new Error(res.status);
-      const gj = await res.json();
-      const jetzt = new Date().toISOString();
-      const neu = [];
-      gj.features.forEach(ft => {
-        const p = ft.properties;
-        if (byId(p.id)) return;
-        const rec = {
-          id: p.id,
-          nr: flaechen.some(f => f.nr === p.nr) ? naechsteNr() : p.nr,
-          name: p.name || '',
-          typ: p.typ, bau: p.bau, gruen: p.gruen, wasser: p.wasser, hitze: p.hitze,
-          notiz: p.notiz || '',
-          foto: null,
-          geometry: ft.geometry,
-          flaeche_m2: Math.round(geomArea(ft.geometry) * 10) / 10,
-          gps_genauigkeit_m: null,
-          beispiel: true,
-          erstellt: p.erstellt || jetzt,
-          geaendert: jetzt
-        };
-        flaechen.push(rec);
-        neu.push(rec);
+  // fehlende Flächen des Datensatzes hinzufügen
+  async function analyseLaden() {
+    if (!ANALYSE) return false;
+    const jetzt = new Date().toISOString();
+    const neu = [];
+    ANALYSE.features.forEach(ft => {
+      if (byId(ft.properties.id)) return;
+      const rec = analyseRecord(ft, jetzt);
+      flaechen.push(rec);
+      neu.push(rec);
+    });
+    await persistieren(neu);
+    storageSet('analyseStand', ANALYSE.stand);
+    return true;
+  }
+  // Ältere Stände beim Start einmalig anpassen
+  async function analyseAktualisieren() {
+    const geaendert = [];
+    const weg = [];
+    flaechen.forEach(f => {
+      // bis 0.3 hieß die Markierung "beispiel"
+      if (f.beispiel) { f.analyse = true; delete f.beispiel; geaendert.push(f); }
+      // sechs fiktive Beispiele aus 0.1/0.2 entfallen
+      if (f.analyse && /^f-beispiel-/.test(f.id)) weg.push(f);
+    });
+    if (await metaGet('beispieleGeladen')) await metaDel('beispieleGeladen');
+    // Flächen aus 0.3 ("Beispiel, Bewertung fiktiv."): Umriss und Notiz aus dem Datensatz übernehmen;
+    // Name, Typ und Bewertung bleiben, falls sie geändert wurden.
+    const ALT = 'Beispiel, Bewertung fiktiv. ';
+    if (ANALYSE) {
+      ANALYSE.features.forEach(ft => {
+        const f = byId(ft.properties.id);
+        if (f && (f.notiz || '').startsWith(ALT)) {
+          f.notiz = ft.properties.notiz;
+          f.geometry = ft.geometry;
+          f.flaeche_m2 = Math.round(geomArea(ft.geometry) * 10) / 10;
+          if (!geaendert.includes(f)) geaendert.push(f);
+        }
       });
-      await persistieren(neu);
-      return true;
-    } catch (e) {
-      console.error(e);
-      return false;
     }
+    if (weg.length) {
+      flaechen = flaechen.filter(f => !weg.includes(f));
+      await idb('flaechen', 'readwrite', s => { weg.forEach(f => s.delete(f.id)); });
+    }
+    await persistieren(geaendert.filter(f => !weg.includes(f)));
+    // neuer Stand des Datensatzes: fehlende Flächen ergänzen, wenn die Analyse schon geladen ist
+    if (ANALYSE && analyseDa() && storageGet('analyseStand') !== ANALYSE.stand) await analyseLaden();
   }
 
   // Karte so ausrichten, dass die Geometrie neben/über dem Panel sichtbar ist
@@ -686,7 +694,7 @@
       geometry: d.geometry,
       flaeche_m2: Math.round(geomArea(d.geometry) * 10) / 10,
       gps_genauigkeit_m: d.gps_genauigkeit_m != null ? d.gps_genauigkeit_m : null,
-      beispiel: !!d.beispiel,
+      analyse: !!d.analyse,
       erstellt: d.erstellt || jetzt,
       geaendert: jetzt
     };
@@ -707,19 +715,12 @@
   }
 
   // ================================================================
-  // Klimacheck (Katalog: data/massnahmen.json)
+  // Klimacheck (Katalog: data/massnahmen.js)
   // ================================================================
   let katalog = null;   // null = lädt noch, false = Fehler
 
-  async function ladeKatalog() {
-    try {
-      const res = await fetch('data/massnahmen.json');
-      if (!res.ok) throw new Error(res.status);
-      katalog = await res.json();
-    } catch (e) {
-      console.error(e);
-      katalog = false;
-    }
+  function ladeKatalog() {
+    katalog = window.SENSERSCAN_MASSNAHMEN || false;
     if (ansicht) ansicht();
   }
 
@@ -782,8 +783,7 @@
     if (!f) return;
     const k = klasseVon(f);
     const html =
-      '<div class="sb-head">' + badgeKlasse(k) +
-      (f.beispiel ? '<span class="badge badge--beispiel">' + esc(t('beispiel')) + '</span>' : '') + '</div>' +
+      '<div class="sb-head">' + badgeKlasse(k) + '</div>' +
       '<p class="muted">' + esc(tx(klasseInfo(k).beschreibung)) + '</p>' +
       '<dl class="facts"><dt>' + esc(t('typ')) + '</dt><dd>' + esc(typName(f.typ)) + '</dd>' +
       '<dt>' + esc(t('groesse')) + '</dt><dd>' + esc(groesseText(f)) + '</dd></dl>' +
@@ -818,22 +818,22 @@
   // Liste mit Filter und Statistik
   // ================================================================
   let filterKlasse = 'alle';
-  const sortiert = () => flaechen.slice().sort((a, b) => a.nr - b.nr);
+  const sortiert = () => aktiv().sort((a, b) => a.nr - b.nr);   // nur sichtbare Flächen
   const m2Von = f => geomArea(f.geometry);
 
   function openListe() {
     const klassen = Object.keys(CFG.klassen);
     const stat = {};
     klassen.forEach(k => { stat[k] = { n: 0, m2: 0 }; });
-    flaechen.forEach(f => {
+    aktiv().forEach(f => {
       const k = klasseVon(f);
       if (!stat[k]) stat[k] = { n: 0, m2: 0 };
       stat[k].n++;
       stat[k].m2 += m2Von(f);
     });
-    const summeN = flaechen.length;
-    const summeM2 = flaechen.reduce((s, f) => s + m2Von(f), 0);
-    const hatPunkte = flaechen.some(f => f.geometry.type === 'Point');
+    const summeN = aktiv().length;
+    const summeM2 = aktiv().reduce((s, f) => s + m2Von(f), 0);
+    const hatPunkte = aktiv().some(f => f.geometry.type === 'Point');
     const chip = (k, label, n, farbe) => '<button type="button" data-filter="' + k + '" aria-pressed="' + (filterKlasse === k) + '">' +
       (farbe ? '<span class="dot" style="--c:' + farbe + '"></span>' : '') + esc(label) + ' (' + n + ')</button>';
 
@@ -918,7 +918,7 @@
       notiz: f.notiz || '',
       foto: !!f.foto,
       gps_genauigkeit_m: f.gps_genauigkeit_m != null ? f.gps_genauigkeit_m : null,
-      beispiel: !!f.beispiel,
+      analyse: !!f.analyse,
       erstellt: f.erstellt || '',
       geaendert: f.geaendert || ''
     };
@@ -938,7 +938,7 @@
   }
 
   function exportGeoJSON() {
-    if (!flaechen.length) { toast(t('exportLeer')); return; }
+    if (!aktiv().length) { toast(t('exportLeer')); return; }
     const fc = {
       type: 'FeatureCollection',
       name: 'klimachancen_flaechen',
@@ -960,7 +960,7 @@
     return /[",;\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
   }
   function exportCSV() {
-    if (!flaechen.length) { toast(t('exportLeer')); return; }
+    if (!aktiv().length) { toast(t('exportLeer')); return; }
     const rows = sortiert().map(f => Object.assign(exportProps(f), { wkt: wkt(exportGeom(f.geometry)) }));
     const cols = Object.keys(rows[0]);
     const lines = [cols.join(',')].concat(rows.map(r => cols.map(c => csvZelle(r[c])).join(',')));
@@ -1014,7 +1014,7 @@
         geometry: { type: g.type, coordinates: g.coordinates },
         flaeche_m2: Math.round(geomArea(g) * 10) / 10,
         gps_genauigkeit_m: Number.isFinite(p.gps_genauigkeit_m) ? p.gps_genauigkeit_m : null,
-        beispiel: p.beispiel === true || p.beispiel === 'true',
+        analyse: [p.analyse, p.beispiel].some(v => v === true || v === 'true'),   // "beispiel" bis 0.3
         erstellt: typeof p.erstellt === 'string' && p.erstellt ? p.erstellt : jetzt,
         geaendert: jetzt
       };
@@ -1219,7 +1219,7 @@
     $('#btn-zeichnen').addEventListener('click', zeichnenStart);
     $('#btn-gps').addEventListener('click', gpsPunkt);
     $('#btn-liste').addEventListener('click', openListe);
-    $('#btn-beispiele')?.addEventListener('click', beispieleUmschalten);
+    $('#btn-analyse')?.addEventListener('click', analyseUmschalten);
     $('#btn-info').addEventListener('click', openInfo);
     $('#btn-einst')?.addEventListener('click', openEinstellungen);
     $('#btn-undo').addEventListener('click', zeichnenPunktZurueck);

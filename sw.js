@@ -8,19 +8,19 @@
  * Bei einer neuen App-Version die Endung ?v=… hier UND in index.html anpassen,
  * damit Seite und Skripte immer zur selben Version gehören.
  */
-const VERSION = 'senserscan-v5';
+const VERSION = 'senserscan-v6';
 
 const LOKAL = [
   './',
   'index.html',
-  'style.css?v=0.3.0',
-  'config.js?v=0.3.0',
-  'i18n.js?v=0.3.0',
-  'app.js?v=0.3.0',
+  'style.css?v=0.4.0',
+  'config.js?v=0.4.0',
+  'i18n.js?v=0.4.0',
+  'app.js?v=0.4.0',
   'manifest.json',
-  'data/vaals_gebiete_wgs84.geojson',
-  'data/massnahmen.json',
-  'data/beispielflaechen.geojson',
+  'data/gebiete.js?v=0.4.0',
+  'data/massnahmen.js?v=0.4.0',
+  'data/analyse.js?v=0.4.0',
   'icons/icon.svg',
   'icons/icon-192.png',
   'icons/icon-512.png',

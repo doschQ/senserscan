@@ -1,0 +1,234 @@
+/*
+ * Klima Chancen – Maßnahmenkatalog für den Klimacheck (ENTWURF)
+ * Inhalt im JSON-Format; als Skript, damit die App auch direkt aus dem Ordner (file://) läuft.
+ * Beim Bearbeiten auf Anführungszeichen und Kommas achten (gültiges JSON).
+ */
+window.SENSERSCAN_MASSNAHMEN = {
+  "titel": { "de": "Maßnahmenkatalog Klimacheck", "nl": "Maatregelencatalogus klimaatcheck" },
+  "status": {
+    "de": "ENTWURF – zu überarbeiten",
+    "nl": "CONCEPT – te herzien"
+  },
+  "stand": "2026-11-23",
+  "_anleitung": "Ein Eintrag erscheint im Steckbrief, wenn alle angegebenen Bedingungen passen: 'typen' (Typ-Schlüssel aus config.js oder 'alle'), 'klassen' (optional, Klassen-Schlüssel aus config.js), 'risiko' (Liste aus 'wasser'/'hitze'; leere Liste = unabhängig vom Risiko). Ein Risiko gilt als erhöht ab dem Wert 'ab' des Eintrags, sonst ab 'schwelle'. Ebenen der Maßnahmen: quartier, gebaeude, freiraum.",
+  "schwelle": 3,
+
+  "quelle_richtwerte": {
+    "de": "Vorgabe aus der Aufgabenstellung",
+    "nl": "Uit de opdracht"
+  },
+  "richtwerte": [
+    {
+      "id": "R1", "risiko": "wasser", "wert": "70 mm / 1 h",
+      "text": {
+        "de": "Starkregen von 70 mm in einer Stunde verursacht keinen Schaden.",
+        "nl": "Een bui van 70 mm in één uur veroorzaakt geen schade."
+      }
+    },
+    {
+      "id": "R2", "risiko": "wasser", "wert": "40 mm",
+      "text": {
+        "de": "40 mm Niederschlag werden auf privatem Grund zurückgehalten.",
+        "nl": "40 mm neerslag wordt op eigen terrein vastgehouden."
+      }
+    },
+    {
+      "id": "R3", "risiko": "wasser", "wert": "≤ 0,20 m",
+      "text": {
+        "de": "Bis 0,20 m Wasser auf der Straße entsteht kein Schaden.",
+        "nl": "Tot 0,20 m water op straat ontstaat geen schade."
+      }
+    },
+    {
+      "id": "R4", "risiko": "hitze", "wert": "≤ 300 m",
+      "text": {
+        "de": "Ein kühler Grünort ist höchstens 300 m entfernt.",
+        "nl": "Een koele groene plek ligt op maximaal 300 m afstand."
+      }
+    }
+  ],
+
+  "anforderungen": [
+    {
+      "id": "A1", "typen": ["alle"], "risiko": ["wasser"], "ab": 4,
+      "text": {
+        "de": "Nachweis, dass ein Starkregen von 70 mm in 1 h ohne Schaden abgeleitet oder zwischengespeichert wird; Notwasserweg festlegen.",
+        "nl": "Aantonen dat een bui van 70 mm in 1 uur zonder schade wordt afgevoerd of tijdelijk geborgen; noodwaterweg vastleggen."
+      }
+    },
+    {
+      "id": "A2", "typen": ["parkplatz", "brache", "bauluecke", "flachdach", "innenhof", "satteldach", "wohnbau", "industriebau", "sport"], "risiko": ["wasser"],
+      "text": {
+        "de": "Auf dem Grundstück 40 mm Niederschlag zurückhalten (speichern, versickern, verdunsten); Abfluss gegenüber dem Bestand nicht erhöhen.",
+        "nl": "Op eigen terrein 40 mm neerslag vasthouden (bergen, infiltreren, verdampen); afvoer niet verhogen ten opzichte van de bestaande situatie."
+      }
+    },
+    {
+      "id": "A3", "typen": ["parkplatz", "brache", "bauluecke", "wohnbau", "industriebau"], "risiko": ["wasser"],
+      "text": {
+        "de": "Erdgeschoss, Eingänge und Tiefgaragenzufahrten mindestens 0,20 m über Straßenniveau.",
+        "nl": "Begane grond, entrees en hellingbanen minstens 0,20 m boven straatniveau."
+      }
+    },
+    {
+      "id": "A4", "typen": ["strassenraum"], "risiko": ["wasser"],
+      "text": {
+        "de": "Straßenprofil so gestalten, dass bis 0,20 m Wasser schadlos auf der Straße stehen kann (Bordhöhen, Gefälle zur Fahrbahnmitte).",
+        "nl": "Straatprofiel zo inrichten dat tot 0,20 m water zonder schade op straat kan staan (trottoirbanden, afschot naar het midden)."
+      }
+    },
+    {
+      "id": "A5", "typen": ["alle"], "risiko": ["hitze"], "ab": 4,
+      "text": {
+        "de": "Kühlen Grünort in höchstens 300 m Entfernung nachweisen oder auf der Fläche schaffen.",
+        "nl": "Koele groene plek binnen maximaal 300 m aantonen of op de locatie realiseren."
+      }
+    },
+    {
+      "id": "A6", "typen": ["alle"], "risiko": ["hitze"],
+      "text": {
+        "de": "Aufenthaltsflächen verschatten (Bäume, Pergolen) und helle, wasserdurchlässige Beläge verwenden.",
+        "nl": "Verblijfsplekken beschaduwen (bomen, pergola's) en lichte, waterdoorlatende verharding toepassen."
+      }
+    },
+    {
+      "id": "A7", "typen": ["gruenflaeche"], "risiko": [],
+      "text": {
+        "de": "Keine Neuversiegelung; Fläche als kühlen Grünort und Retentionsraum sichern.",
+        "nl": "Geen nieuwe verharding; locatie behouden als koele groene plek en waterbergingsruimte."
+      }
+    },
+    {
+      "id": "A8", "typen": ["alle"], "klassen": ["verdichten_auflagen", "bauen_entsiegeln"], "risiko": [],
+      "text": {
+        "de": "Doppelte Innenentwicklung: jede Neuversiegelung durch Entsiegelung oder Dach- und Fassadengrün auf der Fläche oder im Quartier ausgleichen.",
+        "nl": "Dubbele binnenstedelijke ontwikkeling: elke nieuwe verharding compenseren met ontharding of dak- en gevelgroen op de locatie of in de wijk."
+      }
+    }
+  ],
+
+  "massnahmen": [
+    {
+      "id": "Q1", "ebene": "quartier", "typen": ["alle"], "risiko": ["wasser"],
+      "titel": { "de": "Notwasserwege und Retentionsräume", "nl": "Noodwaterwegen en waterberging" },
+      "text": {
+        "de": "Oberflächenabfluss bei Starkregen über Straßen und Grünflächen gezielt zu schadlosen Rückhalteflächen und zum Senserbach leiten.",
+        "nl": "Afstromend regenwater bij hevige buien via straten en groen gericht naar veilige bergingsplekken en de Selzerbeek leiden."
+      }
+    },
+    {
+      "id": "Q2", "ebene": "quartier", "typen": ["gruenflaeche", "brache", "strassenraum"], "risiko": ["wasser"],
+      "titel": { "de": "Gewässerraum Senserbach sichern", "nl": "Beekzone Selzerbeek vrijhouden" },
+      "text": {
+        "de": "Uferbereiche von Bebauung freihalten, Aufweitung und naturnahe Gestaltung prüfen, Flächen als Überflutungsraum nutzen.",
+        "nl": "Oeverzones vrijhouden van bebouwing, verbreding en natuurlijke inrichting onderzoeken, vlakken inzetten als overstromingsruimte."
+      }
+    },
+    {
+      "id": "Q3", "ebene": "quartier", "typen": ["alle"], "risiko": ["hitze"],
+      "titel": { "de": "Netz kühler Orte (≤ 300 m)", "nl": "Netwerk van koele plekken (≤ 300 m)" },
+      "text": {
+        "de": "Öffentlich zugängliche, schattige Grünorte so ergänzen, dass jede Wohnung einen kühlen Ort in höchstens 300 m erreicht.",
+        "nl": "Openbaar toegankelijke, schaduwrijke groene plekken zo aanvullen dat elke woning binnen 300 m een koele plek heeft."
+      }
+    },
+    {
+      "id": "Q4", "ebene": "quartier", "typen": ["brache", "bauluecke", "parkplatz", "gruenflaeche", "sport", "spielflaeche"], "risiko": ["hitze"],
+      "titel": { "de": "Kaltluftbahnen freihalten", "nl": "Koele-luchtbanen vrijhouden" },
+      "text": {
+        "de": "Hangabwärts gerichtete Luftleitbahnen von Querriegeln freihalten; Baukörper parallel zur Strömungsrichtung stellen.",
+        "nl": "Hellingafwaartse luchtstromen vrijhouden van dwarsbebouwing; bouwvolumes evenwijdig aan de stroomrichting plaatsen."
+      }
+    },
+    {
+      "id": "Q5", "ebene": "quartier", "typen": ["alle"], "klassen": ["verdichten_auflagen", "bauen_entsiegeln"], "risiko": [],
+      "titel": { "de": "Bauen und Entsiegeln koppeln", "nl": "Bouwen en ontharden koppelen" },
+      "text": {
+        "de": "Verdichtung nur zusammen mit Entsiegelung und Begrünung im Quartier; Flächenbilanz je Vorhaben.",
+        "nl": "Verdichting alleen samen met ontharding en vergroening in de wijk; vlakkenbalans per project."
+      }
+    },
+
+    {
+      "id": "G1", "ebene": "gebaeude", "typen": ["flachdach", "bauluecke", "brache", "parkplatz", "innenhof", "industriebau"], "risiko": [],
+      "titel": { "de": "Retentionsgründach", "nl": "Groen retentiedak" },
+      "text": {
+        "de": "Gründach mit Wasserspeicher: hält Regen zurück, verdunstet und kühlt; Beitrag zu 40 mm auf privatem Grund.",
+        "nl": "Groen dak met waterbuffer: houdt regen vast, verdampt en koelt; draagt bij aan 40 mm op eigen terrein."
+      }
+    },
+    {
+      "id": "G2", "ebene": "gebaeude", "typen": ["flachdach", "bauluecke", "brache", "parkplatz", "innenhof", "strassenraum", "wohnbau", "industriebau"], "risiko": ["hitze"],
+      "titel": { "de": "Fassadenbegrünung und Verschattung", "nl": "Gevelgroen en zonwering" },
+      "text": {
+        "de": "Bodengebundenes Fassadengrün und außenliegender Sonnenschutz senken Oberflächen- und Innentemperaturen.",
+        "nl": "Grondgebonden gevelgroen en buitenzonwering verlagen oppervlakte- en binnentemperaturen."
+      }
+    },
+    {
+      "id": "G3", "ebene": "gebaeude", "typen": ["bauluecke", "brache", "parkplatz", "wohnbau", "industriebau"], "risiko": ["wasser"],
+      "titel": { "de": "Wasserrobust bauen", "nl": "Waterrobuust bouwen" },
+      "text": {
+        "de": "Erdgeschoss und Eingänge mindestens 0,20 m über Straßenniveau; Lichtschächte und Kellerzugänge gegen Oberflächenwasser sichern; Rückstausicherung.",
+        "nl": "Begane grond en entrees minstens 0,20 m boven straatniveau; lichtschachten en keldertoegangen beveiligen tegen oppervlaktewater; terugslagbeveiliging."
+      }
+    },
+    {
+      "id": "G4", "ebene": "gebaeude", "typen": ["flachdach", "bauluecke", "brache", "parkplatz", "innenhof", "satteldach", "wohnbau", "industriebau"], "risiko": ["wasser"],
+      "titel": { "de": "Regenwasser speichern und nutzen", "nl": "Regenwater opvangen en hergebruiken" },
+      "text": {
+        "de": "Zisterne für Bewässerung und Toilettenspülung; Überlauf in eine Versickerungsmulde.",
+        "nl": "Regenwatertank voor besproeiing en toiletspoeling; overloop naar een wadi."
+      }
+    },
+    {
+      "id": "G5", "ebene": "gebaeude", "typen": ["flachdach", "bauluecke", "brache", "parkplatz", "satteldach", "wohnbau", "industriebau"], "risiko": ["hitze"],
+      "titel": { "de": "Helle Oberflächen und Hitzeschutz", "nl": "Lichte oppervlakken en hittebescherming" },
+      "text": {
+        "de": "Helle Dach- und Fassadenmaterialien, Querlüftung und Nachtauskühlung; keine dunklen, unverschatteten Flächen.",
+        "nl": "Lichte dak- en gevelmaterialen, dwarsventilatie en nachtkoeling; geen donkere, onbeschaduwde oppervlakken."
+      }
+    },
+
+    {
+      "id": "F1", "ebene": "freiraum", "typen": ["parkplatz", "strassenraum", "innenhof", "brache", "industriebau", "spielflaeche"], "risiko": [],
+      "titel": { "de": "Entsiegeln", "nl": "Ontharden" },
+      "text": {
+        "de": "Asphalt und Pflaster entfernen oder durch versickerungsfähige Beläge ersetzen; offenen Boden schaffen.",
+        "nl": "Asfalt en bestrating verwijderen of vervangen door waterdoorlatende verharding; open bodem creëren."
+      }
+    },
+    {
+      "id": "F2", "ebene": "freiraum", "typen": ["parkplatz", "brache", "bauluecke", "innenhof", "strassenraum", "gruenflaeche", "wohnbau", "industriebau", "sport", "spielflaeche"], "risiko": ["wasser"],
+      "titel": { "de": "Mulden, Rigolen, Regengärten", "nl": "Wadi's en regentuinen" },
+      "text": {
+        "de": "Flache Mulden und Regengärten nehmen Dachwasser und Oberflächenabfluss auf und lassen es versickern.",
+        "nl": "Ondiepe wadi's en regentuinen vangen dak- en oppervlaktewater op en laten het infiltreren."
+      }
+    },
+    {
+      "id": "F3", "ebene": "freiraum", "typen": ["strassenraum", "parkplatz", "innenhof", "gruenflaeche", "brache", "wohnbau", "sport", "spielflaeche"], "risiko": ["hitze", "wasser"],
+      "titel": { "de": "Großkronige Bäume mit Baumrigole", "nl": "Bomen met grote kroon en waterbuffer" },
+      "text": {
+        "de": "Schattenspendende Bäume mit großem Wurzelraum, der Regenwasser speichert (Schwammstadt-Prinzip).",
+        "nl": "Schaduwgevende bomen met een ruime groeiplaats die regenwater opslaat (sponsstad-principe)."
+      }
+    },
+    {
+      "id": "F4", "ebene": "freiraum", "typen": ["gruenflaeche", "innenhof", "strassenraum", "parkplatz", "sport", "spielflaeche"], "risiko": ["wasser"], "ab": 4,
+      "titel": { "de": "Temporäre Wasserflächen", "nl": "Waterplein" },
+      "text": {
+        "de": "Tiefer liegende Platz- oder Grünflächen, die bei Starkregen kurzzeitig geflutet werden dürfen.",
+        "nl": "Verlaagde plein- of groenvlakken die bij hevige regen tijdelijk onder water mogen staan."
+      }
+    },
+    {
+      "id": "F5", "ebene": "freiraum", "typen": ["gruenflaeche", "innenhof", "strassenraum", "flachdach", "sport", "spielflaeche"], "risiko": ["hitze"],
+      "titel": { "de": "Kühler Aufenthaltsort", "nl": "Koele verblijfsplek" },
+      "text": {
+        "de": "Schattige Sitzplätze, Trinkwasserstelle und artenreiche Wiese statt Rasen; auf Flachdächern als Dachgarten.",
+        "nl": "Schaduwrijke zitplekken, een drinkwaterpunt en bloemrijk grasland in plaats van gazon; op platte daken als daktuin."
+      }
+    }
+  ]
+};
