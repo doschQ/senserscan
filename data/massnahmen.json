@@ -9,8 +9,8 @@
   "schwelle": 3,
 
   "quelle_richtwerte": {
-    "de": "Vorgabe aus der Aufgabenstellung – Quelle in der Thesis ergänzen",
-    "nl": "Uit de opdracht – bron in de thesis aanvullen"
+    "de": "Vorgabe aus der Aufgabenstellung",
+    "nl": "Uit de opdracht"
   },
   "richtwerte": [
     {
