@@ -132,7 +132,8 @@ main { position: relative; flex: 1 1 auto; min-height: 0; }
 .gebiet-label.analyse span { color: #343a40; }
 .gebiet-label.oben span { transform: translate(-50%, calc(-100% - 4px)); }
 
-/* Beschriftung der Beispielflächen (Schild über der Fläche) */
+/* Beschriftung der Beispielflächen (Schild über der Fläche), erst ab Zoomstufe 18 */
+.leaflet-container:not(.zoom-nah) .beispiel-label { display: none; }
 .beispiel-label span {
   position: absolute;
   transform: translate(-50%, calc(-100% - 3px));
@@ -240,7 +241,16 @@ body.drawing .leaflet-marker-icon.beispiel-label { pointer-events: none; }
   font-weight: 600;
 }
 .bottombar button:active { background: #e6eeea; }
-.bottombar button span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* lange Beschriftungen ("Mein Standort") auf schmalen Handys zweizeilig */
+.bottombar button span {
+  max-width: 100%;
+  overflow: hidden;
+  text-align: center;
+  line-height: 1.1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
 .bottombar button[aria-pressed="true"] { background: var(--primary-soft); color: var(--primary); }
 .bottombar svg, .btn svg {
   width: 26px;
@@ -313,7 +323,7 @@ body.drawing .leaflet-marker-icon.beispiel-label { pointer-events: none; }
 .btn--danger { color: #b42318; border-color: #f1b5ae; }
 .btn[disabled] { opacity: .45; cursor: not-allowed; }
 .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
-.btn-row .btn { flex: 1 1 0; }
+.btn-row .btn { flex: 1 1 calc(50% - 4px); }   /* höchstens zwei Knöpfe je Zeile */
 .btn-file { position: relative; overflow: hidden; }
 .btn-file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 
@@ -449,6 +459,20 @@ ul.plain li { margin: 4px 0; }
   font-weight: 700;
 }
 .klasse-einst textarea { min-height: 72px; }
+.field input[type="text"], .typ-eigen input[type="text"] {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font: inherit;
+}
+.typen-std { margin: 8px 0; }
+.typen-std span { padding: 6px 12px; border: 1px solid var(--line); border-radius: 18px; font-size: 14px; color: var(--muted); }
+.typ-eigen { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
+.typ-eigen input[type="text"] { flex: 1 1 auto; }
+.typ-eigen .btn { flex: 0 0 auto; }
 input[type="color"] {
   flex: 0 0 auto;
   width: 46px;

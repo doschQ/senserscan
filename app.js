@@ -76,16 +76,25 @@
   });
   L.control.zoom({ position: 'bottomright' }).addTo(map);
   L.control.scale({ position: 'bottomright', imperial: false }).addTo(map);
+  // Schilder der Beispielflächen erst nah herangezoomt zeigen, sonst überdecken sie sich
+  const nahZoom = () => map.getContainer().classList.toggle('zoom-nah', map.getZoom() >= 18);
+  map.on('zoomend', nahZoom);
+  nahZoom();
 
-  const basemaps = {
-    // Karte: NL (PDOK) und DE (basemap.de) übereinander
-    karte: L.featureGroup(CFG.karten.karte.map(k => L.tileLayer(k.url, {
-      maxZoom: 21,
+  // Kartenebene aus config.js: WMS (wms) oder Kacheln (url)
+  function kartenEbene(k) {
+    const o = { maxZoom: 21, minZoom: k.minZoom || 0, attribution: k.attribution };
+    if (k.wms) return L.tileLayer.wms(k.wms, Object.assign(o, { layers: k.layers, format: 'image/png', transparent: true }));
+    return L.tileLayer(k.url, Object.assign(o, {
       maxNativeZoom: k.maxNativeZoom,
-      attribution: k.attribution,
-      // TileMatrix-IDs sind zweistellig: 00 … 19
+      // TileMatrix-IDs sind zweistellig: 00, 01, …
       tm: data => String(data.z).padStart(2, '0')
-    }))),
+    }));
+  }
+  const basemaps = {
+    // Karte und Grundstücke: NL- und DE-Dienste übereinander, in der Reihenfolge aus config.js
+    karte: L.featureGroup(CFG.karten.karte.map(kartenEbene)),
+    grundstuecke: L.featureGroup(CFG.karten.grundstuecke.map(kartenEbene)),
     luftbild: L.tileLayer(CFG.karten.luftbild.url, {
       maxZoom: 21,
       maxNativeZoom: CFG.karten.luftbild.maxNativeZoom,
@@ -111,7 +120,9 @@
   function setBasemap(name, leise) {
     if (!basemaps[name] || name === basemapAktiv) return;
     if (basemapAktiv) map.removeLayer(basemaps[basemapAktiv]);
-    basemaps[name].addTo(map).bringToBack();
+    // Die Hintergrundkarte ist die einzige Kachelebene; die Ebenen einer Gruppe
+    // liegen in der Reihenfolge übereinander, in der sie hinzugefügt werden.
+    basemaps[name].addTo(map);
     basemapAktiv = name;
     storageSet('basemap', name);
     $$('.basemap-switch button').forEach(b => b.classList.toggle('active', b.dataset.basemap === name));
@@ -119,6 +130,7 @@
       lbStatus.ok = 0; lbStatus.err = 0; lbStatus.gewarnt = false;
       if (!leise) toast(t('luftbildHinweis'));
     }
+    if (name === 'grundstuecke' && !leise && map.getZoom() < 17) toast(t('grundstueckeHinweis'), 4000);
   }
 
   // ================================================================
@@ -252,7 +264,9 @@
     return '<span class="badge" style="--c:' + kl.farbe + ';--ci:' + inkFor(kl.farbe) + '">' + esc(tx(kl.name)) + '</span>';
   }
   function typName(key) { return tx(CFG.typen[key]) || key || '–'; }
-  function titel(f) { return f.beispiel ? t('beispiel') + ' ' + f.nr : typName(f.typ) + ' #' + f.nr; }
+  // Name der Fläche; ohne eigenen Namen "Typ #Nr" bzw. "Beispiel Nr"
+  function standardTitel(f) { return f.beispiel ? t('beispiel') + ' ' + f.nr : typName(f.typ) + ' #' + f.nr; }
+  function titel(f) { return f.name || standardTitel(f); }
   function groesseText(f) {
     if (f.geometry.type === 'Point') {
       return t('ohneFlaeche') + (f.gps_genauigkeit_m != null ? ' · ' + t('gpsGenauigkeit', { m: f.gps_genauigkeit_m }) : '');
@@ -362,6 +376,13 @@
         await beispieleEntfernen();
         await metaDel('beispieleGeladen');
       }
+      // Bis Version 0.2 gab es sechs fiktive Beispiele (IDs "f-beispiel-…"); die neuen
+      // Beispiele (IDs "f-bsp-…") ersetzen sie. Alte Beispiele einmalig entfernen.
+      const alt = flaechen.filter(f => f.beispiel && /^f-beispiel-/.test(f.id));
+      if (alt.length) {
+        flaechen = flaechen.filter(f => !alt.includes(f));
+        await idb('flaechen', 'readwrite', s => { alt.forEach(f => s.delete(f.id)); });
+      }
     } catch (e) { console.error(e); }
     renderFlaechen();
     beispielKnopf();
@@ -406,6 +427,7 @@
         const rec = {
           id: p.id,
           nr: flaechen.some(f => f.nr === p.nr) ? naechsteNr() : p.nr,
+          name: p.name || '',
           typ: p.typ, bau: p.bau, gruen: p.gruen, wasser: p.wasser, hitze: p.hitze,
           notiz: p.notiz || '',
           foto: null,
@@ -575,6 +597,8 @@
     const html =
       '<div class="klasse-preview" id="klasse-preview"></div>' +
       '<p class="muted">' + esc(t('groesse')) + ': ' + esc(groesseText(d)) + '</p>' +
+      '<div class="field"><label for="f-name">' + esc(t('nameOptional')) + '</label>' +
+      '<input type="text" id="f-name" maxlength="80" value="' + esc(d.name || '') + '"></div>' +
       '<div class="field"><span class="label">' + esc(t('typ')) + '</span><div class="chips" id="typ-chips">' + typen + '</div></div>' +
       '<p class="muted">' + esc(t('skala')) + '</p>' +
       ['bau', 'gruen', 'wasser', 'hitze'].map(f =>
@@ -605,6 +629,7 @@
       else if (b.dataset.feld) { d[b.dataset.feld] = Number(b.dataset.wert); update(); }
     });
     $('#notiz', v).addEventListener('input', e => { d.notiz = e.target.value; });
+    $('#f-name', v).addEventListener('input', e => { d.name = e.target.value; });
     $('#f-abbrechen', v).addEventListener('click', () => { schliessePanel(); if (d.id) openSteckbrief(d.id); });
     $('#f-speichern', v).addEventListener('click', () => speichern(d));
     renderFotoBox(v, d);
@@ -653,6 +678,7 @@
     const rec = {
       id: d.id || neueId(),
       nr: d.nr || naechsteNr(),
+      name: (d.name || '').trim(),
       typ: d.typ,
       bau: d.bau, gruen: d.gruen, wasser: d.wasser, hitze: d.hitze,
       notiz: (d.notiz || '').trim(),
@@ -767,6 +793,7 @@
       klimacheckHTML(f) +
       '<div class="btn-row">' +
       '<button type="button" class="btn" id="sb-karte">' + esc(t('aufKarte')) + '</button>' +
+      '<button type="button" class="btn" id="sb-name">' + esc(t('umbenennen')) + '</button>' +
       '<button type="button" class="btn" id="sb-edit">' + esc(t('bearbeiten')) + '</button>' +
       '<button type="button" class="btn btn--danger" id="sb-del">' + esc(t('loeschen')) + '</button></div>';
 
@@ -775,6 +802,14 @@
     auswahlId = id;
     renderFlaechen();
     $('#sb-karte', v).addEventListener('click', () => zeigeGeometrie(f.geometry));
+    $('#sb-name', v).addEventListener('click', async () => {
+      const neu = window.prompt(t('umbenennenFrage', { standard: standardTitel(f) }), f.name || '');
+      if (neu === null) return;
+      f.name = neu.trim();
+      f.geaendert = new Date().toISOString();
+      await persistieren([f]);
+      openSteckbrief(id);
+    });
     $('#sb-edit', v).addEventListener('click', () => oeffneFormular(Object.assign({}, f)));
     $('#sb-del', v).addEventListener('click', () => loeschen(id));
   }
@@ -870,6 +905,7 @@
     return {
       id: f.id,
       nr: f.nr,
+      name: f.name || '',
       typ: f.typ,
       typ_name: typName(f.typ),
       klasse: k,
@@ -964,10 +1000,13 @@
       const p = ft.properties || {};
       const id = typeof p.id === 'string' && /^f-/.test(p.id) ? p.id : neueId();
       const alt = byId(id);
-      const typ = typAus(p.typ) || typAus(p.typ_name);
+      let typ = typAus(p.typ) || typAus(p.typ_name);
+      // eigener Typ von einem anderen Gerät: mit seinem Namen übernehmen
+      if (!typ && /^eigen_[a-z0-9_]+$/.test(p.typ) && p.typ_name) typ = typAnlegen(String(p.typ_name), p.typ);
       const rec = {
         id: id,
         nr: alt ? alt.nr : nr++,
+        name: p.name ? String(p.name).trim() : '',
         typ: typ || 'brache',
         bau: wert15(p.bau), gruen: wert15(p.gruen), wasser: wert15(p.wasser), hitze: wert15(p.hitze),
         notiz: (typ ? '' : '[Import: Typ unbekannt] ') + (p.notiz ? String(p.notiz) : ''),
@@ -1003,10 +1042,10 @@
   }
 
   // ================================================================
-  // Einstellungen: Klassen, Schwellenwerte, Menüfarbe
+  // Einstellungen: Klassen, Schwellenwerte, Flächentypen, Menüfarbe
   // Nur in diesem Browser gespeichert; der Standard steht in config.js.
   // ================================================================
-  const STANDARD = JSON.parse(JSON.stringify({ menuFarbe: CFG.menuFarbe, schwellen: CFG.schwellen, klassen: CFG.klassen }));
+  const STANDARD = JSON.parse(JSON.stringify({ menuFarbe: CFG.menuFarbe, schwellen: CFG.schwellen, klassen: CFG.klassen, typen: CFG.typen }));
   const MENUFARBEN = ['#e10a17', '#0b5563', '#1d4e89', '#2b7a3d', '#343a40'];
   let einst = {};
   try { einst = JSON.parse(storageGet('einstellungen')) || {}; } catch (e) { einst = {}; }
@@ -1014,6 +1053,8 @@
 
   function einstellungenAnwenden() {
     CFG.schwellen = Object.assign({}, STANDARD.schwellen, einst.schwellen);
+    // Flächentypen: Standard aus config.js, eigene Typen hinten dazu
+    CFG.typen = Object.assign({}, STANDARD.typen, einst.typen);
     Object.keys(STANDARD.klassen).forEach(k => {
       const s = STANDARD.klassen[k];
       const o = (einst.klassen && einst.klassen[k]) || {};
@@ -1052,6 +1093,15 @@
     }
     einstellungenSpeichern();
   }
+  // Eigener Flächentyp (Schlüssel "eigen_…"); der Name gilt zunächst für beide Sprachen
+  function typAnlegen(name, key) {
+    key = key || 'eigen_' + Date.now().toString(36);
+    einst.typen = Object.assign({}, einst.typen, { [key]: { de: name, nl: name } });
+    einstellungenSpeichern();
+    return key;
+  }
+  const typGenutzt = k => flaechen.filter(f => f.typ === k).length;
+
   function regelText(k) {
     const i = CFG.regeln.findIndex(r => r.klasse === k);
     if (i < 0 || !CFG.regeln[i].text) return '';
@@ -1076,6 +1126,13 @@
       '<h3>' + esc(t('schwellen')) + '</h3>' +
       ['bau', 'wasser', 'hitze'].map(f =>
         '<div class="field"><span class="label">' + esc(t('hochAb', { name: t(f) })) + '</span>' + seg(f) + '</div>').join('') +
+      '<h3>' + esc(t('typen')) + '</h3><p class="muted">' + esc(t('typenHinweis')) + '</p>' +
+      '<div class="chips typen-std">' + Object.keys(STANDARD.typen).map(k => '<span>' + esc(typName(k)) + '</span>').join('') + '</div>' +
+      Object.keys(einst.typen || {}).map(k =>
+        '<div class="typ-eigen"><input type="text" data-typ-name="' + esc(k) + '" value="' + esc(typName(k)) + '" maxlength="40" aria-label="' + esc(t('name')) + '">' +
+        '<button type="button" class="btn btn--danger" data-typ-weg="' + esc(k) + '" aria-label="' + esc(t('typLoeschen')) + '" title="' + esc(t('typLoeschen')) + '">✕</button></div>').join('') +
+      '<div class="typ-eigen"><input type="text" id="typ-neu" maxlength="40" placeholder="' + esc(t('typNeu')) + '" aria-label="' + esc(t('typNeu')) + '">' +
+      '<button type="button" class="btn" id="typ-dazu">' + esc(t('hinzufuegen')) + '</button></div>' +
       '<h3>' + esc(t('menuFarbe')) + '</h3><div class="farben">' +
       MENUFARBEN.map(c => '<button type="button" class="farbwahl" data-menufarbe="' + c + '" style="--c:' + c +
         '" aria-pressed="' + (c === menuFarbe()) + '" aria-label="' + c + '"></button>').join('') +
@@ -1093,13 +1150,29 @@
         einst.schwellen = Object.assign({}, einst.schwellen, { [b.dataset.schwelle]: Number(b.dataset.wert) });
       } else if (b.dataset.menufarbe) {
         einst.menuFarbe = b.dataset.menufarbe;
+      } else if (b.dataset.typWeg) {
+        const n = typGenutzt(b.dataset.typWeg);
+        if (n) { toast(t('typBenutzt', { n: n }), 4000); return; }
+        einst.typen = Object.assign({}, einst.typen);
+        delete einst.typen[b.dataset.typWeg];
+      } else if (b.id === 'typ-dazu') {
+        const name = $('#typ-neu', v).value.trim();
+        if (!name) return;
+        if (typAus(name)) { toast(t('typVorhanden')); return; }
+        typAnlegen(name);
+        neu();
+        return;
       } else if (b.id === 'einst-reset') {
         if (!window.confirm(t('standardFrage'))) return;
-        einst = {};
+        // eigene Typen, die noch von Flächen genutzt werden, bleiben erhalten
+        const typen = {};
+        Object.keys(einst.typen || {}).forEach(k => { if (typGenutzt(k)) typen[k] = einst.typen[k]; });
+        einst = { typen: typen };
       } else return;
       einstellungenSpeichern();
       neu();
     });
+    $('#typ-neu', v).addEventListener('keydown', e => { if (e.key === 'Enter') $('#typ-dazu', v).click(); });
     v.addEventListener('input', e => {
       const el = e.target;
       if (el.id === 'menu-eigen') {
@@ -1108,6 +1181,11 @@
         $$('.farbwahl', v).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.menufarbe === el.value)));
       } else if (el.dataset.k) {
         klasseSetzen(el.dataset.k, el.dataset.prop, el.value);
+      } else if (el.dataset.typName && el.value.trim()) {
+        // Name eines eigenen Typs in der aktuellen Sprache
+        const k = el.dataset.typName;
+        einst.typen = Object.assign({}, einst.typen, { [k]: Object.assign({}, einst.typen[k], { [lang]: el.value.trim() }) });
+        einstellungenSpeichern();
       }
     });
   }
@@ -1132,7 +1210,7 @@
   function init() {
     einstellungenAnwenden();
     applyStaticTexts();
-    setBasemap(storageGet('basemap') === 'luftbild' ? 'luftbild' : 'karte', true);
+    setBasemap(basemaps[storageGet('basemap')] ? storageGet('basemap') : 'karte', true);
     renderLegende();
 
     $$('.basemap-switch button').forEach(b => b.addEventListener('click', () => setBasemap(b.dataset.basemap)));

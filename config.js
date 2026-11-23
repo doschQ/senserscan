@@ -13,25 +13,32 @@
  * Der Maßnahmenkatalog steht in data/massnahmen.json.
  *
  * Menüfarbe, Klassen (Name, Farbe, Beschreibung) und Schwellenwerte
- * lassen sich auch in der App unter "Einstellungen" ändern. Die Werte
- * hier sind dann der Standard ("Standard wiederherstellen").
+ * lassen sich auch in der App unter "Einstellungen" ändern, dort können
+ * auch eigene Flächentypen ergänzt werden. Die Werte hier sind dann der
+ * Standard ("Standard wiederherstellen").
  */
 window.SENSERSCAN_CONFIG = {
-  version: '0.2.1',
+  version: '0.3.0',
 
   // Farbe von Kopfzeile und Bedienelementen (Vaals-Rot, wie vaals.nl)
   menuFarbe: '#e10a17',
 
   // Typen der Potenzialflächen. Schlüssel (links) nicht ändern,
   // wenn schon Flächen erfasst sind; Bezeichnungen frei änderbar.
+  // Eigene Typen aus den Einstellungen kommen hinten dazu.
   typen: {
-    parkplatz:    { de: 'Parkplatz',   nl: 'Parkeerplaats' },
-    brache:       { de: 'Brache',      nl: 'Braakliggend terrein' },
-    bauluecke:    { de: 'Baulücke',    nl: 'Lege kavel' },
-    flachdach:    { de: 'Flachdach',   nl: 'Plat dak' },
-    innenhof:     { de: 'Innenhof',    nl: 'Binnenhof' },
-    strassenraum: { de: 'Straßenraum', nl: 'Straatruimte' },
-    gruenflaeche: { de: 'Grünfläche',  nl: 'Groenvoorziening' }
+    parkplatz:    { de: 'Parkplatz',    nl: 'Parkeerplaats' },
+    brache:       { de: 'Brache',       nl: 'Braakliggend terrein' },
+    bauluecke:    { de: 'Baulücke',     nl: 'Lege kavel' },
+    flachdach:    { de: 'Flachdach',    nl: 'Plat dak' },
+    satteldach:   { de: 'Satteldach',   nl: 'Zadeldak' },
+    innenhof:     { de: 'Innenhof',     nl: 'Binnenhof' },
+    wohnbau:      { de: 'Wohnbau',      nl: 'Woningbouw' },
+    industriebau: { de: 'Industriebau', nl: 'Industriegebouw' },
+    strassenraum: { de: 'Straßenraum',  nl: 'Straatruimte' },
+    gruenflaeche: { de: 'Grünfläche',   nl: 'Groenvoorziening' },
+    sport:        { de: 'Sport',        nl: 'Sport' },
+    spielflaeche: { de: 'Spielfläche',  nl: 'Speelplek' }
   },
 
   // Klassen mit Farbe (Karte und Legende) und Kurzbeschreibung.
@@ -131,6 +138,13 @@ window.SENSERSCAN_CONFIG = {
   //     abgerufen 23.11.2026): Layer "de_basemapde_web_raster_farbe" (auch "_grau"),
   //     TileMatrixSet "GLOBAL_WEBMERCATOR", TileMatrix-IDs "00"–"19", image/png,
   //     Reihenfolge {TileMatrix}/{TileRow}/{TileCol} = {tm}/{y}/{x}, Lizenz CC BY 4.0.
+  // Grundstücke: graue Karte mit Flurstücksgrenzen (sichtbar ab Zoomstufe 17).
+  //   NL: Kadastrale kaart (Kadaster), laut GetCapabilities
+  //     (https://service.pdok.nl/kadaster/kadastralekaart/wmts/v5_0, abgerufen 23.11.2026):
+  //     Layer "Kadastralekaart", TileMatrixSet "EPSG:3857", TileMatrix-IDs "00"–"22".
+  //   DE: ALKIS NRW (Geobasis NRW) als WMS, Layer "adv_alkis_flurstuecke",
+  //     sichtbar bis Maßstab 1:5501, Lizenz Datenlizenz Deutschland – Zero 2.0.
+  //   Einträge mit "wms" werden als WMS geladen, die übrigen als Kacheln.
   // Luftbild: PDOK WMTS, laut GetCapabilities (abgerufen 23.11.2026):
   //   Layer "Actueel_orthoHR", TileMatrixSet "EPSG:3857",
   //   TileMatrix-IDs "00"–"21" (zweistellig, daher {tm}), image/jpeg.
@@ -146,6 +160,30 @@ window.SENSERSCAN_CONFIG = {
         url: 'https://sgx.geodatenzentrum.de/wmts_basemapde/tile/1.0.0/de_basemapde_web_raster_farbe/default/GLOBAL_WEBMERCATOR/{tm}/{y}/{x}.png',
         maxNativeZoom: 19,
         attribution: 'Karte: © <a href="https://basemap.de/">GeoBasis-DE / BKG</a> (2026) CC BY 4.0'
+      }
+    ],
+    grundstuecke: [
+      {
+        url: 'https://service.pdok.nl/kadaster/brt-achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{tm}/{x}/{y}.png',
+        maxNativeZoom: 19,
+        attribution: 'Kaart: <a href="https://www.pdok.nl/">PDOK</a> / © Kadaster'
+      },
+      {
+        url: 'https://sgx.geodatenzentrum.de/wmts_basemapde/tile/1.0.0/de_basemapde_web_raster_grau/default/GLOBAL_WEBMERCATOR/{tm}/{y}/{x}.png',
+        maxNativeZoom: 19,
+        attribution: 'Karte: © <a href="https://basemap.de/">GeoBasis-DE / BKG</a> (2026) CC BY 4.0'
+      },
+      {
+        url: 'https://service.pdok.nl/kadaster/brk-kadastrale-kaart/wmts/v5_0/Kadastralekaart/EPSG:3857/{tm}/{x}/{y}.png',
+        minZoom: 17,
+        maxNativeZoom: 21,
+        attribution: 'Kaart: <a href="https://www.pdok.nl/">PDOK</a> / © Kadaster'   // gleicher Text wie oben, erscheint nur einmal
+      },
+      {
+        wms: 'https://www.wms.nrw.de/geobasis/wms_nw_alkis',
+        layers: 'adv_alkis_flurstuecke',
+        minZoom: 17,
+        attribution: 'Flurstücke: © <a href="https://www.bezreg-koeln.nrw.de/geobasis-nrw">Geobasis NRW</a>, dl-de/zero-2-0'
       }
     ],
     luftbild: {
