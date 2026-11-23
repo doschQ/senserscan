@@ -97,7 +97,19 @@ window.SENSERSCAN_I18N = {
       'Hintergrundkarten: © OpenStreetMap-Mitwirkende; Luftbild: PDOK / Beeldmateriaal Nederland',
       'Bibliotheken: Leaflet 1.9.4, Leaflet-Geoman free 2.17.0 (MIT-Lizenz)'
     ],
-    version: 'Version {v}'
+    version: 'Version {v}',
+    einstellungen: 'Einstellungen',
+    klassen: 'Klassen',
+    farbe: 'Farbe',
+    name: 'Name',
+    beschreibung: 'Beschreibung',
+    regel: 'Regel',
+    schwellen: 'Schwellenwerte',
+    hochAb: '{name} hoch ab',
+    menuFarbe: 'Menüfarbe',
+    eigeneFarbe: 'Eigene Farbe',
+    standard: 'Standard wiederherstellen',
+    standardFrage: 'Alle Einstellungen auf den Standard zurücksetzen?'
   },
 
   nl: {
@@ -193,6 +205,18 @@ window.SENSERSCAN_I18N = {
       'Achtergrondkaarten: © OpenStreetMap-bijdragers; luchtfoto: PDOK / Beeldmateriaal Nederland',
       'Bibliotheken: Leaflet 1.9.4, Leaflet-Geoman free 2.17.0 (MIT-licentie)'
     ],
-    version: 'Versie {v}'
+    version: 'Versie {v}',
+    einstellungen: 'Instellingen',
+    klassen: 'Categorieën',
+    farbe: 'Kleur',
+    name: 'Naam',
+    beschreibung: 'Beschrijving',
+    regel: 'Regel',
+    schwellen: 'Drempelwaarden',
+    hochAb: '{name} hoog vanaf',
+    menuFarbe: 'Menukleur',
+    eigeneFarbe: 'Eigen kleur',
+    standard: 'Standaard herstellen',
+    standardFrage: 'Alle instellingen terugzetten naar de standaard?'
   }
 };

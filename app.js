@@ -232,7 +232,7 @@
   // ================================================================
   function klasseVon(f) {
     for (const r of CFG.regeln) {
-      try { if (r.wenn(f)) return r.klasse; } catch (e) { console.warn('Regel fehlerhaft:', r, e); }
+      try { if (r.wenn(f, CFG.schwellen)) return r.klasse; } catch (e) { console.warn('Regel fehlerhaft:', r, e); }
     }
     return null;
   }
@@ -999,6 +999,116 @@
   }
 
   // ================================================================
+  // Einstellungen: Klassen, Schwellenwerte, Menüfarbe
+  // Nur in diesem Browser gespeichert; der Standard steht in config.js.
+  // ================================================================
+  const STANDARD = JSON.parse(JSON.stringify({ menuFarbe: CFG.menuFarbe, schwellen: CFG.schwellen, klassen: CFG.klassen }));
+  const MENUFARBEN = ['#e10a17', '#0b5563', '#1d4e89', '#2b7a3d', '#343a40'];
+  let einst = {};
+  try { einst = JSON.parse(storageGet('einstellungen')) || {}; } catch (e) { einst = {}; }
+  const menuFarbe = () => einst.menuFarbe || STANDARD.menuFarbe;
+
+  function einstellungenAnwenden() {
+    CFG.schwellen = Object.assign({}, STANDARD.schwellen, einst.schwellen);
+    Object.keys(STANDARD.klassen).forEach(k => {
+      const s = STANDARD.klassen[k];
+      const o = (einst.klassen && einst.klassen[k]) || {};
+      CFG.klassen[k] = {
+        farbe: o.farbe || s.farbe,
+        name: Object.assign({}, s.name, o.name),
+        beschreibung: Object.assign({}, s.beschreibung, o.beschreibung)
+      };
+    });
+    const c = menuFarbe();
+    const st = document.documentElement.style;
+    st.setProperty('--primary', c);
+    st.setProperty('--primary-soft', mitWeiss(c, 0.12));
+    st.setProperty('--on-primary', inkFor(c));
+    $('meta[name="theme-color"]').setAttribute('content', c);
+  }
+  // Farbe mit Weiß aufhellen (a = Anteil der Farbe)
+  function mitWeiss(hex, a) {
+    const n = parseInt(hex.slice(1), 16);
+    return 'rgb(' + [n >> 16, (n >> 8) & 255, n & 255].map(v => Math.round(255 - (255 - v) * a)).join(',') + ')';
+  }
+  function einstellungenSpeichern() {
+    storageSet('einstellungen', JSON.stringify(einst));
+    einstellungenAnwenden();
+    renderLegende();
+    renderFlaechen();
+  }
+  // Angabe zu einer Klasse ändern; leerer Text = Standard
+  function klasseSetzen(k, prop, wert) {
+    einst.klassen = einst.klassen || {};
+    const o = einst.klassen[k] = einst.klassen[k] || {};
+    if (prop === 'farbe') o.farbe = wert;
+    else {
+      o[prop] = o[prop] || {};
+      if (wert.trim()) o[prop][lang] = wert; else delete o[prop][lang];
+    }
+    einstellungenSpeichern();
+  }
+  function regelText(k) {
+    const i = CFG.regeln.findIndex(r => r.klasse === k);
+    if (i < 0 || !CFG.regeln[i].text) return '';
+    return t('regel') + ' ' + 'abcdefghij'[i] + ': ' +
+      tx(CFG.regeln[i].text).replace(/\{(\w+)\}/g, (m, n) => CFG.schwellen[n]);
+  }
+
+  function openEinstellungen() {
+    const kl = CFG.klassen;
+    const seg = feld => '<div class="seg" role="group" aria-label="' + esc(t(feld)) + '">' +
+      [1, 2, 3, 4, 5].map(v => '<button type="button" data-schwelle="' + feld + '" data-wert="' + v + '" aria-pressed="' +
+        (CFG.schwellen[feld] === v) + '">' + v + '</button>').join('') + '</div>';
+    const html =
+      '<h3>' + esc(t('klassen')) + '</h3>' +
+      Object.keys(kl).map(k =>
+        '<div class="klasse-einst"><div class="klasse-einst-kopf">' +
+        '<input type="color" data-k="' + k + '" data-prop="farbe" value="' + esc(kl[k].farbe) + '" aria-label="' + esc(t('farbe')) + '">' +
+        '<input type="text" data-k="' + k + '" data-prop="name" value="' + esc(tx(kl[k].name)) + '" maxlength="60" aria-label="' + esc(t('name')) + '">' +
+        '</div><p class="muted">' + esc(regelText(k)) + '</p>' +
+        '<textarea data-k="' + k + '" data-prop="beschreibung" maxlength="400" aria-label="' + esc(t('beschreibung')) + '">' +
+        esc(tx(kl[k].beschreibung)) + '</textarea></div>').join('') +
+      '<h3>' + esc(t('schwellen')) + '</h3>' +
+      ['bau', 'wasser', 'hitze'].map(f =>
+        '<div class="field"><span class="label">' + esc(t('hochAb', { name: t(f) })) + '</span>' + seg(f) + '</div>').join('') +
+      '<h3>' + esc(t('menuFarbe')) + '</h3><div class="farben">' +
+      MENUFARBEN.map(c => '<button type="button" class="farbwahl" data-menufarbe="' + c + '" style="--c:' + c +
+        '" aria-pressed="' + (c === menuFarbe()) + '" aria-label="' + c + '"></button>').join('') +
+      '<input type="color" id="menu-eigen" value="' + esc(menuFarbe()) + '" aria-label="' + esc(t('eigeneFarbe')) + '"></div>' +
+      '<div class="btn-row"><button type="button" class="btn" id="einst-reset">' + esc(t('standard')) + '</button></div>';
+
+    const v = oeffnePanel(t('einstellungen'), html);
+    ansicht = openEinstellungen;
+    // neu zeichnen, ohne an den Anfang zu springen
+    const neu = () => { const y = $('#panel-body').scrollTop; openEinstellungen(); $('#panel-body').scrollTop = y; };
+    v.addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      if (b.dataset.schwelle) {
+        einst.schwellen = Object.assign({}, einst.schwellen, { [b.dataset.schwelle]: Number(b.dataset.wert) });
+      } else if (b.dataset.menufarbe) {
+        einst.menuFarbe = b.dataset.menufarbe;
+      } else if (b.id === 'einst-reset') {
+        if (!window.confirm(t('standardFrage'))) return;
+        einst = {};
+      } else return;
+      einstellungenSpeichern();
+      neu();
+    });
+    v.addEventListener('input', e => {
+      const el = e.target;
+      if (el.id === 'menu-eigen') {
+        einst.menuFarbe = el.value;
+        einstellungenSpeichern();
+        $$('.farbwahl', v).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.menufarbe === el.value)));
+      } else if (el.dataset.k) {
+        klasseSetzen(el.dataset.k, el.dataset.prop, el.value);
+      }
+    });
+  }
+
+  // ================================================================
   // Sprache umschalten
   // ================================================================
   function setLang(l) {
@@ -1016,6 +1126,7 @@
   // Start
   // ================================================================
   function init() {
+    einstellungenAnwenden();
     applyStaticTexts();
     setBasemap(storageGet('basemap') === 'luftbild' ? 'luftbild' : 'osm', true);
     renderLegende();
@@ -1028,6 +1139,7 @@
     $('#btn-liste').addEventListener('click', openListe);
     $('#btn-beispiele').addEventListener('click', beispieleUmschalten);
     $('#btn-info').addEventListener('click', openInfo);
+    $('#btn-einst').addEventListener('click', openEinstellungen);
     $('#btn-undo').addEventListener('click', zeichnenPunktZurueck);
     $('#btn-cancel').addEventListener('click', zeichnenAbbrechen);
     $('#btn-finish').addEventListener('click', zeichnenFertig);

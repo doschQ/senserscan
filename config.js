@@ -11,9 +11,16 @@
  * Nach einer Änderung die Seite neu laden. Läuft die App als
  * installierte PWA, ggf. zweimal neu laden (Offline-Cache).
  * Der Maßnahmenkatalog steht in data/massnahmen.json.
+ *
+ * Menüfarbe, Klassen (Name, Farbe, Beschreibung) und Schwellenwerte
+ * lassen sich auch in der App unter "Einstellungen" ändern. Die Werte
+ * hier sind dann der Standard ("Standard wiederherstellen").
  */
 window.SENSERSCAN_CONFIG = {
   version: '0.2.0',
+
+  // Farbe von Kopfzeile und Bedienelementen (Vaals-Rot, wie vaals.nl)
+  menuFarbe: '#e10a17',
 
   // Typen der Potenzialflächen. Schlüssel (links) nicht ändern,
   // wenn schon Flächen erfasst sind; Bezeichnungen frei änderbar.
@@ -64,6 +71,10 @@ window.SENSERSCAN_CONFIG = {
     }
   },
 
+  // Schwellenwerte: ab diesem Wert (1–5) gilt ein Wert als "hoch".
+  // In den Regeln unten als s.bau, s.wasser, s.hitze verwendet.
+  schwellen: { bau: 4, wasser: 4, hitze: 4 },
+
   // Regeln für die automatische Klassifizierung.
   // Sie werden von oben nach unten geprüft; die ERSTE zutreffende
   // Regel bestimmt die Klasse. Verfügbare Werte einer Fläche f:
@@ -72,15 +83,25 @@ window.SENSERSCAN_CONFIG = {
   //   f.gruen  – Grünpotenzial 1–5
   //   f.wasser – Risiko Wasser 1–5
   //   f.hitze  – Risiko Hitze 1–5
+  // "text" beschreibt die Regel in den Einstellungen; {bau}, {wasser}
+  // und {hitze} werden durch die Schwellenwerte ersetzt.
   regeln: [
     // a) Typ = Grünfläche -> Grün sichern
-    { klasse: 'gruen_sichern',       wenn: f => f.typ === 'gruenflaeche' },
+    { klasse: 'gruen_sichern',
+      text: { de: 'Typ Grünfläche', nl: 'Type groenvoorziening' },
+      wenn: (f, s) => f.typ === 'gruenflaeche' },
     // b) Baupotenzial >= 4 und (Wasser >= 4 oder Hitze >= 4) -> Verdichten mit Auflagen
-    { klasse: 'verdichten_auflagen', wenn: f => f.bau >= 4 && (f.wasser >= 4 || f.hitze >= 4) },
+    { klasse: 'verdichten_auflagen',
+      text: { de: 'Bau ≥ {bau} und (Wasser ≥ {wasser} oder Hitze ≥ {hitze})', nl: 'Bouw ≥ {bau} en (water ≥ {wasser} of hitte ≥ {hitze})' },
+      wenn: (f, s) => f.bau >= s.bau && (f.wasser >= s.wasser || f.hitze >= s.hitze) },
     // c) Baupotenzial >= 4 -> Bauen und entsiegeln
-    { klasse: 'bauen_entsiegeln',    wenn: f => f.bau >= 4 },
+    { klasse: 'bauen_entsiegeln',
+      text: { de: 'Bau ≥ {bau}', nl: 'Bouw ≥ {bau}' },
+      wenn: (f, s) => f.bau >= s.bau },
     // d) sonst -> Grün aufwerten
-    { klasse: 'gruen_aufwerten',     wenn: f => true }
+    { klasse: 'gruen_aufwerten',
+      text: { de: 'alle übrigen Flächen', nl: 'alle overige locaties' },
+      wenn: (f, s) => true }
   ],
 
   // Gebietsgrenzen (GeoJSON in WGS84)
