@@ -249,7 +249,7 @@
     return '<span class="badge" style="--c:' + kl.farbe + ';--ci:' + inkFor(kl.farbe) + '">' + esc(tx(kl.name)) + '</span>';
   }
   function typName(key) { return tx(CFG.typen[key]) || key || '–'; }
-  function titel(f) { return f.beispiel ? t('beispielErsetzen') + ' ' + f.nr : typName(f.typ) + ' #' + f.nr; }
+  function titel(f) { return f.beispiel ? t('beispiel') + ' ' + f.nr : typName(f.typ) + ' #' + f.nr; }
   function groesseText(f) {
     if (f.geometry.type === 'Point') {
       return t('ohneFlaeche') + (f.gps_genauigkeit_m != null ? ' · ' + t('gpsGenauigkeit', { m: f.gps_genauigkeit_m }) : '');
@@ -290,7 +290,7 @@
   const dbSpeichern = list => idb('flaechen', 'readwrite', s => { list.forEach(f => s.put(f)); });
   const dbLoeschen = id => idb('flaechen', 'readwrite', s => s.delete(id));
   const metaGet = k => idb('meta', 'readonly', s => s.get(k));
-  const metaSet = (k, v) => idb('meta', 'readwrite', s => s.put(v, k));
+  const metaDel = k => idb('meta', 'readwrite', s => s.delete(k));
 
   async function persistieren(list) {
     try { await dbSpeichern(list); } catch (e) { console.error(e); toast(t('speicherFehler'), 6000); }
@@ -330,7 +330,7 @@
       if (f.beispiel) {
         L.marker(nordpunkt(f.geometry), {
           keyboard: false,
-          icon: L.divIcon({ className: 'beispiel-label', html: '<span>' + esc(t('beispielErsetzen')) + '</span>', iconSize: null })
+          icon: L.divIcon({ className: 'beispiel-label', html: '<span>' + esc(t('beispiel')) + '</span>', iconSize: null })
         }).on('click', () => { if (!zeichnen) openSteckbrief(f.id); }).addTo(flaechenLayer);
       }
     });
@@ -352,16 +352,44 @@
       flaechen = [];
       toast(t('speicherFehler'), 6000);
     }
-    await ladeBeispiele();
+    // Bis Version 0.1 kamen die Beispiele beim ersten Start automatisch dazu.
+    // Jetzt startet die App leer: diese Beispiele einmalig entfernen.
+    try {
+      if (await metaGet('beispieleGeladen')) {
+        await beispieleEntfernen();
+        await metaDel('beispieleGeladen');
+      }
+    } catch (e) { console.error(e); }
     renderFlaechen();
+    beispielKnopf();
   }
 
-  // Beim allerersten Start die Beispielflächen übernehmen (danach nie wieder,
-  // auch wenn sie gelöscht wurden).
-  async function ladeBeispiele() {
-    let geladen = false;
-    try { geladen = !!(await metaGet('beispieleGeladen')); } catch (e) { /* ohne DB trotzdem zeigen */ }
-    if (geladen) return;
+  // Menüpunkt "Beispiele": Beispielflächen einblenden bzw. wieder entfernen
+  const beispieleDa = () => flaechen.some(f => f.beispiel);
+  function beispielKnopf() {
+    $('#btn-beispiele').setAttribute('aria-pressed', String(beispieleDa()));
+  }
+  async function beispieleUmschalten() {
+    if (beispieleDa()) {
+      if (byId(auswahlId) && byId(auswahlId).beispiel) schliessePanel();
+      try { await beispieleEntfernen(); } catch (e) { console.error(e); toast(t('speicherFehler'), 6000); }
+      toast(t('beispieleAus'));
+    } else if (await beispieleLaden()) {
+      toast(t('beispieleAn'));
+      zoomPlanungsgebiet();
+    } else {
+      toast(t('beispieleFehler'), 5000);
+    }
+    renderFlaechen();
+    beispielKnopf();
+    if (ansicht) ansicht();
+  }
+  async function beispieleEntfernen() {
+    const weg = flaechen.filter(f => f.beispiel);
+    flaechen = flaechen.filter(f => !f.beispiel);
+    await idb('flaechen', 'readwrite', s => { weg.forEach(f => s.delete(f.id)); });
+  }
+  async function beispieleLaden() {
     try {
       const res = await fetch('data/beispielflaechen.geojson');
       if (!res.ok) throw new Error(res.status);
@@ -388,9 +416,10 @@
         neu.push(rec);
       });
       await persistieren(neu);
-      await metaSet('beispieleGeladen', true);
+      return true;
     } catch (e) {
       console.error(e);
+      return false;
     }
   }
 
@@ -724,7 +753,7 @@
     const k = klasseVon(f);
     const html =
       '<div class="sb-head">' + badgeKlasse(k) +
-      (f.beispiel ? '<span class="badge badge--beispiel">' + esc(t('beispielErsetzen')) + '</span>' : '') + '</div>' +
+      (f.beispiel ? '<span class="badge badge--beispiel">' + esc(t('beispiel')) + '</span>' : '') + '</div>' +
       '<p class="muted">' + esc(tx(klasseInfo(k).beschreibung)) + '</p>' +
       '<dl class="facts"><dt>' + esc(t('typ')) + '</dt><dd>' + esc(typName(f.typ)) + '</dd>' +
       '<dt>' + esc(t('groesse')) + '</dt><dd>' + esc(groesseText(f)) + '</dd></dl>' +
@@ -997,6 +1026,7 @@
     $('#btn-zeichnen').addEventListener('click', zeichnenStart);
     $('#btn-gps').addEventListener('click', gpsPunkt);
     $('#btn-liste').addEventListener('click', openListe);
+    $('#btn-beispiele').addEventListener('click', beispieleUmschalten);
     $('#btn-info').addEventListener('click', openInfo);
     $('#btn-undo').addEventListener('click', zeichnenPunktZurueck);
     $('#btn-cancel').addEventListener('click', zeichnenAbbrechen);

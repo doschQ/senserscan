@@ -197,7 +197,7 @@ body.drawing .draw-hint { top: 10px; }
 .bottombar {
   flex: 0 0 auto;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 4px;
   padding: 6px 8px calc(6px + var(--safe-b));
   background: var(--surface);
@@ -211,6 +211,7 @@ body.drawing .draw-hint { top: 10px; }
   align-items: center;
   justify-content: center;
   gap: 3px;
+  padding: 0 2px;
   border: 0;
   border-radius: 12px;
   background: transparent;
@@ -218,6 +219,8 @@ body.drawing .draw-hint { top: 10px; }
   font-weight: 600;
 }
 .bottombar button:active { background: #e6eeea; }
+.bottombar button span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bottombar button[aria-pressed="true"] { background: var(--primary-soft); color: var(--primary); }
 .bottombar svg, .btn svg {
   width: 26px;
   height: 26px;

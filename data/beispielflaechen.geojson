@@ -1,7 +1,7 @@
 {
  "type": "FeatureCollection",
  "name": "beispielflaechen",
- "_hinweis": "Beispielflaechen fuer die Demo (KI-generiert). Lage und Bewertung fiktiv – ersetzen.",
+ "_hinweis": "Beispielflaechen fuer die Demo (KI-generiert). Lage und Bewertung fiktiv.",
  "features": [
   {
    "type": "Feature",
@@ -13,7 +13,7 @@
     "gruen": 3,
     "wasser": 4,
     "hitze": 4,
-    "notiz": "Beispiel – ersetzen. Fiktive Lage und Bewertung, keine reale Nutzung.",
+    "notiz": "Beispiel. Fiktive Lage und Bewertung, keine reale Nutzung.",
     "beispiel": true,
     "erstellt": "2026-11-23T00:00:00Z"
    },
@@ -55,7 +55,7 @@
     "gruen": 2,
     "wasser": 2,
     "hitze": 3,
-    "notiz": "Beispiel – ersetzen. Fiktive Lage und Bewertung, keine reale Nutzung.",
+    "notiz": "Beispiel. Fiktive Lage und Bewertung, keine reale Nutzung.",
     "beispiel": true,
     "erstellt": "2026-11-23T00:00:00Z"
    },
@@ -97,7 +97,7 @@
     "gruen": 4,
     "wasser": 3,
     "hitze": 2,
-    "notiz": "Beispiel – ersetzen. Fiktive Lage und Bewertung, keine reale Nutzung.",
+    "notiz": "Beispiel. Fiktive Lage und Bewertung, keine reale Nutzung.",
     "beispiel": true,
     "erstellt": "2026-11-23T00:00:00Z"
    },
@@ -139,7 +139,7 @@
     "gruen": 5,
     "wasser": 3,
     "hitze": 4,
-    "notiz": "Beispiel – ersetzen. Fiktive Lage und Bewertung, keine reale Nutzung.",
+    "notiz": "Beispiel. Fiktive Lage und Bewertung, keine reale Nutzung.",
     "beispiel": true,
     "erstellt": "2026-11-23T00:00:00Z"
    },
@@ -181,7 +181,7 @@
     "gruen": 4,
     "wasser": 2,
     "hitze": 3,
-    "notiz": "Beispiel – ersetzen. Fiktive Lage und Bewertung, keine reale Nutzung.",
+    "notiz": "Beispiel. Fiktive Lage und Bewertung, keine reale Nutzung.",
     "beispiel": true,
     "erstellt": "2026-11-23T00:00:00Z"
    },
@@ -223,7 +223,7 @@
     "gruen": 4,
     "wasser": 5,
     "hitze": 4,
-    "notiz": "Beispiel – ersetzen. Fiktive Lage und Bewertung, keine reale Nutzung.",
+    "notiz": "Beispiel. Fiktive Lage und Bewertung, keine reale Nutzung.",
     "beispiel": true,
     "erstellt": "2026-11-23T00:00:00Z"
    },
