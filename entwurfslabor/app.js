@@ -80,7 +80,19 @@
       csvRegen: 'Bemessungsregen', csvRegenWert: '{mm} mm in {h} h', csvHinweis: 'Hinweis',
       csvSchluessel: 'Schlüssel', csvVers: 'Versiegelungsfaktor', csvStatus: 'Status Kennwerte', csvGeprueft: 'geprüft',
       csvStatusSz: 'Status Flächenbilanz', csvWerte: 'Werte', csvEinheit: 'Einheit', csvKennzahl: 'Kennzahl',
-      csvQuellen: 'Quellen der Kennwerte', csvQuellePsi: 'Quelle ψ', csvQuelleSp: 'Quelle Speicher', csvQuelleVers: 'Quelle Versiegelung'
+      csvQuellen: 'Quellen der Kennwerte', csvQuellePsi: 'Quelle ψ', csvQuelleSp: 'Quelle Speicher', csvQuelleVers: 'Quelle Versiegelung',
+      // Karte und Import
+      karteFehlt: 'Karte nicht verfügbar: Leaflet konnte nicht geladen werden (Internetverbindung?).',
+      impLaden: 'SenserScan-Datei laden (.geojson)', impWeg: 'Import entfernen',
+      impInfo: 'Potenzialflächen aus dem GeoJSON-Export von SenserScan. Gezählt werden Flächen, deren Mittelpunkt im Planungsgebiet liegt.',
+      impStatus: '{datei}: {n} Flächen im Planungsgebiet',
+      impAussen: 'außerhalb: {n}', impPunkte: 'Punkte ohne Fläche (übersprungen): {n}', impUngueltig: 'nicht lesbar (z. B. anderes Koordinatensystem): {n}',
+      impTyp: 'Typ', impAnzahl: 'Anzahl',
+      impParkAktiv: 'Parkplätze {m2} m² → „{name}“', impParkAlle: '→ alle Szenarien',
+      impParkKeine: 'Keine Parkplätze im Planungsgebiet.',
+      impParkOk: 'Parkplatzfläche {m2} m² übernommen: {namen}',
+      impFehler: 'Datei nicht lesbar: kein GeoJSON.', impOk: '{n} Potenzialflächen im Planungsgebiet geladen.',
+      hDachSenser: 'SenserScan: Flachdächer im Gebiet {m2} m²', nr: 'Nr.'
     },
     nl: {}
   };
@@ -464,7 +476,8 @@
       if (document.activeElement !== feld) feld.value = zahl(v);
     });
     const hilfe = {
-      dachGruenAnteil: e.dach > 0 ? t('hDach', { a0: prozent(e.dachAnteil0, 0), dach: zahl(e.dach), neu: zahl(e.dachNeuGruen) }) : t('hDachLeer'),
+      dachGruenAnteil: (e.dach > 0 ? t('hDach', { a0: prozent(e.dachAnteil0, 0), dach: zahl(e.dach), neu: zahl(e.dachNeuGruen) }) : t('hDachLeer')) +
+        (importSumme(CFG.senserscan.typFlachdach) > 0 ? ' · ' + t('hDachSenser', { m2: zahl(importSumme(CFG.senserscan.typFlachdach)) }) : ''),
       parkEntsiegelt: t('hPark', { ent: zahl(e.entsiegelt), p: zahl(aktivSz().parkplaetze_m2) }),
       baeume: t('hBaeume', { n: zahl(r.baeume), k: zahl(r.kronenflaeche), m2: zahl(e.kroneNeu) }),
       kronenflaeche: CFG.regler.kronenflaeche.quelle || '',
@@ -871,8 +884,150 @@
   });
 
   // ================================================================
+  // Übersichtskarte (Leaflet, OpenStreetMap)
+  // ================================================================
+  let karte = null, importLayer = null;
+  function karteStart() {
+    if (!window.L) { $('#map').innerHTML = '<p class="warnung">' + esc(t('karteFehlt')) + '</p>'; return; }
+    karte = L.map('map', { scrollWheelZoom: false });
+    L.tileLayer(CFG.karte.url, { maxZoom: CFG.karte.maxZoom, attribution: CFG.karte.attribution }).addTo(karte);
+    const gebiet = L.polygon(CFG.gebiet.polygon.map(p => [p[1], p[0]]),
+      { color: '#0b5563', weight: 3, fillColor: '#0b5563', fillOpacity: 0.08 }).addTo(karte);
+    gebiet.bindTooltip(() => tx(CFG.gebiet.name) + ' · ' + zahl(A_GEBIET) + ' m²', { sticky: true });
+    karte.fitBounds(gebiet.getBounds(), { padding: [12, 12] });
+    importLayer = L.featureGroup().addTo(karte);
+  }
+  function importKarte() {
+    if (!importLayer) return;
+    importLayer.clearLayers();
+    if (!state.import) return;
+    state.import.flaechen.forEach(f => {
+      L.geoJSON(f.geometry, { style: { color: '#e8590c', weight: 2, fillColor: '#e8590c', fillOpacity: 0.35 } })
+        .bindTooltip(() => (f.nr != null ? t('nr') + ' ' + f.nr + ' · ' : '') + (f.typ_name || f.typ) + ' · ' + zahl(f.m2) + ' m²')
+        .addTo(importLayer);
+    });
+  }
+
+  // ================================================================
+  // Import der Potenzialflächen aus SenserScan
+  // ================================================================
+  const rad = x => x * Math.PI / 180;
+  // Fläche auf der Kugel (WGS84-Radius), wie in SenserScan
+  function ringFlaeche(c) {
+    let s = 0;
+    for (let i = 0; i < c.length - 1; i++) s += rad(c[i + 1][0] - c[i][0]) * (2 + Math.sin(rad(c[i][1])) + Math.sin(rad(c[i + 1][1])));
+    return Math.abs(s * 6378137 * 6378137 / 2);
+  }
+  function geomFlaeche(g) {
+    const poly = p => ringFlaeche(p[0]) - p.slice(1).reduce((s, r) => s + ringFlaeche(r), 0);
+    return g.type === 'Polygon' ? poly(g.coordinates) : g.coordinates.reduce((s, p) => s + poly(p), 0);
+  }
+  function imPolygon(pt, ring) {
+    let innen = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+      if ((yi > pt[1]) !== (yj > pt[1]) && pt[0] < (xj - xi) * (pt[1] - yi) / (yj - yi) + xi) innen = !innen;
+    }
+    return innen;
+  }
+  function mittelpunkt(ring) {
+    const n = ring.length - 1 || 1;
+    let x = 0, y = 0;
+    for (let i = 0; i < n; i++) { x += ring[i][0]; y += ring[i][1]; }
+    return [x / n, y / n];
+  }
+  const istWgs84 = p => Array.isArray(p) && Math.abs(p[0]) <= 180 && Math.abs(p[1]) <= 90;
+
+  function importieren(text, datei) {
+    let gj = null;
+    try { gj = JSON.parse(text); } catch (e) { gj = null; }
+    const feats = gj && gj.type === 'FeatureCollection' ? gj.features : (gj && gj.type === 'Feature' ? [gj] : null);
+    if (!Array.isArray(feats)) { toast(t('impFehler')); return; }
+    const flaechen = [];
+    let punkte = 0, aussen = 0, ungueltig = 0;
+    feats.forEach(ft => {
+      const g = ft && ft.geometry, p = (ft && ft.properties) || {};
+      if (g && g.type === 'Point') { punkte++; return; }
+      const ring = g && (g.type === 'Polygon' ? g.coordinates && g.coordinates[0] : g.type === 'MultiPolygon' ? g.coordinates && g.coordinates[0] && g.coordinates[0][0] : null);
+      if (!Array.isArray(ring) || ring.length < 4 || !ring.every(istWgs84)) { ungueltig++; return; }
+      if (!imPolygon(mittelpunkt(ring), CFG.gebiet.polygon)) { aussen++; return; }
+      const m2 = Number(p.flaeche_m2) > 0 ? Number(p.flaeche_m2) : geomFlaeche(g);
+      flaechen.push({
+        nr: p.nr != null ? p.nr : null,
+        typ: String(p.typ || '?'),
+        typ_name: p.typ_name ? String(p.typ_name) : null,
+        m2: Math.round(m2 * 10) / 10,
+        geometry: { type: g.type, coordinates: g.coordinates }
+      });
+    });
+    state.import = { datei: String(datei || '').slice(0, 80), flaechen: flaechen, punkte: punkte, aussen: aussen, ungueltig: ungueltig };
+    importKarte();
+    aktualisieren();
+    toast(t('impOk', { n: flaechen.length }));
+  }
+  function importSumme(typ) {
+    return state.import ? state.import.flaechen.filter(f => f.typ === typ).reduce((s, f) => s + f.m2, 0) : 0;
+  }
+
+  const importBox = $('#import');
+  UPDATE.push(function importAnzeige() {
+    let h = '<div class="btn-reihe"><label class="btn hell datei-knopf">' + esc(t('impLaden')) +
+      '<input type="file" accept=".geojson,.json,application/geo+json,application/json" data-imp="datei"></label>' +
+      (state.import ? '<button type="button" class="btn klein" data-imp="weg">' + esc(t('impWeg')) + '</button>' : '') + '</div>' +
+      '<p class="fussnote">' + esc(t('impInfo')) + '</p>';
+    const im = state.import;
+    if (im) {
+      const neben = [];
+      if (im.aussen) neben.push(t('impAussen', { n: im.aussen }));
+      if (im.punkte) neben.push(t('impPunkte', { n: im.punkte }));
+      if (im.ungueltig) neben.push(t('impUngueltig', { n: im.ungueltig }));
+      h += '<p><b>' + esc(t('impStatus', { datei: im.datei, n: im.flaechen.length })) + '</b>' + (neben.length ? ' · ' + esc(neben.join(' · ')) : '') + '</p>';
+      const typen = {};
+      im.flaechen.forEach(f => {
+        const x = typen[f.typ] || (typen[f.typ] = { name: f.typ_name || f.typ, n: 0, m2: 0 });
+        x.n++; x.m2 += f.m2;
+      });
+      const keys = Object.keys(typen).sort((a, b) => typen[b].m2 - typen[a].m2);
+      if (keys.length) {
+        h += '<table><tr><th>' + esc(t('impTyp')) + '</th><th>' + esc(t('impAnzahl')) + '</th><th>m²</th></tr>' +
+          keys.map(k => '<tr><td>' + esc(typen[k].name) + '</td><td>' + typen[k].n + '</td><td>' + zahl(typen[k].m2) + '</td></tr>').join('') +
+          '<tr><th>' + esc(t('zeileSumme')) + '</th><th>' + im.flaechen.length + '</th><th>' + zahl(im.flaechen.reduce((s, f) => s + f.m2, 0)) + '</th></tr></table>';
+      }
+      const park = importSumme(CFG.senserscan.typParkplatz);
+      h += park > 0
+        ? '<div class="btn-reihe"><button type="button" class="btn" data-imp="park">' + esc(t('impParkAktiv', { m2: zahl(park), name: szName(state.aktiv) })) +
+          '</button><button type="button" class="btn hell" data-imp="parkAlle">' + esc(t('impParkAlle')) + '</button></div>'
+        : '<p class="fussnote">' + esc(t('impParkKeine')) + '</p>';
+    }
+    importBox.innerHTML = h;
+  });
+  importBox.addEventListener('change', ev => {
+    const inp = ev.target.closest('input[data-imp="datei"]');
+    if (!inp || !inp.files || !inp.files[0]) return;
+    const datei = inp.files[0];
+    datei.text().then(text => importieren(text, datei.name), () => toast(t('impFehler')));
+  });
+  importBox.addEventListener('click', ev => {
+    const b = ev.target.closest('button[data-imp]');
+    if (!b) return;
+    if (b.dataset.imp === 'weg') {
+      state.import = null;
+      importKarte();
+      aktualisieren();
+    } else {
+      const park = Math.round(importSumme(CFG.senserscan.typParkplatz));
+      const ziele = b.dataset.imp === 'parkAlle' ? state.szenarien.map((s, i) => i) : [state.aktiv];
+      ziele.forEach(i => { state.szenarien[i].parkplaetze_m2 = park; });
+      neuAufbauen();
+      toast(t('impParkOk', { m2: zahl(park), namen: ziele.map(szName).join(', ') }));
+    }
+  });
+
+  // ================================================================
   // Start
   // ================================================================
+  karteStart();
+  importKarte();
   neuAufbauen();
   if (state.configNeu) toast(t('configNeu'));
 })();

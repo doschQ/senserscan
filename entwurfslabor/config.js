@@ -212,6 +212,12 @@ window.ENTWURFSLABOR_CONFIG = {
     }
   ],
 
+  // Import der Potenzialflächen aus SenserScan (GeoJSON-Export der anderen App)
+  senserscan: {
+    typParkplatz: 'parkplatz', // Typ-Schlüssel für "Parkplatzfläche übernehmen"
+    typFlachdach: 'flachdach'  // Typ-Schlüssel für den Hinweis am Dach-Regler
+  },
+
   // Übersichtskarte
   karte: {
     url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
