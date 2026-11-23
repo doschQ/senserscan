@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b5563">
+  <meta name="description" content="Vaals Entwurfslabor – Szenario-Rechner für Wasser- und Hitzeresilienz im Planungsgebiet Selzerbeek (Prototyp, KI-generiert)">
+  <title>Vaals Entwurfslabor</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b5563'/%3E%3Cpath d='M16 6c4 6 7 9.5 7 13a7 7 0 0 1-14 0c0-3.5 3-7 7-13z' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="kopf">
+    <div class="kopf-zeile">
+      <div class="marke">
+        <strong>Vaals Entwurfslabor</strong>
+        <span id="untertitel">Selzerbeek</span>
+      </div>
+      <nav class="szenarien" id="szenarien" role="tablist"></nav>
+      <div class="aktionen">
+        <button id="btn-sprache" class="rund" type="button">NL</button>
+        <button id="btn-info" class="rund" type="button">i</button>
+      </div>
+    </div>
+    <div class="kurz" id="kurz" aria-hidden="true"></div>
+  </header>
+
+  <div id="hinweis" class="hinweis-band"></div>
+
+  <main class="raster">
+    <section class="panel" id="p-kennzahlen">
+      <div class="panel-kopf">
+        <h2 data-i18n="kennzahlen">Kennzahlen</h2>
+        <span class="unter" id="kz-unter"></span>
+      </div>
+      <div id="kz-warnung"></div>
+      <div class="kacheln" id="kacheln"></div>
+      <p class="fussnote" id="ampel-legende"></p>
+    </section>
+
+    <section class="panel" id="p-regler">
+      <div class="panel-kopf">
+        <h2 data-i18n="regler">Regler</h2>
+      </div>
+      <label class="namefeld">
+        <span data-i18n="szenarioName">Name des Szenarios</span>
+        <input id="sz-name" type="text" maxlength="40" autocomplete="off">
+      </label>
+      <p id="regler-gesperrt" class="info-zeile" hidden></p>
+      <div id="regler"></div>
+      <p class="fussnote" id="regler-fuss"></p>
+      <button id="btn-reset" class="btn klein" type="button" data-i18n="zuruecksetzen">Alles zurücksetzen</button>
+    </section>
+
+    <section class="panel" id="p-diagramm">
+      <div class="panel-kopf">
+        <h2 data-i18n="vergleich">Vergleich der Szenarien</h2>
+        <div class="segment" id="ansicht" role="group"></div>
+      </div>
+      <div class="chart-box"><canvas id="chart"></canvas></div>
+      <div class="btn-reihe">
+        <button id="btn-png" class="btn" type="button" data-i18n="pngExport">PNG für Folien</button>
+        <button id="btn-csv" class="btn" type="button" data-i18n="csvExport">CSV-Bilanz</button>
+      </div>
+    </section>
+
+    <section class="panel" id="p-bilanz">
+      <div class="panel-kopf">
+        <h2 data-i18n="bilanz">Flächenbilanz</h2>
+        <span class="unter" id="bilanz-unter"></span>
+      </div>
+      <div id="bilanz-warnung"></div>
+      <div class="tabelle-scroll"><table class="bilanz" id="bilanz"></table></div>
+      <p class="fussnote" id="bilanz-quelle"></p>
+    </section>
+
+    <section class="panel" id="p-karte">
+      <div class="panel-kopf">
+        <h2 data-i18n="karteTitel">Planungsgebiet</h2>
+      </div>
+      <div id="map"></div>
+      <div id="import"></div>
+    </section>
+  </main>
+
+  <footer class="fuss" id="fuss"></footer>
+
+  <dialog id="info"></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <noscript>Vaals Entwurfslabor benötigt JavaScript.</noscript>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
