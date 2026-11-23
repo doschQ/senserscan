@@ -115,6 +115,7 @@ Der Katalog ist ein **KI-generierter Entwurf** und muss fachlich überarbeitet w
 - **Beispielflächen:** `data/beispielflaechen.geojson`. Sie werden über den Menüpunkt „Beispiele“ geladen und wieder entfernt.
 - **Gebiete:** `data/vaals_gebiete_wgs84.geojson`; Name, Stil und Planungsgebiet-ID in `config.js` unter `gebiete`
 - **Offline-Cache:** `sw.js`. Wenn neue Dateien hinzukommen, in die Liste eintragen und `VERSION` erhöhen.
+  Bei einer neuen App-Version die Endung `?v=…` von `style.css`, `config.js`, `i18n.js` und `app.js` in `index.html` **und** `sw.js` gleich anpassen, damit kein Gerät alte und neue Dateien mischt.
 
 ---
 

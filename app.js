@@ -367,7 +367,8 @@
   // Menüpunkt "Beispiele": Beispielflächen einblenden bzw. wieder entfernen
   const beispieleDa = () => flaechen.some(f => f.beispiel);
   function beispielKnopf() {
-    $('#btn-beispiele').setAttribute('aria-pressed', String(beispieleDa()));
+    // ?. – falls eine ältere, zwischengespeicherte index.html den Knopf noch nicht hat
+    $('#btn-beispiele')?.setAttribute('aria-pressed', String(beispieleDa()));
   }
   async function beispieleUmschalten() {
     if (beispieleDa()) {
@@ -1137,9 +1138,9 @@
     $('#btn-zeichnen').addEventListener('click', zeichnenStart);
     $('#btn-gps').addEventListener('click', gpsPunkt);
     $('#btn-liste').addEventListener('click', openListe);
-    $('#btn-beispiele').addEventListener('click', beispieleUmschalten);
+    $('#btn-beispiele')?.addEventListener('click', beispieleUmschalten);
     $('#btn-info').addEventListener('click', openInfo);
-    $('#btn-einst').addEventListener('click', openEinstellungen);
+    $('#btn-einst')?.addEventListener('click', openEinstellungen);
     $('#btn-undo').addEventListener('click', zeichnenPunktZurueck);
     $('#btn-cancel').addEventListener('click', zeichnenAbbrechen);
     $('#btn-finish').addEventListener('click', zeichnenFertig);

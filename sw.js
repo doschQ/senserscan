@@ -5,16 +5,18 @@
  *  - Leaflet/Geoman vom CDN (feste Versionen): erst Cache, sonst Netz
  *  - Kartenkacheln (OSM, PDOK) werden nicht abgefangen und nicht gespeichert
  * Wenn sich die Liste unten ändert, VERSION erhöhen.
+ * Bei einer neuen App-Version die Endung ?v=… hier UND in index.html anpassen,
+ * damit Seite und Skripte immer zur selben Version gehören.
  */
-const VERSION = 'senserscan-v2';
+const VERSION = 'senserscan-v3';
 
 const LOKAL = [
   './',
   'index.html',
-  'style.css',
-  'config.js',
-  'i18n.js',
-  'app.js',
+  'style.css?v=0.2.0',
+  'config.js?v=0.2.0',
+  'i18n.js?v=0.2.0',
+  'app.js?v=0.2.0',
   'manifest.json',
   'data/vaals_gebiete_wgs84.geojson',
   'data/massnahmen.json',
@@ -35,7 +37,8 @@ const CDN = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(VERSION)
-      .then(cache => cache.addAll(LOKAL.concat(CDN)))
+      // eigene Dateien am Browser-Cache vorbei frisch vom Server holen
+      .then(cache => cache.addAll(LOKAL.map(u => new Request(u, { cache: 'reload' })).concat(CDN)))
       .then(() => self.skipWaiting())
   );
 });
