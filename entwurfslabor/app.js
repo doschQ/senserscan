@@ -62,7 +62,25 @@
       aBesserZiel: 'besser, Ziel verfehlt', aGleich: '= gleich', aReferenz: 'Referenz',
       ampelLegende: 'Ampel: grün = Ziel erreicht bzw. besser als Bestand · gelb = besser als Bestand, aber Ziel verfehlt, oder gleich · rot = schlechter als Bestand. Ohne Ampel: Niederschlag, BGF, GFZ, Wohneinheiten.',
       warnRefSumme: 'Die Flächenbilanz des Bestands stimmt nicht – der Vergleich mit dem Bestand ist unsicher.',
-      kurzDeltaV: 'ΔV', kurzVers: 'Versiegelt', kurzPsi: 'ψm', kurzKrone: 'Krone'
+      kurzDeltaV: 'ΔV', kurzVers: 'Versiegelt', kurzPsi: 'ψm', kurzKrone: 'Krone',
+      // Diagramm und Export
+      aWasser: 'Wasser', aHitze: 'Hitze', aFlaechen: 'Flächen',
+      tWasser: 'Wasserbilanz bei {mm} mm in {h} h', tHitze: 'Versiegelung, Abfluss und Baumkronen', tFlaechen: 'Flächenbilanz nach Maßnahmen',
+      dNiederschlag: 'Niederschlag', dAbfluss: 'Abfluss', dSpeicher: 'Speicher', dDeltaV: 'ΔV = Speicher − Abfluss',
+      dVersiegelung: 'Versiegelungsgrad', dPsi: 'mittl. Abflussbeiwert ψm × 100', dKrone: 'Baumkronenanteil',
+      achseM3: 'm³', achseProzent: '%', achseFlaeche: 'Anteil an der Flächenbilanz (%)',
+      zielKrone: 'Ziel Baumkronen {wert} %',
+      exportUnter: '{gebiet} · {flaeche} m² · Stand {datum}',
+      exportPlatzhalter: 'Enthält PLATZHALTER (Flächenbilanz) und ungeprüfte Annahmen (ψ, Speicher) – keine Messwerte.',
+      exportAnnahme: 'Enthält ungeprüfte Annahmen (ψ, Speicher).',
+      exportFuss: 'Vaals Entwurfslabor · Prototyp, KI-generiert',
+      keinChart: 'Diagramm nicht verfügbar: Chart.js konnte nicht geladen werden (Internetverbindung?).',
+      gespeichert: 'Gespeichert: {name}',
+      csvTitel: 'Vaals Entwurfslabor – Flächenbilanz', csvStand: 'Stand', csvGebiet: 'Gebietsfläche m²',
+      csvRegen: 'Bemessungsregen', csvRegenWert: '{mm} mm in {h} h', csvHinweis: 'Hinweis',
+      csvSchluessel: 'Schlüssel', csvVers: 'Versiegelungsfaktor', csvStatus: 'Status Kennwerte', csvGeprueft: 'geprüft',
+      csvStatusSz: 'Status Flächenbilanz', csvWerte: 'Werte', csvEinheit: 'Einheit', csvKennzahl: 'Kennzahl',
+      csvQuellen: 'Quellen der Kennwerte', csvQuellePsi: 'Quelle ψ', csvQuelleSp: 'Quelle Speicher', csvQuelleVers: 'Quelle Versiegelung'
     },
     nl: {}
   };
@@ -570,6 +588,286 @@
       const farbe = a ? ({ gruen: 'var(--gruen)', gelb: '#f08c00', rot: 'var(--rot)' }[a.farbe] || 'var(--grau)') : 'var(--grau)';
       return '<div style="border-left-color:' + farbe + '">' + esc(t(l)) + '<b>' + esc(kpiFormat(kpi, v)) + (kpi.einheit ? ' ' + esc(kpi.einheit) : '') + '</b></div>';
     }).join('');
+  });
+
+  // ================================================================
+  // Diagramm (Chart.js) und PNG-Export
+  // ================================================================
+  const ANSICHTEN = ['wasser', 'hitze', 'flaechen'];
+  if (!ANSICHTEN.includes(state.ansicht)) state.ansicht = 'wasser';
+  const FARBEN = {
+    niederschlag: '#91c8f6', abfluss: '#1864ab', speicher: '#2b8a3e', deltaV: '#7048e8',
+    versiegelung: '#495057', psi: '#1864ab', krone: '#2b8a3e'
+  };
+  const SCHRIFT = 'system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif';
+  const heute = () => new Date().toLocaleDateString(loc(), { day: '2-digit', month: '2-digit', year: 'numeric' });
+  function datumStempel() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  if (window.Chart) {
+    Chart.defaults.font.family = SCHRIFT;
+    Chart.register(
+      { // weißer Hintergrund (sonst ist das PNG durchsichtig)
+        id: 'hintergrund',
+        beforeDraw(chart, args, o) {
+          if (!o || !o.farbe) return;
+          const c = chart.ctx; c.save(); c.fillStyle = o.farbe; c.fillRect(0, 0, chart.width, chart.height); c.restore();
+        }
+      },
+      { // Zahlen an den Balken
+        id: 'werte',
+        afterDatasetsDraw(chart, args, o) {
+          if (!o || !o.format || (!o.immer && chart.width < 620)) return;
+          const c = chart.ctx; c.save();
+          c.font = '600 ' + (o.groesse || 12) + 'px ' + SCHRIFT; c.fillStyle = '#17201c'; c.textAlign = 'center';
+          chart.data.datasets.forEach((ds, di) => {
+            const meta = chart.getDatasetMeta(di);
+            if (meta.hidden) return;
+            meta.data.forEach((bar, i) => {
+              const v = ds.data[i];
+              if (!Number.isFinite(v)) return;
+              c.textBaseline = v < 0 ? 'top' : 'bottom';
+              c.fillText(o.format(v, di), bar.x, bar.y + (v < 0 ? 4 : -4));
+            });
+          });
+          c.restore();
+        }
+      },
+      { // Ziellinie (z. B. Baumkronen 30 %)
+        id: 'zielLinie',
+        afterDatasetsDraw(chart, args, o) {
+          if (!o || o.wert == null || !chart.scales.y) return;
+          const y = chart.scales.y.getPixelForValue(o.wert), a = chart.chartArea, c = chart.ctx;
+          c.save(); c.strokeStyle = FARBEN.krone; c.lineWidth = o.breite || 2; c.setLineDash([8, 5]);
+          c.beginPath(); c.moveTo(a.left, y); c.lineTo(a.right, y); c.stroke();
+          c.setLineDash([]); c.font = '700 ' + (o.groesse || 12) + 'px ' + SCHRIFT;
+          c.textAlign = 'right'; c.textBaseline = 'bottom';
+          const g = o.groesse || 12, w = c.measureText(o.text).width;
+          c.fillStyle = 'rgba(255,255,255,.9)'; c.fillRect(a.right - w - 10, y - g - 7, w + 10, g + 5);
+          c.fillStyle = FARBEN.krone; c.fillText(o.text, a.right - 5, y - 4);
+          c.restore();
+        }
+      }
+    );
+  }
+
+  function diagrammTitel(ansicht) {
+    return t({ wasser: 'tWasser', hitze: 'tHitze', flaechen: 'tFlaechen' }[ansicht], { mm: CFG.regen.mm, h: CFG.regen.dauer_h });
+  }
+
+  // Chart-Konfiguration für Bildschirm (gross = false) oder PNG (gross = true)
+  function diagrammConfig(ansicht, gross) {
+    const fs = gross ? 26 : 13;
+    const labels = state.szenarien.map((s, i) => (erg[i].summeOk ? '' : '⚠ ') + szName(i));
+    let datasets, yAchse, werte = null, ziel = null, gestapelt = false;
+
+    if (ansicht === 'wasser') {
+      datasets = [
+        { label: t('dNiederschlag'), data: erg.map(e => e.niederschlag), backgroundColor: FARBEN.niederschlag },
+        { label: t('dAbfluss'), data: erg.map(e => e.abfluss), backgroundColor: FARBEN.abfluss },
+        { label: t('dSpeicher'), data: erg.map(e => e.speicher), backgroundColor: FARBEN.speicher },
+        { label: t('dDeltaV'), data: erg.map(e => e.deltaV), backgroundColor: FARBEN.deltaV }
+      ];
+      yAchse = t('achseM3');
+      werte = (v, di) => (di === 3 ? zahlVz(v) : zahl(v));
+    } else if (ansicht === 'hitze') {
+      datasets = [
+        { label: t('dVersiegelung'), data: erg.map(e => e.versiegelung * 100), backgroundColor: FARBEN.versiegelung },
+        { label: t('dPsi'), data: erg.map(e => e.psiM * 100), backgroundColor: FARBEN.psi },
+        { label: t('dKrone'), data: erg.map(e => e.kroneAnteil * 100), backgroundColor: FARBEN.krone }
+      ];
+      yAchse = t('achseProzent');
+      werte = v => zahl(v, 1);
+      ziel = { wert: CFG.richtwerte.baumkronen_prozent, text: t('zielKrone', { wert: CFG.richtwerte.baumkronen_prozent }), groesse: fs, breite: gross ? 4 : 2 };
+    } else {
+      gestapelt = true;
+      datasets = BK.map(k => ({
+        label: tx(BELAEGE[k].name),
+        data: erg.map(e => (e.summeWirksam > 0 ? e.flaechen[k] / e.summeWirksam * 100 : 0)),
+        m2: erg.map(e => e.flaechen[k]),
+        backgroundColor: BELAEGE[k].farbe
+      }));
+      yAchse = t('achseFlaeche');
+    }
+
+    const platzhalter = CFG.szenarien.some(s => s.platzhalter);
+    const annahmen = BK.some(k => !BELAEGE[k].geprueft);
+    const unter = [t('exportUnter', { gebiet: tx(CFG.gebiet.name), flaeche: zahl(A_GEBIET), datum: heute() })];
+    if (platzhalter) unter.push(t('exportPlatzhalter')); else if (annahmen) unter.push(t('exportAnnahme'));
+
+    return {
+      type: 'bar',
+      data: { labels: labels, datasets: datasets },
+      options: {
+        maintainAspectRatio: false,
+        animation: gross ? false : { duration: 250 },
+        layout: { padding: gross ? { left: 30, right: 40, top: 10, bottom: 20 } : { top: 6 } },
+        scales: {
+          x: { stacked: gestapelt, ticks: { font: { size: fs + 1, weight: '600' }, color: '#17201c' }, grid: { display: false } },
+          y: {
+            stacked: gestapelt,
+            max: gestapelt ? 100 : undefined,
+            grace: gestapelt ? 0 : '8%',
+            title: { display: true, text: yAchse, font: { size: fs }, color: '#56625d' },
+            ticks: { font: { size: fs }, color: '#56625d', callback: v => zahl(v) },
+            grid: { color: c => (c.tick && c.tick.value === 0 ? '#17201c' : '#e3e8e5'), lineWidth: c => (c.tick && c.tick.value === 0 ? 2 : 1) }
+          }
+        },
+        plugins: {
+          legend: { position: 'bottom', labels: { font: { size: fs }, color: '#17201c', boxWidth: gross ? 30 : 14, padding: gross ? 22 : 10 } },
+          title: { display: gross, text: 'Vaals Entwurfslabor – ' + diagrammTitel(ansicht), font: { size: 40, weight: '700' }, color: '#0b5563', padding: { top: 10, bottom: 6 } },
+          subtitle: { display: gross, text: unter, font: { size: 22 }, color: platzhalter ? '#b35c00' : '#56625d', padding: { bottom: 24 } },
+          tooltip: {
+            callbacks: {
+              label: c => {
+                const ds = c.dataset, v = c.raw;
+                if (ds.m2) return ds.label + ': ' + zahl(v, 1) + ' % (' + zahl(ds.m2[c.dataIndex]) + ' m²)';
+                return ds.label + ': ' + (ansicht === 'wasser' ? zahl(v) + ' m³' : zahl(v, 1) + ' %');
+              }
+            }
+          },
+          hintergrund: { farbe: '#ffffff' },
+          werte: werte ? { format: werte, groesse: gross ? 22 : 12, immer: gross } : false,
+          zielLinie: ziel || false
+        }
+      }
+    };
+  }
+
+  const segment = $('#ansicht');
+  AUFBAU.push(function ansichtAufbau() {
+    segment.innerHTML = ANSICHTEN.map(a =>
+      '<button type="button" data-a="' + a + '" aria-pressed="' + (a === state.ansicht) + '">' +
+      esc(t({ wasser: 'aWasser', hitze: 'aHitze', flaechen: 'aFlaechen' }[a])) + '</button>').join('');
+  });
+  segment.addEventListener('click', ev => {
+    const b = ev.target.closest('button[data-a]');
+    if (!b) return;
+    state.ansicht = b.dataset.a;
+    segment.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    aktualisieren();
+  });
+
+  let chart = null, chartSchluessel = '';
+  UPDATE.push(function diagramm() {
+    const box = $('.chart-box');
+    if (!window.Chart) {
+      box.innerHTML = '<p class="warnung">' + esc(t('keinChart')) + '</p>';
+      return;
+    }
+    const cfg = diagrammConfig(state.ansicht, false);
+    const schluessel = state.ansicht + '|' + state.sprache;
+    if (chart && chartSchluessel === schluessel) {
+      chart.data.labels = cfg.data.labels;
+      cfg.data.datasets.forEach((ds, i) => { Object.assign(chart.data.datasets[i], { data: ds.data, label: ds.label, m2: ds.m2 }); });
+      chart.update('none');
+    } else {
+      if (chart) chart.destroy();
+      chart = new Chart($('#chart'), cfg);
+      chartSchluessel = schluessel;
+    }
+  });
+
+  function herunterladen(blob, name) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    toast(t('gespeichert', { name: name }));
+  }
+
+  // PNG im Folienformat 1920 × 1080, unabhängig von der Bildschirmgröße
+  function pngBlob() {
+    return new Promise((resolve, reject) => {
+      if (!window.Chart) { reject(new Error(t('keinChart'))); return; }
+      const box = document.createElement('div');
+      box.className = 'export-box';
+      const c = document.createElement('canvas');
+      c.width = 1920; c.height = 1080;
+      c.style.width = '1920px'; c.style.height = '1080px';
+      box.appendChild(c);
+      document.body.appendChild(box);
+      const cfg = diagrammConfig(state.ansicht, true);
+      Object.assign(cfg.options, { responsive: false, animation: false, devicePixelRatio: 1, events: [] });
+      const ch = new Chart(c, cfg);
+      c.toBlob(blob => {
+        ch.destroy(); box.remove();
+        if (blob) resolve(blob); else reject(new Error('PNG'));
+      }, 'image/png');
+    });
+  }
+  $('#btn-png').addEventListener('click', () => {
+    pngBlob().then(
+      blob => herunterladen(blob, 'vaals_entwurfslabor_' + state.ansicht + '_' + datumStempel() + '.png'),
+      err => toast(err.message)
+    );
+  });
+
+  // ================================================================
+  // CSV-Export der Bilanz (Semikolon, Dezimalkomma – für Excel DE/NL)
+  // ================================================================
+  function csvText() {
+    const zc = (n, d) => (Number.isFinite(n) ? runden(n, d || 0).toFixed(d || 0).replace('.', ',') : '');
+    const q = s => { s = String(s == null ? '' : s); return /[;"\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const n = state.szenarien.length, idx = [...Array(n).keys()];
+    const rows = [];
+    const platzhalter = CFG.szenarien.some(s => s.platzhalter);
+    rows.push([t('csvTitel'), tx(CFG.gebiet.name)]);
+    rows.push([t('csvStand'), datumStempel()]);
+    rows.push([t('csvGebiet'), zc(A_GEBIET)]);
+    rows.push([t('csvRegen'), t('csvRegenWert', { mm: CFG.regen.mm, h: CFG.regen.dauer_h })]);
+    if (platzhalter) rows.push([t('csvHinweis'), t('exportPlatzhalter')]);
+    else if (BK.some(k => !BELAEGE[k].geprueft)) rows.push([t('csvHinweis'), t('exportAnnahme')]);
+    rows.push([]);
+
+    // Flächenbilanz
+    const kopf = [t('thBelag'), t('csvSchluessel'), t('thPsi'), t('thSpeicherMm'), t('csvVers'), t('csvStatus')];
+    idx.forEach(i => kopf.push(szName(i) + ': ' + t('thGrund'), szName(i) + ': ' + t('thWirksam')));
+    rows.push(kopf);
+    BK.forEach(k => {
+      const b = BELAEGE[k];
+      const r = [tx(b.name), k, zc(b.psi, 2), zc(b.speicher_mm), zc(b.versiegelung, 2), b.geprueft ? t('csvGeprueft') : t('annahme')];
+      idx.forEach(i => r.push(zc(state.szenarien[i].flaechen[k]), zc(erg[i].flaechen[k])));
+      rows.push(r);
+    });
+    const zeile = (label, fnGrund, fnWirk) => {
+      const r = [label, '', '', '', '', ''];
+      idx.forEach(i => r.push(fnGrund(i), fnWirk(i)));
+      rows.push(r);
+    };
+    zeile(t('zeileSumme'), i => zc(erg[i].summeGrund), i => zc(erg[i].summeWirksam));
+    zeile(t('zeilePark'), i => zc(state.szenarien[i].parkplaetze_m2), i => zc(state.szenarien[i].parkplaetze_m2 - erg[i].entsiegelt));
+    zeile(t('zeileKrone'), i => zc(state.szenarien[i].baumkronen_m2), i => zc(erg[i].krone));
+    zeile(t('csvStatusSz'), i => (CFG.szenarien[i].platzhalter ? t('platzhalter') : t('csvWerte')), i => (erg[i].summeOk ? t('summeOk') : '⚠ ' + t('tabWarn')));
+    rows.push([]);
+
+    // Regler
+    rows.push([t('regler'), t('csvEinheit')].concat(idx.map(szName)));
+    REGLER.forEach(R => {
+      rows.push([t(R.label), CFG.regler[R.k].einheit].concat(idx.map(i =>
+        R.k === 'dachGruenAnteil' ? zc(erg[i].dachAnteil * 100, 1) : zc(state.szenarien[i].regler[R.k]))));
+    });
+    rows.push([]);
+
+    // Kennzahlen
+    rows.push([t('csvKennzahl'), t('csvEinheit')].concat(idx.map(szName)));
+    KPI.forEach(kpi => rows.push([kpiTitel(kpi), kpi.einheit].concat(idx.map(i => zc(kpiWert(kpi, erg[i]), kpi.d)))));
+    rows.push([]);
+
+    // Quellen
+    rows.push([t('csvQuellen'), t('csvQuellePsi'), t('csvQuelleSp'), t('csvQuelleVers')]);
+    BK.forEach(k => rows.push([tx(BELAEGE[k].name), BELAEGE[k].psiQuelle, BELAEGE[k].speicherQuelle, BELAEGE[k].versiegelungQuelle]));
+    rows.push([t('kKrone'), CFG.richtwerte.quelle]);
+    rows.push([t('csvRegen'), CFG.regen.quelle]);
+    idx.forEach(i => rows.push([szName(i), CFG.szenarien[i].quelle || '']));
+
+    return '﻿' + rows.map(r => r.map(q).join(';')).join('\r\n') + '\r\n';
+  }
+  $('#btn-csv').addEventListener('click', () => {
+    herunterladen(new Blob([csvText()], { type: 'text/csv;charset=utf-8' }), 'vaals_entwurfslabor_bilanz_' + datumStempel() + '.csv');
   });
 
   // ================================================================
