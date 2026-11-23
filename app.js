@@ -1014,6 +1014,11 @@
 
     window.addEventListener('offline', () => toast(t('offline'), 5000));
 
+    // Service Worker: App-Oberfläche offline (nur über HTTPS oder localhost möglich)
+    if ('serviceWorker' in navigator && window.isSecureContext) {
+      navigator.serviceWorker.register('sw.js').catch(e => console.warn('Service Worker:', e));
+    }
+
     ladeGebiete();
     ladeFlaechen();
     ladeKatalog();
