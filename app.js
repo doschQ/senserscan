@@ -695,6 +695,217 @@
   }
 
   // ================================================================
+  // Liste mit Filter und Statistik
+  // ================================================================
+  let filterKlasse = 'alle';
+  const sortiert = () => flaechen.slice().sort((a, b) => a.nr - b.nr);
+  const m2Von = f => geomArea(f.geometry);
+
+  function openListe() {
+    const klassen = Object.keys(CFG.klassen);
+    const stat = {};
+    klassen.forEach(k => { stat[k] = { n: 0, m2: 0 }; });
+    flaechen.forEach(f => {
+      const k = klasseVon(f);
+      if (!stat[k]) stat[k] = { n: 0, m2: 0 };
+      stat[k].n++;
+      stat[k].m2 += m2Von(f);
+    });
+    const summeN = flaechen.length;
+    const summeM2 = flaechen.reduce((s, f) => s + m2Von(f), 0);
+    const hatPunkte = flaechen.some(f => f.geometry.type === 'Point');
+    const chip = (k, label, n, farbe) => '<button type="button" data-filter="' + k + '" aria-pressed="' + (filterKlasse === k) + '">' +
+      (farbe ? '<span class="dot" style="--c:' + farbe + '"></span>' : '') + esc(label) + ' (' + n + ')</button>';
+
+    const liste = sortiert().filter(f => filterKlasse === 'alle' || klasseVon(f) === filterKlasse);
+
+    const html =
+      '<table class="stat"><thead><tr><th>' + esc(t('klasse')) + '</th><th class="num">' + esc(t('anzahl')) +
+      '</th><th class="num">m²</th></tr></thead><tbody>' +
+      klassen.map(k => '<tr><td><span class="dot" style="--c:' + CFG.klassen[k].farbe + '"></span> ' + esc(tx(CFG.klassen[k].name)) +
+        '</td><td class="num">' + stat[k].n + '</td><td class="num">' + fmtNum(Math.round(stat[k].m2)) + '</td></tr>').join('') +
+      '</tbody><tfoot><tr><td>' + esc(t('summe')) + '</td><td class="num">' + summeN + '</td><td class="num">' +
+      fmtNum(Math.round(summeM2)) + '</td></tr></tfoot></table>' +
+      (hatPunkte ? '<p class="muted">' + esc(t('punkteHinweis')) + '</p>' : '') +
+      '<div class="chips filter">' + chip('alle', t('alle'), summeN) +
+      klassen.map(k => chip(k, tx(CFG.klassen[k].name), stat[k].n, CFG.klassen[k].farbe)).join('') + '</div>' +
+      (liste.length ? '<ul class="items">' + liste.map(f => {
+        const kl = klasseInfo(klasseVon(f));
+        return '<li><button type="button" data-id="' + esc(f.id) + '"><span class="dot" style="--c:' + kl.farbe + '"></span>' +
+          '<span class="main"><strong>' + esc(titel(f)) + '</strong><span>' + esc(tx(kl.name)) + ' · ' + esc(typName(f.typ)) + '</span></span>' +
+          '<span class="area">' + (f.geometry.type === 'Point' ? esc(t('punkt')) : esc(fmtM2(m2Von(f)))) + '</span></button></li>';
+      }).join('') + '</ul>' : '<p class="muted">' + esc(t('leer')) + '</p>') +
+      '<h3>' + esc(t('daten')) + '</h3><p class="muted">' + esc(t('speicherHinweis')) + '</p>' +
+      '<div class="btn-row"><button type="button" class="btn" id="ex-geojson">' + esc(t('exportGeojson')) + '</button>' +
+      '<button type="button" class="btn" id="ex-csv">' + esc(t('exportCsv')) + '</button></div>' +
+      '<div class="btn-row"><label class="btn btn-file">' + esc(t('importGeojson')) +
+      '<input type="file" id="im-geojson" accept=".geojson,.json,application/geo+json,application/json"></label></div>';
+
+    const v = oeffnePanel(t('listeTitel') + ' (' + summeN + ')', html);
+    ansicht = openListe;
+    v.addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      if (b.dataset.filter) { filterKlasse = b.dataset.filter; openListe(); }
+      else if (b.dataset.id) { const f = byId(b.dataset.id); openSteckbrief(f.id); zeigeGeometrie(f.geometry); }
+    });
+    $('#ex-geojson', v).addEventListener('click', exportGeoJSON);
+    $('#ex-csv', v).addEventListener('click', exportCSV);
+    $('#im-geojson', v).addEventListener('change', e => {
+      const file = e.target.files && e.target.files[0];
+      if (file) importGeoJSON(file);
+    });
+  }
+
+  // ================================================================
+  // Export (GeoJSON, CSV mit WKT) und Import (GeoJSON) – für QGIS
+  // ================================================================
+  function datumStempel() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function signedRing(c) {
+    let s = 0;
+    for (let i = 0; i < c.length - 1; i++) s += c[i][0] * c[i + 1][1] - c[i + 1][0] * c[i][1];
+    return s / 2;
+  }
+  // RFC 7946: Außenring gegen den Uhrzeigersinn, Löcher im Uhrzeigersinn; 7 Nachkommastellen (≈ 1 cm)
+  function exportGeom(g) {
+    const ring = (r, i) => {
+      const rr = r.map(p => [round7(p[0]), round7(p[1])]);
+      return (signedRing(rr) > 0) === (i === 0) ? rr : rr.reverse();
+    };
+    if (g.type === 'Point') return { type: 'Point', coordinates: [round7(g.coordinates[0]), round7(g.coordinates[1])] };
+    if (g.type === 'Polygon') return { type: 'Polygon', coordinates: g.coordinates.map(ring) };
+    return { type: 'MultiPolygon', coordinates: g.coordinates.map(p => p.map(ring)) };
+  }
+  // Flache Attribute (eine Spalte je Wert) für QGIS
+  function exportProps(f) {
+    const k = klasseVon(f);
+    return {
+      id: f.id,
+      nr: f.nr,
+      typ: f.typ,
+      typ_name: typName(f.typ),
+      klasse: k,
+      klasse_name: tx(klasseInfo(k).name),
+      bau: f.bau,
+      gruen: f.gruen,
+      wasser: f.wasser,
+      hitze: f.hitze,
+      flaeche_m2: Math.round(m2Von(f) * 10) / 10,
+      notiz: f.notiz || '',
+      foto: !!f.foto,
+      gps_genauigkeit_m: f.gps_genauigkeit_m != null ? f.gps_genauigkeit_m : null,
+      beispiel: !!f.beispiel,
+      erstellt: f.erstellt || '',
+      geaendert: f.geaendert || ''
+    };
+  }
+
+  function download(name, text, mime) {
+    const blob = new Blob([text], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    toast(t('exportOk', { name: name }));
+  }
+
+  function exportGeoJSON() {
+    if (!flaechen.length) { toast(t('exportLeer')); return; }
+    const fc = {
+      type: 'FeatureCollection',
+      name: 'senserscan_flaechen',
+      features: sortiert().map(f => ({ type: 'Feature', properties: exportProps(f), geometry: exportGeom(f.geometry) }))
+    };
+    download('senserscan_flaechen_' + datumStempel() + '.geojson', JSON.stringify(fc, null, 1), 'application/geo+json');
+  }
+
+  function wkt(g) {
+    const p = c => c[0] + ' ' + c[1];
+    const ring = r => '(' + r.map(p).join(', ') + ')';
+    if (g.type === 'Point') return 'POINT (' + p(g.coordinates) + ')';
+    if (g.type === 'Polygon') return 'POLYGON (' + g.coordinates.map(ring).join(', ') + ')';
+    return 'MULTIPOLYGON (' + g.coordinates.map(pl => '(' + pl.map(ring).join(', ') + ')').join(', ') + ')';
+  }
+  function csvZelle(v) {
+    if (v == null) return '';
+    const s = String(v);
+    return /[",;\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function exportCSV() {
+    if (!flaechen.length) { toast(t('exportLeer')); return; }
+    const rows = sortiert().map(f => Object.assign(exportProps(f), { wkt: wkt(exportGeom(f.geometry)) }));
+    const cols = Object.keys(rows[0]);
+    const lines = [cols.join(',')].concat(rows.map(r => cols.map(c => csvZelle(r[c])).join(',')));
+    download('senserscan_flaechen_' + datumStempel() + '.csv', '﻿' + lines.join('\r\n') + '\r\n', 'text/csv;charset=utf-8');
+  }
+
+  function typAus(v) {
+    if (v == null) return null;
+    const s = String(v).trim().toLowerCase();
+    if (CFG.typen[s]) return s;
+    return Object.keys(CFG.typen).find(k =>
+      ['de', 'nl'].some(l => CFG.typen[k][l] && CFG.typen[k][l].toLowerCase() === s)) || null;
+  }
+  const wert15 = v => { const n = Math.round(Number(v)); return n >= 1 && n <= 5 ? n : 3; };
+  // nur Punkte/Polygone in WGS84 (Längengrad/Breitengrad)
+  function geomOk(g) {
+    if (!g || !Array.isArray(g.coordinates)) return false;
+    let c;
+    if (g.type === 'Point') c = g.coordinates;
+    else if (g.type === 'Polygon') c = g.coordinates[0] && g.coordinates[0][0];
+    else if (g.type === 'MultiPolygon') c = g.coordinates[0] && g.coordinates[0][0] && g.coordinates[0][0][0];
+    return !!c && Math.abs(c[0]) <= 180 && Math.abs(c[1]) <= 90;
+  }
+
+  async function importGeoJSON(file) {
+    let gj;
+    try { gj = JSON.parse(await file.text()); } catch (e) { toast(t('importFehler'), 5000); return; }
+    const feats = gj && gj.type === 'FeatureCollection' ? gj.features : (gj && gj.type === 'Feature' ? [gj] : null);
+    if (!Array.isArray(feats)) { toast(t('importFehler'), 5000); return; }
+    const jetzt = new Date().toISOString();
+    const neu = [];
+    let skip = 0;
+    let nr = naechsteNr();
+    feats.forEach(ft => {
+      const g = ft && ft.geometry;
+      if (!geomOk(g)) { skip++; return; }
+      const p = ft.properties || {};
+      const id = typeof p.id === 'string' && /^f-/.test(p.id) ? p.id : neueId();
+      const alt = byId(id);
+      const typ = typAus(p.typ) || typAus(p.typ_name);
+      const rec = {
+        id: id,
+        nr: alt ? alt.nr : nr++,
+        typ: typ || 'brache',
+        bau: wert15(p.bau), gruen: wert15(p.gruen), wasser: wert15(p.wasser), hitze: wert15(p.hitze),
+        notiz: (typ ? '' : '[Import: Typ unbekannt] ') + (p.notiz ? String(p.notiz) : ''),
+        foto: alt ? alt.foto : null,
+        geometry: { type: g.type, coordinates: g.coordinates },
+        flaeche_m2: Math.round(geomArea(g) * 10) / 10,
+        gps_genauigkeit_m: Number.isFinite(p.gps_genauigkeit_m) ? p.gps_genauigkeit_m : null,
+        beispiel: p.beispiel === true || p.beispiel === 'true',
+        erstellt: typeof p.erstellt === 'string' && p.erstellt ? p.erstellt : jetzt,
+        geaendert: jetzt
+      };
+      const i = flaechen.findIndex(f => f.id === id);
+      if (i >= 0) flaechen[i] = rec; else flaechen.push(rec);
+      neu.push(rec);
+    });
+    await persistieren(neu);
+    renderFlaechen();
+    toast(t('importOk', { n: neu.length, skip: skip }), 5000);
+    if (neu.length) map.fitBounds(L.geoJSON({ type: 'FeatureCollection', features: neu.map(f => ({ type: 'Feature', properties: {}, geometry: f.geometry })) }).getBounds(), { padding: [30, 30], maxZoom: 19 });
+    openListe();
+  }
+
+  // ================================================================
   // Sprache umschalten
   // ================================================================
   function setLang(l) {
@@ -721,6 +932,7 @@
     $('#btn-home').addEventListener('click', zoomPlanungsgebiet);
     $('#btn-zeichnen').addEventListener('click', zeichnenStart);
     $('#btn-gps').addEventListener('click', gpsPunkt);
+    $('#btn-liste').addEventListener('click', openListe);
     $('#btn-undo').addEventListener('click', zeichnenPunktZurueck);
     $('#btn-cancel').addEventListener('click', zeichnenAbbrechen);
     $('#btn-finish').addEventListener('click', zeichnenFertig);
