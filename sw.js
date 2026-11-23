@@ -6,7 +6,7 @@
  *  - Kartenkacheln (OSM, PDOK) werden nicht abgefangen und nicht gespeichert
  * Wenn sich die Liste unten ändert, VERSION erhöhen.
  */
-const VERSION = 'senserscan-v1';
+const VERSION = 'senserscan-v2';
 
 const LOKAL = [
   './',
@@ -63,8 +63,7 @@ self.addEventListener('fetch', event => {
 async function netzZuerst(req) {
   const cache = await caches.open(VERSION);
   try {
-    // no-cache: beim Server nachfragen, damit geänderte Dateien (z. B. config.js) sofort wirken
-    const res = await fetchMitTimeout(new Request(req, { cache: 'no-cache' }), 4000);
+    const res = await fetchMitTimeout(frisch(req), 4000);
     if (res && res.ok) cache.put(req, res.clone());
     return res;
   } catch (err) {
@@ -75,6 +74,19 @@ async function netzZuerst(req) {
       if (start) return start;
     }
     throw err;
+  }
+}
+
+// Anfrage mit cache: 'no-cache' – der Browser fragt beim Server nach, damit
+// geänderte Dateien (z. B. config.js) sofort wirken. Navigationen werden aus
+// der URL neu aufgebaut (Request-Kopien im Modus "navigate" sind nicht überall erlaubt).
+function frisch(req) {
+  try {
+    return req.mode === 'navigate'
+      ? new Request(req.url, { cache: 'no-cache', credentials: 'same-origin' })
+      : new Request(req, { cache: 'no-cache' });
+  } catch (e) {
+    return req;
   }
 }
 

@@ -260,6 +260,7 @@ body.drawing .draw-hint { top: 10px; }
 @media (min-width: 768px) {
   .panel { left: auto; top: 12px; right: 12px; bottom: 12px; width: 420px; max-height: none; border-radius: 16px; }
   body.panel-open .basemap-switch { right: 444px; }
+  body.panel-open .leaflet-bottom.leaflet-right { right: 432px; }
 }
 
 .panel h3 { font-size: 15px; margin: 18px 0 8px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); }
