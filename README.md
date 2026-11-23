@@ -16,7 +16,7 @@ Im Kernbereich von Vaals werden Potenzialflächen für **doppelte Innenentwicklu
 
 **https://doschq.github.io/senserscan/**
 
-Läuft über HTTPS, daher funktionieren dort GPS-Punkt und Offline-Start.
+Läuft über HTTPS, daher funktionieren dort „Mein Standort“ (GPS) und Offline-Start.
 Als App installieren:
 
 - **Android/Chrome:** Menü ⋮ → „App installieren“ bzw. „Zum Startbildschirm hinzufügen“
@@ -33,7 +33,7 @@ python -m http.server 8080 --bind 0.0.0.0
 - Laptop: <http://localhost:8080>
 - Handy im selben WLAN: `http://<IP-des-Laptops>:8080`. Die IP zeigt `ipconfig` unter „IPv4-Adresse“; am 23.11.2026 war es `192.168.0.196`.
   Beim ersten Start fragt die Windows-Firewall, ob Python im **privaten** Netzwerk erreichbar sein darf. Bitte erlauben.
-  **Achtung:** Über `http://` im WLAN gehen auf dem Handy **kein GPS-Punkt und kein Offline-Start**. Browser erlauben beides nur über HTTPS oder `localhost`. Fürs Handy deshalb die Online-Adresse nutzen.
+  **Achtung:** Über `http://` im WLAN gehen auf dem Handy **kein GPS („Mein Standort“) und kein Offline-Start**. Browser erlauben beides nur über HTTPS oder `localhost`. Fürs Handy deshalb die Online-Adresse nutzen.
 
 ---
 
@@ -42,15 +42,15 @@ python -m http.server 8080 --bind 0.0.0.0
 | Element | Funktion |
 |---|---|
 | **Fläche** | Polygon zeichnen: Eckpunkte antippen. Mit **Punkt zurück** den letzten Punkt entfernen, mit **Fertig** schließen. |
-| **GPS-Punkt** | Punkt an der aktuellen Position. Ohne GPS kann der Punkt in der Kartenmitte gesetzt werden. |
-| Formular | Typ, Baupotenzial, Grünpotenzial, Risiko Wasser, Risiko Hitze (je 1–5), Notiz, Foto. Die Klasse wird live berechnet. |
-| Fläche antippen | Öffnet den **Steckbrief** mit Klasse, Bewertung und **Klimacheck** (Richtwerte, Anforderungen, Maßnahmen je Ebene). Dort auch **Bearbeiten** und **Löschen**. |
-| **Liste** | Alle Flächen, Filter nach Klasse, Anzahl und m² je Klasse, Export und Import |
-| **Beispiele** | Sechs fiktive Beispielflächen einblenden bzw. wieder entfernen. Die App startet ohne Beispiele. |
-| **Gebiet** | Zoomt auf das Planungsgebiet Selzerbeek |
-| **Karte / Luftbild** | Amtliche Karte (NL: PDOK, DE: basemap.de) oder PDOK-Luftbild, auch während des Zeichnens umschaltbar. Lädt das Luftbild nicht, schaltet die App automatisch auf die Karte zurück. |
+| **Mein Standort** | Punkt an der aktuellen Position (GPS). Ohne GPS kann der Punkt in der Kartenmitte gesetzt werden. |
+| Formular | Name (optional), Typ, Baupotenzial, Grünpotenzial, Risiko Wasser, Risiko Hitze (je 1–5), Notiz, Foto. Die Klasse wird live berechnet. Ohne Namen heißt die Fläche „Typ #Nr“. |
+| Fläche antippen | Öffnet den **Steckbrief** mit Klasse, Bewertung und **Klimacheck** (Richtwerte, Anforderungen, Maßnahmen je Ebene). Dort auch **Umbenennen**, **Bearbeiten** und **Löschen**. |
+| **Flächen** | Alle Flächen mit Namen, Filter nach Klasse, Anzahl und m² je Klasse, Export und Import. Eine Fläche antippen öffnet ihren Steckbrief (dort umbenennen). |
+| **Beispiele** | 16 Beispielflächen im Plangebiet einblenden bzw. wieder entfernen: Umrisse real (BGT/BAG), Bewertungen fiktiv. Die App startet ohne Beispiele. Die Schilder „Beispiel“ erscheinen ab Zoomstufe 18. |
+| **Plangebiet** | Zoomt auf das Planungsgebiet Selzerbeek |
+| **Karte / Luftbild / Grundstücke** | Amtliche Karte (NL: PDOK, DE: basemap.de), PDOK-Luftbild oder graue Karte mit Flurstücksgrenzen (NL: Kadaster, DE: ALKIS NRW, ab Zoomstufe 17). Auch während des Zeichnens umschaltbar. Lädt das Luftbild nicht, schaltet die App automatisch auf die Karte zurück. |
 | **NL / DE** | Sprache umschalten |
-| **Einstellungen** (Regler-Symbol) | Klassen (Name, Farbe, Beschreibung), Schwellenwerte der Regeln, Menüfarbe (Standard Vaals-Rot). Gilt sofort und wird nur in diesem Browser gespeichert; „Standard wiederherstellen“ setzt alles zurück. |
+| **Einstellungen** (Regler-Symbol) | Klassen (Name, Farbe, Beschreibung), Schwellenwerte der Regeln, eigene Flächentypen, Menüfarbe (Standard Vaals-Rot). Gilt sofort und wird nur in diesem Browser gespeichert; „Standard wiederherstellen“ setzt alles zurück (eigene Typen, die noch genutzt werden, bleiben). |
 | **i** | Quellen und Versionsnummer |
 
 ### Daten speichern, exportieren, in QGIS öffnen
@@ -59,10 +59,10 @@ python -m http.server 8080 --bind 0.0.0.0
 - **Export GeoJSON:** `klimachancen_flaechen_JJJJ-MM-TT.geojson`, WGS84 (EPSG:4326) nach RFC 7946, eine Spalte je Attribut.
   In QGIS die Datei ins Kartenfenster ziehen. Sind Polygone **und** Punkte enthalten, fragt QGIS, welche Teil-Layer geladen werden sollen; beide auswählen.
 - **Export CSV:** gleiche Attribute plus Spalte `wkt` mit der Geometrie. QGIS: *Layer → Layer hinzufügen → Getrennte Texte*, Geometrie „Well-Known Text (WKT)“, Feld `wkt`, KBS EPSG:4326.
-- **Import GeoJSON:** Punkte und (Multi-)Polygone in WGS84. Eigene Exporte werden anhand der `id` aktualisiert statt verdoppelt. Features in anderen Koordinatensystemen (z. B. RD New) werden übersprungen.
+- **Import GeoJSON:** Punkte und (Multi-)Polygone in WGS84. Eigene Exporte werden anhand der `id` aktualisiert statt verdoppelt. Eigene Flächentypen eines anderen Geräts werden mit ihrem Namen (`typ_name`) übernommen. Features in anderen Koordinatensystemen (z. B. RD New) werden übersprungen.
 - **Fotos** bleiben im Browser und sind nicht im Export enthalten. Das Feld `foto` zeigt nur, ob eines vorhanden ist.
 
-**Attribute im Export:** `id, nr, typ, typ_name, klasse, klasse_name, bau, gruen, wasser, hitze, flaeche_m2, notiz, foto, gps_genauigkeit_m, beispiel, erstellt, geaendert`
+**Attribute im Export:** `id, nr, name, typ, typ_name, klasse, klasse_name, bau, gruen, wasser, hitze, flaeche_m2, notiz, foto, gps_genauigkeit_m, beispiel, erstellt, geaendert`
 
 ---
 
@@ -71,6 +71,7 @@ python -m http.server 8080 --bind 0.0.0.0
 ### In der App: Einstellungen
 
 Name, Farbe und Beschreibung jeder Klasse, die Schwellenwerte („hoch ab“) für Baupotenzial, Risiko Wasser und Risiko Hitze sowie die Menüfarbe lassen sich direkt in der App ändern (Regler-Symbol oben).
+Unter **Flächentypen** können eigene Typen ergänzt, umbenannt und gelöscht werden (nur, solange keine Fläche sie nutzt). Im Klimacheck gelten für eigene Typen die Einträge mit `"typen": ["alle"]`.
 Die Änderungen gelten nur im jeweiligen Browser. Die Werte in `config.js` sind der Standard.
 
 ### Regeln, Klassen, Farben, Typen → `config.js`
@@ -88,7 +89,7 @@ regeln: [
 ```
 
 Verfügbar sind `f.typ`, `f.bau`, `f.gruen`, `f.wasser`, `f.hitze`. Jede Regel hat zusätzlich einen `text`, der in den Einstellungen angezeigt wird.
-Namen, Farben und Kurzbeschreibungen der Klassen stehen unter `klassen`, die Flächentypen unter `typen`, die Menüfarbe unter `menuFarbe`.
+Namen, Farben und Kurzbeschreibungen der Klassen stehen unter `klassen`, die Flächentypen unter `typen` (Parkplatz, Brache, Baulücke, Flachdach, Satteldach, Innenhof, Wohnbau, Industriebau, Straßenraum, Grünfläche, Sport, Spielfläche), die Menüfarbe unter `menuFarbe`.
 Nach dem Speichern die Seite neu laden.
 
 ### Maßnahmenkatalog → `data/massnahmen.json` (Entwurf)
@@ -112,7 +113,8 @@ Der Katalog ist ein **KI-generierter Entwurf** und muss fachlich überarbeitet w
 ### Weitere Dateien
 
 - **Oberflächentexte DE/NL:** `i18n.js`
-- **Beispielflächen:** `data/beispielflaechen.geojson`. Sie werden über den Menüpunkt „Beispiele“ geladen und wieder entfernt.
+- **Beispielflächen:** `data/beispielflaechen.geojson`, 16 benannte Flächen im Plangebiet. Sie werden über den Menüpunkt „Beispiele“ geladen und wieder entfernt.
+  Die Umrisse stammen aus BGT (Straßenräume, Parkplätze, Grün, Brache) und BAG (Gebäude), abgerufen über PDOK am 23.11.2026; Straßenräume und Innenhof sind daraus zusammengesetzt. Die Bewertungen sind fiktiv.
 - **Gebiete:** `data/vaals_gebiete_wgs84.geojson`; Name, Stil und Planungsgebiet-ID in `config.js` unter `gebiete`
 - **Offline-Cache:** `sw.js`. Wenn neue Dateien hinzukommen, in die Liste eintragen und `VERSION` erhöhen.
   Bei einer neuen App-Version die Endung `?v=…` von `style.css`, `config.js`, `i18n.js` und `app.js` in `index.html` **und** `sw.js` gleich anpassen, damit kein Gerät alte und neue Dateien mischt.
@@ -133,11 +135,15 @@ Der Katalog ist ein **KI-generierter Entwurf** und muss fachlich überarbeitet w
   - TileMatrix-IDs `00`–`21`, zweistellig
   - Format `image/jpeg`
 - Das Luftbild deckt nur niederländisches Gebiet ab; östlich der Grenze (auch im Norden des Planungsgebiets) bleibt es weiß.
+- **Grundstücke:** graue Karte (PDOK `grijs`, basemap.de `grau`) mit Flurstücksgrenzen, sichtbar ab Zoomstufe 17:
+  - NL: Kadastrale kaart, laut WMTS-GetCapabilities (`https://service.pdok.nl/kadaster/kadastralekaart/wmts/v5_0`, abgerufen 23.11.2026): Layer `Kadastralekaart`, TileMatrixSet `EPSG:3857`, TileMatrix-IDs `00`–`22`
+  - DE: ALKIS NRW als WMS (`https://www.wms.nrw.de/geobasis/wms_nw_alkis`), Layer `adv_alkis_flurstuecke`, sichtbar bis Maßstab 1:5 501, Lizenz Datenlizenz Deutschland – Zero 2.0
 - **Flächenberechnung** auf der Kugel (WGS84-Radius, wie Turf.js). Abweichung zu QGIS (Ellipsoid) unter 0,5 %.
 - **Offline:**
   - Der Service Worker speichert App-Dateien und Bibliotheken. Eigene Dateien holt er zuerst vom Server und greift nur ohne Netz auf den Cache zurück.
   - Kartenkacheln werden nicht gespeichert; offline erscheinen Gebiete und Flächen auf grauem Grund.
 - Getestet im Chromium-Browser bei 390 × 844 und 1280 × 800: Zeichnen, Bewerten, Klassen, Steckbrief, Liste, Export/Import, Offline-Start, Ausfall des PDOK-Luftbilds.
+  Version 0.3 zusätzlich bei 375 × 812 und 1280 × 800: Beispiele, Umbenennen, eigene Typen (Anlegen, Umbenennen, Löschsperre, Export/Import), Grundstücke-Ansicht, NL-Texte.
   Der Export wurde gegen RFC 7946 geprüft. In QGIS selbst wurde er nicht geöffnet (dort nicht installiert). Safari/iOS ist nicht getestet.
 
 ## Bekannte Grenzen
@@ -154,7 +160,7 @@ KI-generiert (Claude Code, Claude Opus 5.5, 23.11.2026):
 - gesamter Programmcode: `index.html`, `app.js`, `style.css`, `config.js`, `i18n.js`, `sw.js`, `manifest.json`
 - Umsetzung der Klassifikationsregeln in `config.js` (die Regeln selbst stammen aus der Aufgabenstellung)
 - Maßnahmenkatalog und Anforderungen in `data/massnahmen.json` (**Entwurf**)
-- sechs Beispielflächen in `data/beispielflaechen.geojson` (Lage und Bewertung fiktiv, als „Beispiel“ gekennzeichnet)
+- Beispielflächen in `data/beispielflaechen.geojson`: Auswahl, Namen, Notizen und Bewertungen (fiktiv, als „Beispiel“ gekennzeichnet); die Umrisse sind aus BGT/BAG übernommen bzw. abgeleitet
 - niederländische Übersetzung aller Texte
 - App-Icons in `icons/`
 - diese README
@@ -163,4 +169,5 @@ KI-generiert (Claude Code, Claude Opus 5.5, 23.11.2026):
 
 - Gebietsgrenzen in `data/vaals_gebiete_wgs84.geojson` (Shapefile Lehrstuhl, EPSG:25832, umprojiziert nach WGS84)
 - Klassifikationsregeln a–d und Richtwerte (Vorgabe aus der Aufgabenstellung)
-- Kartengrundlagen: Karte PDOK / © Kadaster (NL) und © GeoBasis-DE / BKG (2026), CC BY 4.0 (DE); Luftbild: PDOK / Beeldmateriaal Nederland
+- Kartengrundlagen: Karte PDOK / © Kadaster (NL) und © GeoBasis-DE / BKG (2026), CC BY 4.0 (DE); Luftbild: PDOK / Beeldmateriaal Nederland; Grundstücke: Kadastrale kaart, PDOK / © Kadaster (NL) und ALKIS, © Geobasis NRW, dl-de/zero-2-0 (DE)
+- Umrisse der Beispielflächen: BGT und BAG (PDOK / Kadaster)
