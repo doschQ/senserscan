@@ -22,8 +22,8 @@
 window.ENTWURFSLABOR_CONFIG = {
   version: '0.2.0',
 
-  // Farbe von Kopfzeile und Bedienelementen (Vaals-Rot, wie Klima Chancen)
-  menuFarbe: '#e10a17',
+  // Leitfarbe von Kopfzeile und Bedienelementen (Wasserblau)
+  menuFarbe: '#1971c2',
 
   // Planungsgebiet Selzerbeek
   gebiet: {
@@ -40,12 +40,12 @@ window.ENTWURFSLABOR_CONFIG = {
   regen: {
     mm: 70,
     dauer_h: 1,
-    quelle: 'Richtwert 70 mm in 1 h (Vorgabe aus der Aufgabenstellung – Quelle in der Thesis ergänzen)'
+    quelle: 'Richtwert 70 mm in 1 h (Vorgabe aus der Aufgabenstellung)'
   },
   richtwerte: {
     deltaV_m3: 0,          // Retentionsbilanz: Speicher mindestens so groß wie der Abfluss
     baumkronen_prozent: 30, // Ziel Baumkronenanteil
-    quelle: 'Ziel 30 % Baumkronenanteil und ΔV ≥ 0: Vorgabe aus der Aufgabenstellung – Quelle in der Thesis ergänzen'
+    quelle: 'Ziel 30 % Baumkronenanteil und ΔV ≥ 0: Vorgabe aus der Aufgabenstellung'
   },
 
   // Erlaubte Abweichung der Summe von der Gebietsfläche (m², Rundung)
@@ -155,7 +155,7 @@ window.ENTWURFSLABOR_CONFIG = {
   },
 
   // Szenarien. Reihenfolge = Umschalter.
-  //   referenz: true  -> Vergleichsbasis der Ampel, Regler gesperrt
+  //   referenz: true  -> Vergleichsbasis der Ampel
   //   flaechen: m² je Belagsart (Summe = Gebietsfläche)
   //             oder 'bestand' = Kopie der Bestandsbilanz
   //   parkplaetze_m2: davon Parkplätze (liegen in Asphalt/Beton)

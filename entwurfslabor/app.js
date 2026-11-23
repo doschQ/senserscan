@@ -17,7 +17,7 @@
   const TEXTE = {
     de: {
       untertitel: 'Vaals · Senserbach',
-      kennzahlen: 'Kennzahlen', regler: 'Regler', vergleich: 'Vergleich der Szenarien',
+      kennzahlen: 'Kennzahlen', regler: 'Szenario', vergleich: 'Vergleich der Szenarien',
       bilanz: 'Flächenbilanz', karteTitel: 'Planungsgebiet',
       szenarioName: 'Name des Szenarios',
       pngExport: 'PNG für Folien (1920 × 1080)', csvExport: 'CSV-Bilanz',
@@ -56,7 +56,8 @@
       hBaeume: 'neue Baumkrone: {n} × {k} m² = {m2} m²',
       hAue: 'geht direkt in den Speicher',
       hBgf: 'GFZ {gfz}', hWohnen: '{wbgf} m² BGF Wohnen', hBgfWe: '{we} Wohneinheiten',
-      gesperrt: 'Der Bestand ist die Referenz: Regler gesperrt. Bestandswerte in der Flächenbilanz bzw. in config.js ändern.',
+      plusTitel: 'Variante hinzufügen (Kopie des gewählten Szenarios)', entfernen: 'Variante entfernen',
+      entfernenFrage: '„{name}“ entfernen?',
       reglerFuss: 'Startwerte der Regler in den Varianten: Annahme – anpassen. Regler und Flächenbilanz sind nicht gekoppelt: Die Neubau-BGF ändert keine Flächen; neue Dächer gehören in die Flächenbilanz der Variante.',
       zuruecksetzen: 'Eingaben zurücksetzen', resetFrage: 'Alle Eingaben auf die Werte aus config.js zurücksetzen?',
       resetOk: 'Eingaben zurückgesetzt.',
@@ -119,8 +120,7 @@
         '<li><b>Anteil entsiegelter Parkplätze:</b> Dieser Anteil der Zeile „davon Parkplätze“ wechselt von „{von}“ zu „{nach}“.</li>' +
         '<li><b>Neue Bäume × Kronenfläche:</b> wird zu den Baumkronen addiert (Überlagerung, nicht in der Flächensumme, nicht in der Wasserbilanz).</li>' +
         '<li><b>Retentionsvolumen der Aue:</b> wird direkt zum Speicher addiert.</li>' +
-        '<li><b>Neubau-BGF, Anteil Wohnen, BGF je WE:</b> ergeben GFZ und Wohneinheiten. Sie ändern die Flächenbilanz nicht.</li></ul>' +
-        '<p>Die Regler buchen nur um; die Summe der Flächenbilanz bleibt gleich. Im Bestand sind sie gesperrt.</p>',
+        '<li><b>Neubau-BGF, Anteil Wohnen, BGF je WE:</b> ergeben GFZ und Wohneinheiten. Sie ändern die Flächenbilanz nicht.</li></ul>',
       infoAnnahmenTitel: 'Kennwerte je Belagsart (änderbar unter Einstellungen)',
       infoAnnahmen: 'ψ enthält bereits den Rückhalt der Fläche selbst. Speichervermögen haben deshalb nur Flächen mit zusätzlichem Rückhalteraum (Mulde, Retentionsdach), sonst würde doppelt gezählt.',
       thStatus: 'Status', geprueft: 'geprüft',
@@ -134,7 +134,7 @@
     },
     nl: {
       untertitel: 'Vaals · Senserbach',
-      kennzahlen: 'Kengetallen', regler: 'Schuifregelaars', vergleich: 'Vergelijking van de scenario’s',
+      kennzahlen: 'Kengetallen', regler: 'Scenario', vergleich: 'Vergelijking van de scenario’s',
       bilanz: 'Oppervlaktebalans', karteTitel: 'Plangebied',
       szenarioName: 'Naam van het scenario',
       pngExport: 'PNG voor dia’s (1920 × 1080)', csvExport: 'CSV-balans',
@@ -171,7 +171,8 @@
       hBaeume: 'nieuwe boomkroon: {n} × {k} m² = {m2} m²',
       hAue: 'telt direct mee als berging',
       hBgf: 'FSI {gfz}', hWohnen: '{wbgf} m² BVO wonen', hBgfWe: '{we} woningen',
-      gesperrt: 'De bestaande situatie is de referentie: schuifregelaars vergrendeld. Waarden in de oppervlaktebalans of in config.js wijzigen.',
+      plusTitel: 'Variant toevoegen (kopie van het gekozen scenario)', entfernen: 'Variant verwijderen',
+      entfernenFrage: '„{name}” verwijderen?',
       reglerFuss: 'Startwaarden van de schuifregelaars in de varianten: aanname – aanpassen. Schuifregelaars en oppervlaktebalans zijn niet gekoppeld: de nieuwbouw-BVO verandert geen oppervlakken; nieuwe daken horen in de oppervlaktebalans van de variant.',
       zuruecksetzen: 'Invoer herstellen', resetFrage: 'Alle invoer terugzetten naar de waarden uit config.js?',
       resetOk: 'Invoer hersteld.',
@@ -230,8 +231,7 @@
         '<li><b>Aandeel onthard parkeren:</b> dit aandeel van de regel „waarvan parkeerplaatsen” gaat van „{von}” naar „{nach}”.</li>' +
         '<li><b>Nieuwe bomen × kroonoppervlak:</b> komt bij de boomkronen (overlay, niet in het totaal, niet in de waterbalans).</li>' +
         '<li><b>Retentievolume beekdal:</b> telt direct mee als berging.</li>' +
-        '<li><b>Nieuwbouw-BVO, aandeel wonen, BVO per woning:</b> geven FSI en woningen. Ze veranderen de oppervlaktebalans niet.</li></ul>' +
-        '<p>De schuifregelaars verschuiven alleen oppervlak; het totaal blijft gelijk. In de bestaande situatie zijn ze vergrendeld.</p>',
+        '<li><b>Nieuwbouw-BVO, aandeel wonen, BVO per woning:</b> geven FSI en woningen. Ze veranderen de oppervlaktebalans niet.</li></ul>',
       infoAnnahmenTitel: 'Kengetallen per oppervlaktetype (aan te passen onder Instellingen)',
       infoAnnahmen: 'ψ bevat al de berging van het oppervlak zelf. Alleen oppervlakken met extra bergingsruimte (wadi, retentiedak) hebben daarom een bergingsvermogen; anders telt het dubbel. Bronvermelding in het Duits.',
       thStatus: 'Status', geprueft: 'gecontroleerd',
@@ -298,6 +298,8 @@
   }
   const FP = hash(JSON.stringify(CFG.szenarien));
   const REFERENZ = Math.max(0, CFG.szenarien.findIndex(s => s.referenz));
+  const REF_ID = CFG.szenarien[REFERENZ].id;
+  const MAX_SZ = 6; // Bestand + höchstens 5 Varianten
 
   function startSzenarien() {
     const bestand = CFG.szenarien[REFERENZ];
@@ -307,6 +309,10 @@
       BK.forEach(k => { flaechen[k] = +((basis.flaechen && basis.flaechen[k]) || 0); });
       const r = Object.assign({}, s.regler);
       return {
+        id: s.id,
+        nameStd: s.name,
+        quelle: s.quelle || '',
+        quellePh: !!s.platzhalter,
         name: null,
         platzhalter: !!s.platzhalter,
         flaechen: flaechen,
@@ -328,6 +334,27 @@
       if (istZahl(g.regler[k]) || (k === 'dachGruenAnteil' && g.regler[k] === null)) m.regler[k] = g.regler[k];
     });
     return m;
+  }
+  // Grundlage für eine selbst hinzugefügte Variante (Rest kommt per mischen)
+  function neueBasis(id, nameStd) {
+    const b = JSON.parse(JSON.stringify(startSzenarien()[REFERENZ]));
+    const ok = nameStd && typeof nameStd.de === 'string' && typeof nameStd.nl === 'string';
+    return Object.assign(b, { id: id, nameStd: ok ? { de: nameStd.de.slice(0, 40), nl: nameStd.nl.slice(0, 40) } : { de: 'Variante', nl: 'Variant' },
+      quelle: '', quellePh: false });
+  }
+  // Szenarioliste aus gespeicherten oder importierten Daten; der Bestand ist immer dabei
+  function szenarienAus(liste) {
+    const start = startSzenarien();
+    if (!Array.isArray(liste)) return start;
+    if (!liste.some(x => x && typeof x.id === 'string')) return start.map((st, i) => mischen(st, liste[i]));
+    const out = [];
+    liste.forEach(x => {
+      if (!x || typeof x.id !== 'string' || out.some(s => s.id === x.id) || out.length >= MAX_SZ) return;
+      const st = start.find(s => s.id === x.id);
+      out.push(mischen(st || neueBasis(x.id.slice(0, 40), x.nameStd), x));
+    });
+    if (!out.some(s => s.id === REF_ID)) out.unshift(start[REFERENZ]);
+    return out;
   }
   // Kennwerte je Belagsart: Standard aus config.js, Änderungen aus den Einstellungen
   const STANDARD_KW = {};
@@ -364,8 +391,8 @@
       s.kennwerte = kennwerteLesen(g.kennwerte);
       if (typeof g.ansicht === 'string') s.ansicht = g.ansicht;
       if (g.import && Array.isArray(g.import.flaechen)) s.import = g.import;
-      if (g.fp === FP && Array.isArray(g.szenarien) && g.szenarien.length === s.szenarien.length) {
-        s.szenarien = s.szenarien.map((st, i) => mischen(st, g.szenarien[i]));
+      if (g.fp === FP && Array.isArray(g.szenarien)) {
+        s.szenarien = szenarienAus(g.szenarien);
         s.aktiv = Math.min(Math.max(0, g.aktiv | 0), s.szenarien.length - 1);
       } else if (g.fp && g.fp !== FP) {
         s.configNeu = true;
@@ -393,7 +420,7 @@
   kennwerteAnwenden();
 
   // Menüfarbe (Kopfzeile, Knöpfe) – wie in Klima Chancen
-  const MENUFARBEN = ['#e10a17', '#0b5563', '#1d4e89', '#2b7a3d', '#343a40'];
+  const MENUFARBEN = ['#1971c2', '#e10a17', '#0b5563', '#2b7a3d', '#343a40']; // Wasserblau zuerst
   const menuFarbe = () => state.menuFarbe || CFG.menuFarbe || MENUFARBEN[0];
   function rgb(hex) { const n = parseInt(hex.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
   const schriftAuf = hex => { const c = rgb(hex); return 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2] > 165 ? '#17201c' : '#ffffff'; };
@@ -407,10 +434,10 @@
     if (meta) meta.setAttribute('content', c);
   }
 
-  const szName = i => state.szenarien[i].name || tx(CFG.szenarien[i].name);
+  const szName = i => state.szenarien[i].name || tx(state.szenarien[i].nameStd);
   const aktivSz = () => state.szenarien[state.aktiv];
-  const aktivCfg = () => CFG.szenarien[state.aktiv];
-  const istReferenz = i => i === REFERENZ;
+  const refI = () => Math.max(0, state.szenarien.findIndex(s => s.id === REF_ID));
+  const istReferenz = i => i === refI();
 
   // ================================================================
   // Rechenkern
@@ -517,16 +544,40 @@
 
   const nav = $('#szenarien');
   nav.addEventListener('click', e => {
+    if (e.target.closest('button[data-plus]')) { varianteHinzufuegen(); return; }
     const b = e.target.closest('button[data-i]');
     if (!b) return;
     state.aktiv = +b.dataset.i;
     neuAufbauen();
   });
+  // neue Variante = Kopie des gewählten Szenarios, Name "Variante C", "Variante D" …
+  function varianteHinzufuegen() {
+    if (state.szenarien.length >= MAX_SZ) return;
+    const b = 'ABCDEFGHIJ'.split('').find(x => !state.szenarien.some(s => s.nameStd && s.nameStd.de === 'Variante ' + x)) || '?';
+    const neu = JSON.parse(JSON.stringify(aktivSz()));
+    Object.assign(neu, {
+      id: 'v-' + Date.now().toString(36), name: null,
+      nameStd: { de: 'Variante ' + b, nl: 'Variant ' + b }, quelle: '', quellePh: false
+    });
+    state.szenarien.push(neu);
+    state.aktiv = state.szenarien.length - 1;
+    neuAufbauen();
+  }
   UPDATE.push(function tabs() {
     nav.innerHTML = state.szenarien.map((s, i) =>
       '<button type="button" role="tab" data-i="' + i + '" aria-selected="' + (i === state.aktiv) + '"' +
       (erg[i].summeOk ? '' : ' title="' + esc(t('tabWarn')) + '"') + '>' +
-      (erg[i].summeOk ? '' : '<span class="warn">⚠ </span>') + esc(szName(i)) + '</button>').join('');
+      (erg[i].summeOk ? '' : '<span class="warn">⚠ </span>') + esc(szName(i)) + '</button>').join('') +
+      (state.szenarien.length < MAX_SZ
+        ? '<button type="button" class="plus" data-plus title="' + esc(t('plusTitel')) + '" aria-label="' + esc(t('plusTitel')) + '">+</button>'
+        : '');
+    // passt die Leiste nicht, den gewählten Tab ins Bild schieben
+    const a = nav.querySelector('[aria-selected="true"]');
+    if (a && nav.scrollWidth > nav.clientWidth) {
+      const l = a.offsetLeft - nav.offsetLeft, r = l + a.offsetWidth;
+      if (l < nav.scrollLeft) nav.scrollLeft = l - 4;
+      else if (r > nav.scrollLeft + nav.clientWidth) nav.scrollLeft = r - nav.clientWidth + 40;
+    }
   });
 
   function warnungenHtml(i) {
@@ -550,7 +601,7 @@
   // ================================================================
   const tabelle = $('#bilanz');
   AUFBAU.push(function bilanzAufbau() {
-    const sz = aktivSz(), c = aktivCfg();
+    const sz = aktivSz();
     const ph = sz.platzhalter ? ' class="platzhalter"' : '';
     const anBadge = BK.some(k => !BELAEGE[k].geprueft) ? ' <span class="badge annahme">' + esc(t('annahme')) + '</span>' : '';
     const feld = (name, wert) => '<input type="text" inputmode="decimal" autocomplete="off"' + ph +
@@ -578,7 +629,7 @@
       '</tfoot>';
     tabelle.innerHTML = h;
     // Quelle aus config.js nur zeigen, solange der Platzhalter-Status dem der Datei entspricht
-    $('#bilanz-quelle').textContent = c.quelle && sz.platzhalter === !!c.platzhalter ? t('quelle') + ': ' + c.quelle : '';
+    $('#bilanz-quelle').textContent = sz.quelle && sz.platzhalter === sz.quellePh ? t('quelle') + ': ' + sz.quelle : '';
     const schalter = $('#ph-schalter');
     schalter.checked = sz.platzhalter;
     schalter.closest('label').title = t('platzhalterTitel');
@@ -652,20 +703,16 @@
     return aktivSz().regler[k];
   }
   AUFBAU.push(function reglerAufbau() {
-    const gesperrt = istReferenz(state.aktiv);
     reglerBox.innerHTML = REGLER.map(R => {
       const d = CFG.regler[R.k];
-      const dis = gesperrt ? ' disabled' : '';
-      return '<div class="regler' + (gesperrt ? ' gesperrt' : '') + '" data-k="' + R.k + '">' +
+      return '<div class="regler" data-k="' + R.k + '">' +
         '<div class="regler-kopf"><label for="r-' + R.k + '">' + esc(t(R.label)) + '</label>' +
-        '<span class="regler-wert"><input type="text" inputmode="numeric" autocomplete="off" data-zahl="' + R.k + '"' + dis +
+        '<span class="regler-wert"><input type="text" inputmode="numeric" autocomplete="off" data-zahl="' + R.k + '"' +
         ' aria-label="' + esc(t(R.label)) + '"><span>' + esc(d.einheit) + '</span></span></div>' +
-        '<input type="range" id="r-' + R.k + '" data-k="' + R.k + '" min="' + d.min + '" max="' + d.max + '" step="' + d.step + '"' + dis + '>' +
+        '<input type="range" id="r-' + R.k + '" data-k="' + R.k + '" min="' + d.min + '" max="' + d.max + '" step="' + d.step + '">' +
         '<div class="regler-hilfe" data-hilfe="' + R.k + '"></div></div>';
     }).join('');
-    const hinweis = $('#regler-gesperrt');
-    hinweis.hidden = !gesperrt;
-    hinweis.textContent = t('gesperrt');
+    $('#btn-entfernen').hidden = istReferenz(state.aktiv);
     $('#regler-fuss').textContent = t('reglerFuss');
     $('#sz-name').value = szName(state.aktiv);
   });
@@ -723,9 +770,17 @@
     aktivSz().name = v ? v.slice(0, 40) : null;
     aktualisieren();
   });
+  $('#btn-entfernen').addEventListener('click', () => {
+    if (istReferenz(state.aktiv)) return;
+    if (!window.confirm(t('entfernenFrage', { name: szName(state.aktiv) }))) return;
+    state.szenarien.splice(state.aktiv, 1);
+    state.aktiv = Math.min(state.aktiv, state.szenarien.length - 1);
+    neuAufbauen();
+  });
   $('#btn-reset').addEventListener('click', () => {
     if (!window.confirm(t('resetFrage'))) return;
     state.szenarien = startSzenarien();
+    state.aktiv = Math.min(state.aktiv, state.szenarien.length - 1);
     neuAufbauen();
     toast(t('resetOk'));
   });
@@ -752,7 +807,7 @@
   function ampel(kpi, i) {
     if (!kpi.besser) return null;
     const v = runden(kpiWert(kpi, erg[i]), kpi.d);
-    const ref = runden(kpiWert(kpi, erg[REFERENZ]), kpi.d);
+    const ref = runden(kpiWert(kpi, erg[refI()]), kpi.d);
     const hoch = kpi.besser === 'hoch';
     const rw = kpi.richtwert == null ? null : (hoch ? v >= kpi.richtwert : v <= kpi.richtwert);
     if (istReferenz(i)) {
@@ -780,7 +835,7 @@
       let vergleich = '';
       if (a) vergleich += '<span class="pill ' + a.farbe + '">' + esc(a.text) + '</span>';
       if (!istReferenz(i)) {
-        const diff = runden(v, kpi.d) - runden(kpiWert(kpi, erg[REFERENZ]), kpi.d);
+        const diff = runden(v, kpi.d) - runden(kpiWert(kpi, erg[refI()]), kpi.d);
         const einheit = kpi.einheit === '%' ? t('pp') : kpi.einheit;
         vergleich += '<span>' + esc(t('ggBestand', { diff: zahlVz(diff, kpi.d) + (einheit ? ' ' + einheit : '') })) + '</span>';
       }
@@ -793,7 +848,7 @@
         (vergleich ? '<div class="k-vergleich">' + vergleich + '</div>' : '') + '</div>';
     }).join('');
     let w = warnungenHtml(i);
-    if (!istReferenz(i) && !erg[REFERENZ].summeOk) w += '<div class="warnung">⚠ ' + esc(t('warnRefSumme')) + '</div>';
+    if (!istReferenz(i) && !erg[refI()].summeOk) w += '<div class="warnung">⚠ ' + esc(t('warnRefSumme')) + '</div>';
     $('#kz-warnung').innerHTML = w;
     $('#kz-unter').textContent = szName(i);
     $('#ampel-legende').textContent = t('ampelLegende');
@@ -1079,7 +1134,7 @@
     BK.forEach(k => rows.push([tx(BELAEGE[k].name), BELAEGE[k].psiQuelle, BELAEGE[k].speicherQuelle, BELAEGE[k].versiegelungQuelle]));
     rows.push([t('kKrone'), CFG.richtwerte.quelle]);
     rows.push([t('csvRegen'), CFG.regen.quelle]);
-    idx.forEach(i => rows.push([szName(i), CFG.szenarien[i].quelle || '']));
+    idx.forEach(i => rows.push([szName(i), state.szenarien[i].quelle || '']));
 
     return '﻿' + rows.map(r => r.map(q).join(';')).join('\r\n') + '\r\n';
   }
@@ -1347,17 +1402,15 @@
     return JSON.stringify({
       typ: 'vaals-entwurfslabor', version: 1, stand: new Date().toISOString(),
       menuFarbe: state.menuFarbe, kennwerte: kennwerte,
-      szenarien: state.szenarien.map((s, i) => Object.assign({ id: CFG.szenarien[i].id }, s))
+      szenarien: state.szenarien
     }, null, 1);
   }
   function datenImportieren(text) {
     let g = null;
     try { g = JSON.parse(text); } catch (e) { g = null; }
     if (!g || g.typ !== 'vaals-entwurfslabor' || !Array.isArray(g.szenarien)) { toast(t('datenImportFehler')); return; }
-    state.szenarien = startSzenarien().map((st, i) => {
-      const quelle = g.szenarien.find(x => x && x.id === CFG.szenarien[i].id) || g.szenarien[i];
-      return mischen(st, quelle);
-    });
+    state.szenarien = szenarienAus(g.szenarien);
+    state.aktiv = Math.min(state.aktiv, state.szenarien.length - 1);
     state.menuFarbe = istFarbe(g.menuFarbe) ? g.menuFarbe : null;
     state.kennwerte = kennwerteLesen(g.kennwerte);
     kennwerteAnwenden();

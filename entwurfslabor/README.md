@@ -28,7 +28,8 @@ python -m http.server 8081 --bind 0.0.0.0
 | Element | Funktion |
 |---|---|
 | **Bestand / Variante A / Variante B** | Szenario umschalten. Der Name ist im Feld „Name des Szenarios“ änderbar. |
-| **Regler** | Anteil begrünter Dachflächen, Anteil entsiegelter Parkplätze, neue Bäume × Kronenfläche, Retentionsvolumen der Aue, Neubau-BGF, Anteil Wohnen, BGF je Wohneinheit. Zahl auch direkt eintippen. Im Bestand gesperrt (Referenz). |
+| **+** (rechts neben den Szenarien) | neue Variante als Kopie des gewählten Szenarios („Variante C“, „Variante D“ …), bis zu fünf Varianten. **Variante entfernen** in der Szenario-Leiste löscht sie wieder (nicht beim Bestand). |
+| **Szenario** (Leiste links) | Regler: Anteil begrünter Dachflächen, Anteil entsiegelter Parkplätze, neue Bäume × Kronenfläche, Retentionsvolumen der Aue, Neubau-BGF, Anteil Wohnen, BGF je Wohneinheit. Zahl auch direkt eintippen. Gilt auch für den Bestand; er bleibt die Vergleichsbasis der Ampel. |
 | **Kennzahlen** | Niederschlag, Abfluss, Speicher, Retentionsbilanz ΔV, ψm, Versiegelungsgrad, Baumkronenanteil, BGF, GFZ, Wohneinheiten – mit Ampel und Differenz zum Bestand |
 | **Vergleich der Szenarien** | Balkendiagramm aller drei Szenarien: **Wasser** (N, Q, S, ΔV), **Hitze** (Versiegelung, ψm, Baumkronen mit Ziellinie 30 %), **Flächen** (gestapelte Flächenbilanz) |
 | Bild-Symbol | aktuelle Diagrammansicht als PNG für Folien, 1920 × 1080, weißer Hintergrund, mit Titel; solange Platzhalter oder ungeprüfte Kennwerte im Spiel sind, mit Hinweis im Untertitel |
@@ -37,11 +38,11 @@ python -m http.server 8081 --bind 0.0.0.0
 | **Planungsgebiet** | Karte (PDOK für NL, basemap.de für DE) mit der Gebietsgrenze und den importierten SenserScan-Flächen |
 | **SenserScan-Datei laden** | siehe [Import](#import-aus-senserscan) |
 | **NL / DE** | Sprache umschalten |
-| Regler-Symbol (**Einstellungen**) | Menüfarbe (wie Klima Chancen), **Kennwerte je Belagsart** (ψ, Speicher mm, Versiegelungsfaktor, „geprüft“), **Daten exportieren/importieren** (.json), „Standard wiederherstellen“ |
+| Regler-Symbol (**Einstellungen**) | Menüfarbe (Standard Wasserblau), **Kennwerte je Belagsart** (ψ, Speicher mm, Versiegelungsfaktor, „geprüft“), **Daten exportieren/importieren** (.json), „Standard wiederherstellen“ |
 | **i** | Info-Seite: Formeln, Wirkung der Regler, Kennwerte mit Quellen, Modellgrenzen, Quellen der Karten |
-| **Eingaben zurücksetzen** | Flächenbilanzen, Regler und Namen auf die Werte aus `config.js` |
+| **Eingaben zurücksetzen** | Flächenbilanzen, Regler und Namen auf die Werte aus `config.js`; selbst hinzugefügte Varianten entfallen |
 
-**Layout:** Ab 900 px Breite stehen die Regler als feste Leiste links (eigener Bildlauf); rechts Kennzahlen und Diagramm nebeneinander, darunter Flächenbilanz und Karte (ab 1500 px nebeneinander). Auf dem Handy liegt alles untereinander, die Kennzahlen als Zeilen (Titel links, Wert rechts); oben bleibt eine Kurzanzeige mit ΔV, Versiegelung, ψm und Baumkronen stehen.
+**Layout:** Ab 900 px Breite steht die Szenario-Leiste mit den Reglern fest links (eigener Bildlauf); rechts Kennzahlen und Diagramm nebeneinander, darunter Flächenbilanz und Karte (ab 1500 px nebeneinander). Auf dem Handy liegt alles untereinander, die Kennzahlen als Zeilen (Titel links, Wert rechts); oben bleibt eine Kurzanzeige mit ΔV, Versiegelung, ψm und Baumkronen stehen.
 
 Eingaben merkt sich nur der jeweilige Browser (localStorage). Ändert sich in `config.js` etwas unter `szenarien`, startet die App wieder mit den Werten der Datei.
 
@@ -82,6 +83,7 @@ baumkronen_m2: …     // Baumkronen (Überlagerung, nicht in der Summe)
 
 - `flaechen: 'bestand'` übernimmt die Bestandsbilanz (Start). Für den Entwurf eine eigene Bilanz eintragen, **inklusive neuer Dächer**: Die Neubau-BGF ändert keine Flächen.
 - `regler: { … }` sind die Startwerte der Regler.
+- Weitere Varianten entstehen in der App mit **+**; sie werden im Browser gespeichert und mit dem .json-Export übertragen, nicht in `config.js`.
 
 ### Kennwerte je Belagsart
 
@@ -195,5 +197,5 @@ KI-generiert (Claude Code, Claude Opus 5.5, 23.11.2026):
 
 - Gebietsgrenze (Shapefile Lehrstuhl, EPSG 25832, umprojiziert nach WGS84) und Gebietsfläche 203.454 m²
 - Formel der Retentionsbilanz ΔV = Speicher − Σ (Fläche · ψ · 0,07 m), Kennzahlenliste
-- Richtwerte 70 mm in 1 h und 30 % Baumkronenanteil (Vorgaben – Quelle in der Thesis ergänzen)
+- Richtwerte 70 mm in 1 h und 30 % Baumkronenanteil (Vorgaben)
 - Kartengrundlagen: PDOK / © Kadaster (NL), © GeoBasis-DE / BKG (DE)

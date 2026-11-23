@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#e10a17">
+  <meta name="theme-color" content="#1971c2">
   <meta name="description" content="Vaals Entwurfslabor – Szenario-Rechner für Wasser- und Hitzeresilienz im Planungsgebiet Selzerbeek">
   <title>Vaals Entwurfslabor</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='30 30 454 454'%3E%3Crect x='30' y='30' width='454' height='454' rx='90' fill='%23e10a17'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='30' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M166 98q-62 84-62 128a62 62 0 0 0 124 0q0-44-62-128zM290 294v-70M350 294v-150M410 294v-100M80 354q29.5-24 59 0t59 0 59 0 59 0 59 0 59 0M80 406q29.5-24 59 0t59 0 59 0 59 0 59 0 59 0'/%3E%3C/g%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='30 30 454 454'%3E%3Crect x='30' y='30' width='454' height='454' rx='90' fill='%231971c2'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='30' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M166 98q-62 84-62 128a62 62 0 0 0 124 0q0-44-62-128zM290 294v-70M350 294v-150M410 294v-100M80 354q29.5-24 59 0t59 0 59 0 59 0 59 0 59 0M80 406q29.5-24 59 0t59 0 59 0 59 0 59 0 59 0'/%3E%3C/g%3E%3C/svg%3E">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
-  <link rel="stylesheet" href="style.css?v=0.2.2">
+  <link rel="stylesheet" href="style.css?v=0.3.2">
 </head>
 <body>
   <header class="kopf" id="kopf">
@@ -37,7 +37,7 @@
         <span data-i18n="szenarioName">Name des Szenarios</span>
         <input id="sz-name" type="text" maxlength="40" autocomplete="off">
       </label>
-      <p id="regler-gesperrt" class="info-zeile" hidden></p>
+      <button id="btn-entfernen" class="btn klein entfernen" type="button" data-i18n="entfernen">Variante entfernen</button>
       <div id="regler"></div>
       <p class="fussnote" id="regler-fuss"></p>
       <button id="btn-reset" class="btn klein" type="button" data-i18n="zuruecksetzen">Eingaben zurücksetzen</button>
