@@ -29,7 +29,7 @@
       thBelag: 'Belagsart', thGrund: 'Grundbilanz m²', thWirksam: 'nach Maßnahmen m²', thAnteil: 'Anteil',
       thPsi: 'ψ', thSpeicherMm: 'Speicher mm', thAbfluss: 'Abfluss m³ ({mm} mm)', thSpeicherM3: 'Speicher m³',
       zeileAue: 'Retentionsvolumen der Aue (Regler)',
-      zeileSumme: 'Summe', zeilePsiM: 'ψm',
+      zeileSumme: 'Summe',
       zeilePark: 'davon Parkplätze (in Asphalt/Beton)', zeileParkInfo: 'nicht in der Summe · davon entsiegelt: {m2} m²',
       zeileKrone: 'Baumkronen (Überlagerung)', zeileKroneInfo: 'nicht in der Summe · Bestand + neue Bäume',
       summeOk: 'Summe stimmt',
@@ -73,7 +73,6 @@
       exportUnter: '{gebiet} · {flaeche} m² · Stand {datum}',
       exportPlatzhalter: 'Enthält PLATZHALTER (Flächenbilanz) und ungeprüfte Annahmen (ψ, Speicher) – keine Messwerte.',
       exportAnnahme: 'Enthält ungeprüfte Annahmen (ψ, Speicher).',
-      exportFuss: 'Vaals Entwurfslabor · Prototyp, KI-generiert',
       keinChart: 'Diagramm nicht verfügbar: Chart.js konnte nicht geladen werden (Internetverbindung?).',
       gespeichert: 'Gespeichert: {name}',
       csvTitel: 'Vaals Entwurfslabor – Flächenbilanz', csvStand: 'Stand', csvGebiet: 'Gebietsfläche m²',
@@ -92,9 +91,150 @@
       impParkKeine: 'Keine Parkplätze im Planungsgebiet.',
       impParkOk: 'Parkplatzfläche {m2} m² übernommen: {namen}',
       impFehler: 'Datei nicht lesbar: kein GeoJSON.', impOk: '{n} Potenzialflächen im Planungsgebiet geladen.',
-      hDachSenser: 'SenserScan: Flachdächer im Gebiet {m2} m²', nr: 'Nr.'
+      hDachSenser: 'SenserScan: Flachdächer im Gebiet {m2} m²', nr: 'Nr.',
+      // Info-Seite
+      sprache: 'Sprache: Niederländisch', info: 'Info, Formeln, Annahmen', schliessen: 'Schließen',
+      infoTitel: 'Über das Vaals Entwurfslabor',
+      infoZweck: 'Szenario-Rechner zur Masterthesis „Klimaresilient und wassersensibel: Vaals am Senserbach“ (Stadtplanung, RWTH Aachen). Er zeigt, wie ein städtebaulich-freiraumplanerischer Entwurf für das Planungsgebiet Selzerbeek die Wasser- und Hitzeresilienz gegenüber dem Bestand verändert.',
+      infoKiTitel: 'KI-Kennzeichnung',
+      infoKi: 'Prototyp, erstellt mit <b>{werkzeug}</b>, Modell <b>{modell}</b>, am <b>{datum}</b>.',
+      infoKiListe: '<ul><li><b>KI-generiert:</b> gesamter Programmcode; Startwerte für ψ, Speichervermögen und Versiegelungsfaktoren (aus dem Gedächtnis gesetzt, Normtexte nicht eingesehen); Platzhalter-Flächenbilanzen; Startwerte der Regler; niederländische Übersetzung (ungeprüft).</li><li><b>Nicht KI-generiert:</b> Gebietsgrenze und Gebietsfläche, Formel der Retentionsbilanz, Richtwerte 70 mm in 1 h und 30 % Baumkronenanteil (Vorgaben); Kartengrundlage © OpenStreetMap-Mitwirkende.</li></ul>',
+      infoFormelnTitel: 'Formeln',
+      infoFormeln: '<div class="formel">A = {a} m² (Gebietsfläche) · h = {h} m ({mm} mm in {std} h)</div>' +
+        '<div class="formel">Niederschlag N = A · h = {n} m³</div>' +
+        '<div class="formel">Abfluss Q = Σ (Aᵢ · ψᵢ · h)</div>' +
+        '<div class="formel">Speicher S = Σ (Aᵢ · sᵢ / 1000) + V<sub>Aue</sub></div>' +
+        '<div class="formel">Retentionsbilanz ΔV = S − Q &nbsp;(ΔV ≥ 0: der Speicher nimmt den Abfluss auf)</div>' +
+        '<div class="formel">ψm = Σ (Aᵢ · ψᵢ) / Σ Aᵢ</div>' +
+        '<div class="formel">Versiegelungsgrad = Σ (Aᵢ · vᵢ) / Σ Aᵢ</div>' +
+        '<div class="formel">Baumkronenanteil = (Baumkronen Bestand + n · k) / A &nbsp;(Ziel {ziel} %)</div>' +
+        '<div class="formel">GFZ = BGF / A · Wohneinheiten = ⌊ BGF · Anteil Wohnen / BGF je WE ⌋</div>' +
+        '<p>Aᵢ: Fläche der Belagsart i nach Maßnahmen (m²) · ψᵢ: Abflussbeiwert · sᵢ: Speichervermögen (mm) · vᵢ: Versiegelungsfaktor · V<sub>Aue</sub>: Retentionsvolumen der Aue (m³) · n: neue Bäume · k: Kronenfläche je Baum (m²). Σ Aᵢ ist gleich A, wenn die Summenprüfung stimmt. BGF und GFZ beziehen sich nur auf den Neubau.</p>',
+      infoReglerTitel: 'Wie die Regler wirken',
+      infoRegler: '<ul><li><b>Anteil begrünter Dachflächen:</b> Ziel-Anteil begrünter Dächer an allen Dächern. Er liegt nie unter dem Anteil der Flächenbilanz. Zusätzlich begrünte Fläche wechselt von „Dach konventionell“ zu „{ziel}“.</li>' +
+        '<li><b>Anteil entsiegelter Parkplätze:</b> Dieser Anteil der Zeile „davon Parkplätze“ wechselt von „{von}“ zu „{nach}“.</li>' +
+        '<li><b>Neue Bäume × Kronenfläche:</b> wird zu den Baumkronen addiert (Überlagerung, nicht in der Flächensumme, nicht in der Wasserbilanz).</li>' +
+        '<li><b>Retentionsvolumen der Aue:</b> wird direkt zum Speicher addiert.</li>' +
+        '<li><b>Neubau-BGF, Anteil Wohnen, BGF je WE:</b> ergeben GFZ und Wohneinheiten. Sie ändern die Flächenbilanz nicht.</li></ul>' +
+        '<p>Die Regler buchen nur um; die Summe der Flächenbilanz bleibt gleich. Im Bestand sind sie gesperrt.</p>',
+      infoAnnahmenTitel: 'Kennwerte je Belagsart (config.js)',
+      infoAnnahmen: 'ψ enthält bereits den Rückhalt der Fläche selbst. Speichervermögen haben deshalb nur Flächen mit zusätzlichem Rückhalteraum (Mulde, Retentionsdach), sonst würde doppelt gezählt.',
+      thStatus: 'Status', geprueft: 'geprüft',
+      infoGrenzenTitel: 'Grenzen des Modells',
+      infoGrenzen: '<ul><li>Eine Bilanz für das ganze Gebiet: keine Fließwege, kein Gefälle, kein Kanalnetz, keine zeitliche Verteilung des Regens.</li>' +
+        '<li>Die ψ-Werte sind mittlere Abflussbeiwerte. Bei einem Starkregen von 70 mm in 1 h kann der Abfluss höher liegen, vor allem auf Rasen und in Hanglage.</li>' +
+        '<li>Regler und Flächenbilanz sind nicht gekoppelt: Neue Gebäude müssen in der Flächenbilanz der Variante stehen.</li>' +
+        '<li>Baumkronen gehen nicht in die Wasserbilanz ein. Bestands-BGF ist nicht enthalten.</li></ul>',
+      infoTechnikTitel: 'Daten und Technik',
+      infoTechnik: '<p>Alle fachlichen Werte stehen in <code>config.js</code>. Eingaben in der App merkt sich nur dieser Browser; ändert sich <code>config.js</code> unter „szenarien“, startet die App wieder mit den Werten der Datei. Bibliotheken: Chart.js 4.5.1, Leaflet 1.9.4 (jsDelivr, feste Versionen). Karte © OpenStreetMap-Mitwirkende.</p>'
     },
-    nl: {}
+    nl: {
+      untertitel: '{gebiet} · {ha} ha · scenariorekentool',
+      kennzahlen: 'Kengetallen', regler: 'Schuifregelaars', vergleich: 'Vergelijking van de scenario’s',
+      bilanz: 'Oppervlaktebalans', karteTitel: 'Plangebied',
+      szenarioName: 'Naam van het scenario',
+      pngExport: 'PNG voor dia’s', csvExport: 'CSV-balans',
+      platzhalter: 'Plaatshouder', annahme: 'Aanname – controleren',
+      hinweisPlatzhalter: '<b>Plaatshouder:</b> de oppervlaktebalansen zijn geen meetwaarden. Waarden van de bestaande situatie uit QGIS in config.js invullen.',
+      hinweisAnnahme: '<b>Aanname – controleren:</b> ψ- en bergingswaarden zijn startwaarden uit de literatuur (AI), niet gecontroleerd.',
+      fuss: 'Prototype · AI-gegenereerd met {werkzeug} ({modell}), {datum} · plaatshouders en aannames controleren · formules onder „i”',
+      thBelag: 'Oppervlaktetype', thGrund: 'Basisbalans m²', thWirksam: 'na maatregelen m²', thAnteil: 'Aandeel',
+      thPsi: 'ψ', thSpeicherMm: 'Berging mm', thAbfluss: 'Afvoer m³ ({mm} mm)', thSpeicherM3: 'Berging m³',
+      zeileAue: 'Retentievolume beekdal (schuifregelaar)',
+      zeileSumme: 'Totaal',
+      zeilePark: 'waarvan parkeerplaatsen (in asfalt/beton)', zeileParkInfo: 'niet in het totaal · waarvan onthard: {m2} m²',
+      zeileKrone: 'Boomkronen (overlay)', zeileKroneInfo: 'niet in het totaal · bestaand + nieuwe bomen',
+      summeOk: 'Totaal klopt',
+      warnSumme: 'Totaal van de oppervlaktebalans {ist} m², oppervlakte plangebied {soll} m² – verschil {diff} m².',
+      warnSummeFolge: 'Corrigeer de oppervlaktebalans; zo zijn de kengetallen niet betrouwbaar.',
+      warnPark: 'Parkeerplaatsen ({p} m²) groter dan asfalt/beton ({a} m²). Er wordt hooguit het asfalt/beton-oppervlak onthard.',
+      warnZahl: 'Voer een getal ≥ 0 in.',
+      quelle: 'Bron', configNeu: 'config.js is gewijzigd – startwaarden geladen.',
+      tabWarn: 'Totaal klopt niet',
+      rDach: 'Aandeel groene daken', rPark: 'Aandeel onthard parkeren', rBaeume: 'Nieuwe bomen',
+      rKrone: 'Kroonoppervlak per boom', rAue: 'Retentievolume beekdal', rBgf: 'Nieuwbouw-BVO',
+      rWohnen: 'Aandeel wonen', rBgfWe: 'BVO per woning',
+      hDach: 'Oppervlaktebalans: {a0} van {dach} m² dak groen · nieuw vergroend: {neu} m²',
+      hDachLeer: 'Geen daken in de oppervlaktebalans.',
+      hPark: '{ent} m² van {p} m² parkeerplaatsen worden waterdoorlatend',
+      hBaeume: 'nieuwe boomkroon: {n} × {k} m² = {m2} m²',
+      hAue: 'telt direct mee als berging',
+      hBgf: 'FSI {gfz}', hWohnen: '{wbgf} m² BVO wonen', hBgfWe: '{we} woningen',
+      gesperrt: 'De bestaande situatie is de referentie: schuifregelaars vergrendeld. Waarden in de oppervlaktebalans of in config.js wijzigen.',
+      reglerFuss: 'Startwaarden van de schuifregelaars in de varianten: aanname – aanpassen. Schuifregelaars en oppervlaktebalans zijn niet gekoppeld: de nieuwbouw-BVO verandert geen oppervlakken; nieuwe daken horen in de oppervlaktebalans van de variant.',
+      zuruecksetzen: 'Invoer herstellen', resetFrage: 'Alle invoer terugzetten naar de waarden uit config.js?',
+      resetOk: 'Invoer hersteld.',
+      kDeltaV: 'Retentiebalans ΔV (berging − afvoer)', kNiederschlag: 'Neerslag {mm} mm in {h} uur',
+      kAbfluss: 'Afvoer Σ A·ψ·{m} m', kSpeicher: 'Berging', kVersiegelung: 'Verhardingsgraad',
+      kPsiM: 'gemiddelde afvoercoëfficiënt ψm', kKrone: 'Boomkroonbedekking', kBgf: 'BVO (nieuwbouw)', kGfz: 'FSI (GFZ)', kWe: 'Woningen',
+      ziel: 'Doel {op} {wert}', ggBestand: '{diff} t.o.v. bestaand', pp: 'pp.',
+      aZiel: '✓ doel gehaald', aZielNicht: '✗ doel niet gehaald', aBesser: '✓ beter', aSchlechter: '✗ slechter',
+      aBesserZiel: 'beter, doel niet gehaald', aGleich: '= gelijk', aReferenz: 'Referentie',
+      ampelLegende: 'Stoplicht: groen = doel gehaald of beter dan bestaand · geel = beter dan bestaand maar doel niet gehaald, of gelijk · rood = slechter dan bestaand. Zonder stoplicht: neerslag, BVO, FSI, woningen.',
+      warnRefSumme: 'De oppervlaktebalans van de bestaande situatie klopt niet – de vergelijking is onzeker.',
+      kurzDeltaV: 'ΔV', kurzVers: 'Verhard', kurzPsi: 'ψm', kurzKrone: 'Kroon',
+      aWasser: 'Water', aHitze: 'Hitte', aFlaechen: 'Oppervlak',
+      tWasser: 'Waterbalans bij {mm} mm in {h} uur', tHitze: 'Verharding, afvoer en boomkronen', tFlaechen: 'Oppervlaktebalans na maatregelen',
+      dNiederschlag: 'Neerslag', dAbfluss: 'Afvoer', dSpeicher: 'Berging', dDeltaV: 'ΔV = berging − afvoer',
+      dVersiegelung: 'Verhardingsgraad', dPsi: 'gem. afvoercoëfficiënt ψm × 100', dKrone: 'Boomkroonbedekking',
+      achseM3: 'm³', achseProzent: '%', achseFlaeche: 'Aandeel in de oppervlaktebalans (%)',
+      zielKrone: 'Doel boomkronen {wert} %',
+      exportUnter: '{gebiet} · {flaeche} m² · stand {datum}',
+      exportPlatzhalter: 'Bevat PLAATSHOUDERS (oppervlaktebalans) en niet-gecontroleerde aannames (ψ, berging) – geen meetwaarden.',
+      exportAnnahme: 'Bevat niet-gecontroleerde aannames (ψ, berging).',
+      keinChart: 'Grafiek niet beschikbaar: Chart.js kon niet worden geladen (internetverbinding?).',
+      gespeichert: 'Opgeslagen: {name}',
+      csvTitel: 'Vaals Entwurfslabor – oppervlaktebalans', csvStand: 'Stand', csvGebiet: 'Oppervlakte plangebied m²',
+      csvRegen: 'Ontwerpbui', csvRegenWert: '{mm} mm in {h} uur', csvHinweis: 'Opmerking',
+      csvSchluessel: 'Sleutel', csvVers: 'Verhardingsfactor', csvStatus: 'Status kengetallen', csvGeprueft: 'gecontroleerd',
+      csvStatusSz: 'Status oppervlaktebalans', csvWerte: 'Waarden', csvEinheit: 'Eenheid', csvKennzahl: 'Kengetal',
+      csvQuellen: 'Bronnen van de kengetallen', csvQuellePsi: 'Bron ψ', csvQuelleSp: 'Bron berging', csvQuelleVers: 'Bron verharding',
+      karteFehlt: 'Kaart niet beschikbaar: Leaflet kon niet worden geladen (internetverbinding?).',
+      impLaden: 'SenserScan-bestand laden (.geojson)', impWeg: 'Import verwijderen',
+      impInfo: 'Potentiële locaties uit de GeoJSON-export van SenserScan. Meegeteld worden vlakken waarvan het middelpunt in het plangebied ligt.',
+      impStatus: '{datei}: {n} vlakken in het plangebied',
+      impAussen: 'buiten het gebied: {n}', impPunkte: 'punten zonder oppervlak (overgeslagen): {n}', impUngueltig: 'niet leesbaar (bijv. ander coördinatenstelsel): {n}',
+      impTyp: 'Type', impAnzahl: 'Aantal',
+      impParkAktiv: 'Parkeerplaatsen {m2} m² → „{name}”', impParkAlle: '→ alle scenario’s',
+      impParkKeine: 'Geen parkeerplaatsen in het plangebied.',
+      impParkOk: 'Parkeeroppervlak {m2} m² overgenomen: {namen}',
+      impFehler: 'Bestand niet leesbaar: geen GeoJSON.', impOk: '{n} potentiële locaties in het plangebied geladen.',
+      hDachSenser: 'SenserScan: platte daken in het gebied {m2} m²', nr: 'Nr.',
+      sprache: 'Taal: Duits', info: 'Info, formules, aannames', schliessen: 'Sluiten',
+      infoTitel: 'Over het Vaals Entwurfslabor',
+      infoZweck: 'Scenariorekentool bij de masterthesis „Klimaresilient und wassersensibel: Vaals am Senserbach” (stedenbouw, RWTH Aachen). Het laat zien hoe een stedenbouwkundig en landschappelijk ontwerp voor het plangebied Selzerbeek de water- en hitterobuustheid verandert ten opzichte van de bestaande situatie.',
+      infoKiTitel: 'AI-vermelding',
+      infoKi: 'Prototype, gemaakt met <b>{werkzeug}</b>, model <b>{modell}</b>, op <b>{datum}</b>.',
+      infoKiListe: '<ul><li><b>AI-gegenereerd:</b> alle programmacode; startwaarden voor ψ, bergingsvermogen en verhardingsfactoren (uit het geheugen, normteksten niet ingezien); plaatshouder-oppervlaktebalansen; startwaarden van de schuifregelaars; Nederlandse vertaling (niet gecontroleerd).</li><li><b>Niet AI-gegenereerd:</b> gebiedsgrens en oppervlakte, formule van de retentiebalans, richtwaarden 70 mm in 1 uur en 30 % boomkroonbedekking (opdracht); kaart © OpenStreetMap-bijdragers.</li></ul>',
+      infoFormelnTitel: 'Formules',
+      infoFormeln: '<div class="formel">A = {a} m² (oppervlakte plangebied) · h = {h} m ({mm} mm in {std} uur)</div>' +
+        '<div class="formel">Neerslag N = A · h = {n} m³</div>' +
+        '<div class="formel">Afvoer Q = Σ (Aᵢ · ψᵢ · h)</div>' +
+        '<div class="formel">Berging S = Σ (Aᵢ · sᵢ / 1000) + V<sub>beekdal</sub></div>' +
+        '<div class="formel">Retentiebalans ΔV = S − Q &nbsp;(ΔV ≥ 0: de berging vangt de afvoer op)</div>' +
+        '<div class="formel">ψm = Σ (Aᵢ · ψᵢ) / Σ Aᵢ</div>' +
+        '<div class="formel">Verhardingsgraad = Σ (Aᵢ · vᵢ) / Σ Aᵢ</div>' +
+        '<div class="formel">Boomkroonbedekking = (bestaande kronen + n · k) / A &nbsp;(doel {ziel} %)</div>' +
+        '<div class="formel">FSI = BVO / A · woningen = ⌊ BVO · aandeel wonen / BVO per woning ⌋</div>' +
+        '<p>Aᵢ: oppervlak van type i na maatregelen (m²) · ψᵢ: afvoercoëfficiënt · sᵢ: bergingsvermogen (mm) · vᵢ: verhardingsfactor · V<sub>beekdal</sub>: retentievolume beekdal (m³) · n: nieuwe bomen · k: kroonoppervlak per boom (m²). Σ Aᵢ is gelijk aan A als de totaalcontrole klopt. BVO en FSI gaan alleen over nieuwbouw.</p>',
+      infoReglerTitel: 'Wat de schuifregelaars doen',
+      infoRegler: '<ul><li><b>Aandeel groene daken:</b> doelaandeel groene daken van alle daken, nooit lager dan in de oppervlaktebalans. Extra groen dak gaat van „Dak conventioneel” naar „{ziel}”.</li>' +
+        '<li><b>Aandeel onthard parkeren:</b> dit aandeel van de regel „waarvan parkeerplaatsen” gaat van „{von}” naar „{nach}”.</li>' +
+        '<li><b>Nieuwe bomen × kroonoppervlak:</b> komt bij de boomkronen (overlay, niet in het totaal, niet in de waterbalans).</li>' +
+        '<li><b>Retentievolume beekdal:</b> telt direct mee als berging.</li>' +
+        '<li><b>Nieuwbouw-BVO, aandeel wonen, BVO per woning:</b> geven FSI en woningen. Ze veranderen de oppervlaktebalans niet.</li></ul>' +
+        '<p>De schuifregelaars verschuiven alleen oppervlak; het totaal blijft gelijk. In de bestaande situatie zijn ze vergrendeld.</p>',
+      infoAnnahmenTitel: 'Kengetallen per oppervlaktetype (config.js)',
+      infoAnnahmen: 'ψ bevat al de berging van het oppervlak zelf. Alleen oppervlakken met extra bergingsruimte (wadi, retentiedak) hebben daarom een bergingsvermogen; anders telt het dubbel. Bronvermelding in het Duits.',
+      thStatus: 'Status', geprueft: 'gecontroleerd',
+      infoGrenzenTitel: 'Grenzen van het model',
+      infoGrenzen: '<ul><li>Eén balans voor het hele gebied: geen stroombanen, geen hellingen, geen riolering, geen verloop van de bui in de tijd.</li>' +
+        '<li>De ψ-waarden zijn gemiddelde afvoercoëfficiënten. Bij een bui van 70 mm in 1 uur kan de afvoer hoger zijn, vooral op gazon en op hellingen.</li>' +
+        '<li>Schuifregelaars en oppervlaktebalans zijn niet gekoppeld: nieuwe gebouwen moeten in de oppervlaktebalans van de variant staan.</li>' +
+        '<li>Boomkronen tellen niet mee in de waterbalans. Bestaande BVO is niet opgenomen.</li></ul>',
+      infoTechnikTitel: 'Gegevens en techniek',
+      infoTechnik: '<p>Alle vakinhoudelijke waarden staan in <code>config.js</code>. Invoer in de app wordt alleen in deze browser onthouden; verandert <code>config.js</code> onder „szenarien”, dan start de app weer met de waarden uit het bestand. Bibliotheken: Chart.js 4.5.1, Leaflet 1.9.4 (jsDelivr, vaste versies). Kaart © OpenStreetMap-bijdragers.</p>'
+    }
   };
 
   // ================================================================
@@ -1022,6 +1162,60 @@
       toast(t('impParkOk', { m2: zahl(park), namen: ziele.map(szName).join(', ') }));
     }
   });
+
+  // ================================================================
+  // Sprache und Info-Seite
+  // ================================================================
+  AUFBAU.push(function spracheKnopf() {
+    const b = $('#btn-sprache');
+    b.textContent = state.sprache === 'de' ? 'NL' : 'DE';
+    b.setAttribute('aria-label', t('sprache'));
+    b.title = t('sprache');
+    $('#btn-info').setAttribute('aria-label', t('info'));
+    $('#btn-info').title = t('info');
+  });
+  $('#btn-sprache').addEventListener('click', () => {
+    state.sprache = state.sprache === 'de' ? 'nl' : 'de';
+    neuAufbauen();
+  });
+
+  const dialog = $('#info');
+  function infoHtml() {
+    const M = CFG.massnahmen;
+    const zeilen = BK.map(k => {
+      const b = BELAEGE[k];
+      return '<tr><td><span class="swatch" style="background:' + esc(b.farbe) + '"></span>' + esc(tx(b.name)) + '</td>' +
+        '<td>' + zahl(b.psi, 2) + '</td><td>' + esc(b.psiQuelle) + '</td>' +
+        '<td>' + zahl(b.speicher_mm) + '</td><td>' + esc(b.speicherQuelle) + '</td>' +
+        '<td>' + zahl(b.versiegelung, 1) + '</td>' +
+        '<td>' + (b.geprueft ? esc(t('geprueft')) : '<span class="badge annahme">' + esc(t('annahme')) + '</span>') + '</td></tr>';
+    }).join('');
+    return '<div class="info-kopf"><h2>' + esc(t('infoTitel')) + '</h2>' +
+      '<form method="dialog"><button class="rund" type="submit" aria-label="' + esc(t('schliessen')) + '">✕</button></form></div>' +
+      '<div class="info-inhalt">' +
+      '<p>' + esc(t('infoZweck')) + '</p>' +
+      '<h3>' + esc(t('infoKiTitel')) + '</h3>' +
+      '<p>' + t('infoKi', { werkzeug: esc(CFG.info.werkzeug), modell: esc(CFG.info.modell), datum: esc(CFG.info.datum) }) + '</p>' + t('infoKiListe') +
+      '<h3>' + esc(t('infoFormelnTitel')) + '</h3>' +
+      t('infoFormeln', { a: zahl(A_GEBIET), h: zahl(H_REGEN, 3), mm: CFG.regen.mm, std: CFG.regen.dauer_h, n: zahl(A_GEBIET * H_REGEN), ziel: CFG.richtwerte.baumkronen_prozent }) +
+      '<p class="fussnote">' + esc(CFG.regen.quelle) + ' · ' + esc(CFG.richtwerte.quelle) + '</p>' +
+      '<h3>' + esc(t('infoReglerTitel')) + '</h3>' +
+      t('infoRegler', { ziel: esc(tx(BELAEGE[M.dachbegruenungZiel].name)), von: esc(tx(BELAEGE[M.entsiegelungVon].name)), nach: esc(tx(BELAEGE[M.entsiegelungZiel].name)) }) +
+      '<h3>' + esc(t('infoAnnahmenTitel')) + '</h3>' +
+      '<p>' + esc(t('infoAnnahmen')) + '</p>' +
+      '<div class="tabelle-scroll"><table><thead><tr><th>' + esc(t('thBelag')) + '</th><th>ψ</th><th>' + esc(t('quelle')) + '</th><th>' +
+      esc(t('thSpeicherMm')) + '</th><th>' + esc(t('quelle')) + '</th><th>' + esc(t('csvVers')) + '</th><th>' + esc(t('thStatus')) + '</th></tr></thead>' +
+      '<tbody>' + zeilen + '</tbody></table></div>' +
+      '<p class="fussnote">' + esc(CFG.regler.kronenflaeche.quelle || '') + '</p>' +
+      '<h3>' + esc(t('infoGrenzenTitel')) + '</h3>' + t('infoGrenzen') +
+      '<h3>' + esc(t('infoTechnikTitel')) + '</h3>' + t('infoTechnik') +
+      '</div>';
+  }
+  $('#btn-info').addEventListener('click', () => {
+    dialog.innerHTML = infoHtml();
+    if (dialog.showModal) dialog.showModal(); else dialog.setAttribute('open', '');
+  });
+  dialog.addEventListener('click', ev => { if (ev.target === dialog) dialog.close(); });
 
   // ================================================================
   // Start
