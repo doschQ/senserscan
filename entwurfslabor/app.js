@@ -20,7 +20,7 @@
       untertitel: '{gebiet} · {ha} ha · Szenario-Rechner',
       kennzahlen: 'Kennzahlen', regler: 'Regler', vergleich: 'Vergleich der Szenarien',
       bilanz: 'Flächenbilanz', karteTitel: 'Planungsgebiet',
-      szenarioName: 'Name des Szenarios', zuruecksetzen: 'Alles zurücksetzen',
+      szenarioName: 'Name des Szenarios',
       pngExport: 'PNG für Folien', csvExport: 'CSV-Bilanz',
       platzhalter: 'Platzhalter', annahme: 'Annahme – prüfen',
       hinweisPlatzhalter: '<b>Platzhalter:</b> Die Flächenbilanzen sind keine Messwerte. Bestandswerte aus QGIS in config.js eintragen.',
@@ -38,7 +38,31 @@
       warnPark: 'Parkplätze ({p} m²) größer als Asphalt/Beton ({a} m²). Entsiegelt wird höchstens die Asphalt/Beton-Fläche.',
       warnZahl: 'Bitte eine Zahl ≥ 0 eingeben.',
       quelle: 'Quelle', configNeu: 'config.js wurde geändert – Startwerte geladen.',
-      tabWarn: 'Summe stimmt nicht'
+      tabWarn: 'Summe stimmt nicht',
+      // Regler
+      rDach: 'Anteil begrünter Dachflächen', rPark: 'Anteil entsiegelter Parkplätze', rBaeume: 'Neue Bäume',
+      rKrone: 'Kronenfläche je Baum', rAue: 'Retentionsvolumen der Aue', rBgf: 'Neubau-BGF',
+      rWohnen: 'Anteil Wohnen', rBgfWe: 'BGF je Wohneinheit',
+      hDach: 'Flächenbilanz: {a0} von {dach} m² Dach begrünt · neu begrünt: {neu} m²',
+      hDachLeer: 'Keine Dachflächen in der Flächenbilanz.',
+      hPark: '{ent} m² von {p} m² Parkplätzen werden wasserdurchlässig',
+      hBaeume: 'neue Baumkrone: {n} × {k} m² = {m2} m²',
+      hAue: 'geht direkt in den Speicher',
+      hBgf: 'GFZ {gfz}', hWohnen: '{wbgf} m² BGF Wohnen', hBgfWe: '{we} Wohneinheiten',
+      gesperrt: 'Der Bestand ist die Referenz: Regler gesperrt. Bestandswerte in der Flächenbilanz bzw. in config.js ändern.',
+      reglerFuss: 'Startwerte der Regler in den Varianten: Annahme – anpassen. Regler und Flächenbilanz sind nicht gekoppelt: Die Neubau-BGF ändert keine Flächen; neue Dächer gehören in die Flächenbilanz der Variante.',
+      zuruecksetzen: 'Eingaben zurücksetzen', resetFrage: 'Alle Eingaben auf die Werte aus config.js zurücksetzen?',
+      resetOk: 'Eingaben zurückgesetzt.',
+      // Kennzahlen
+      kDeltaV: 'Retentionsbilanz ΔV (Speicher − Abfluss)', kNiederschlag: 'Niederschlag {mm} mm in {h} h',
+      kAbfluss: 'Abfluss Σ A·ψ·{m} m', kSpeicher: 'Speicher', kVersiegelung: 'Versiegelungsgrad',
+      kPsiM: 'mittlerer Abflussbeiwert ψm', kKrone: 'Baumkronenanteil', kBgf: 'BGF (Neubau)', kGfz: 'GFZ', kWe: 'Wohneinheiten',
+      ziel: 'Ziel {op} {wert}', ggBestand: '{diff} ggü. Bestand', pp: 'Pp.',
+      aZiel: '✓ Ziel erreicht', aZielNicht: '✗ Ziel verfehlt', aBesser: '✓ besser', aSchlechter: '✗ schlechter',
+      aBesserZiel: 'besser, Ziel verfehlt', aGleich: '= gleich', aReferenz: 'Referenz',
+      ampelLegende: 'Ampel: grün = Ziel erreicht bzw. besser als Bestand · gelb = besser als Bestand, aber Ziel verfehlt, oder gleich · rot = schlechter als Bestand. Ohne Ampel: Niederschlag, BGF, GFZ, Wohneinheiten.',
+      warnRefSumme: 'Die Flächenbilanz des Bestands stimmt nicht – der Vergleich mit dem Bestand ist unsicher.',
+      kurzDeltaV: 'ΔV', kurzVers: 'Versiegelt', kurzPsi: 'ψm', kurzKrone: 'Krone'
     },
     nl: {}
   };
@@ -322,7 +346,6 @@
       '<td data-z="krone"></td><td data-z="kroneAnteil"></td><td colspan="4" style="text-align:left">' + esc(t('zeileKroneInfo')) + '</td></tr>' +
       '</tfoot>';
     tabelle.innerHTML = h;
-    $('#bilanz-unter').textContent = szName(state.aktiv);
     $('#bilanz-quelle').textContent = t('quelle') + ': ' + (c.quelle || '');
   });
 
@@ -353,6 +376,7 @@
     setz('krone', zahl(e.krone), e.kroneNeu > 0);
     setz('kroneAnteil', prozent(e.kroneAnteil));
     $('#bilanz-warnung').innerHTML = warnungenHtml(state.aktiv);
+    $('#bilanz-unter').textContent = szName(state.aktiv);
   });
 
   tabelle.addEventListener('input', ev => {
@@ -371,6 +395,181 @@
     if (!el) return;
     const n = leseZahl(el.value);
     if (!Number.isNaN(n)) el.value = zahl(n, n % 1 ? 1 : 0);
+  });
+
+  // ================================================================
+  // Regler
+  // ================================================================
+  const REGLER = [
+    { k: 'dachGruenAnteil', label: 'rDach' },
+    { k: 'parkEntsiegelt', label: 'rPark' },
+    { k: 'baeume', label: 'rBaeume' },
+    { k: 'kronenflaeche', label: 'rKrone' },
+    { k: 'aueVolumen', label: 'rAue' },
+    { k: 'neubauBgf', label: 'rBgf' },
+    { k: 'wohnenAnteil', label: 'rWohnen' },
+    { k: 'bgfJeWe', label: 'rBgfWe' }
+  ];
+  const reglerBox = $('#regler');
+  // angezeigter Wert (Dach: wirksamer Anteil, nie unter der Flächenbilanz)
+  function reglerWert(k) {
+    if (k === 'dachGruenAnteil') return runden(erg[state.aktiv].dachAnteil * 100, 0);
+    return aktivSz().regler[k];
+  }
+  AUFBAU.push(function reglerAufbau() {
+    const gesperrt = istReferenz(state.aktiv);
+    reglerBox.innerHTML = REGLER.map(R => {
+      const d = CFG.regler[R.k];
+      const dis = gesperrt ? ' disabled' : '';
+      return '<div class="regler' + (gesperrt ? ' gesperrt' : '') + '" data-k="' + R.k + '">' +
+        '<div class="regler-kopf"><label for="r-' + R.k + '">' + esc(t(R.label)) + '</label>' +
+        '<span class="regler-wert"><input type="text" inputmode="numeric" autocomplete="off" data-zahl="' + R.k + '"' + dis +
+        ' aria-label="' + esc(t(R.label)) + '"><span>' + esc(d.einheit) + '</span></span></div>' +
+        '<input type="range" id="r-' + R.k + '" data-k="' + R.k + '" min="' + d.min + '" max="' + d.max + '" step="' + d.step + '"' + dis + '>' +
+        '<div class="regler-hilfe" data-hilfe="' + R.k + '"></div></div>';
+    }).join('');
+    const hinweis = $('#regler-gesperrt');
+    hinweis.hidden = !gesperrt;
+    hinweis.textContent = t('gesperrt');
+    $('#regler-fuss').textContent = t('reglerFuss');
+    $('#sz-name').value = szName(state.aktiv);
+  });
+  UPDATE.push(function reglerUpdate() {
+    const e = erg[state.aktiv], r = aktivSz().regler;
+    REGLER.forEach(R => {
+      const v = reglerWert(R.k);
+      const range = reglerBox.querySelector('input[type=range][data-k="' + R.k + '"]');
+      const feld = reglerBox.querySelector('input[data-zahl="' + R.k + '"]');
+      if (!range) return;
+      if (R.k === 'dachGruenAnteil') range.min = Math.floor(e.dachAnteil0 * 100);
+      if (document.activeElement !== range) range.value = v;
+      if (document.activeElement !== feld) feld.value = zahl(v);
+    });
+    const hilfe = {
+      dachGruenAnteil: e.dach > 0 ? t('hDach', { a0: prozent(e.dachAnteil0, 0), dach: zahl(e.dach), neu: zahl(e.dachNeuGruen) }) : t('hDachLeer'),
+      parkEntsiegelt: t('hPark', { ent: zahl(e.entsiegelt), p: zahl(aktivSz().parkplaetze_m2) }),
+      baeume: t('hBaeume', { n: zahl(r.baeume), k: zahl(r.kronenflaeche), m2: zahl(e.kroneNeu) }),
+      kronenflaeche: CFG.regler.kronenflaeche.quelle || '',
+      aueVolumen: t('hAue'),
+      neubauBgf: t('hBgf', { gfz: zahl(e.gfz, 2) }),
+      wohnenAnteil: t('hWohnen', { wbgf: zahl(e.bgf * r.wohnenAnteil / 100) }),
+      bgfJeWe: t('hBgfWe', { we: zahl(e.we) })
+    };
+    Object.keys(hilfe).forEach(k => {
+      const el = reglerBox.querySelector('[data-hilfe="' + k + '"]');
+      if (el) el.textContent = hilfe[k];
+    });
+  });
+  function reglerSetzen(k, v) {
+    const d = CFG.regler[k];
+    if (!Number.isFinite(v)) return;
+    aktivSz().regler[k] = Math.min(d.max, Math.max(d.min, v));
+    aktualisieren();
+  }
+  reglerBox.addEventListener('input', ev => {
+    const el = ev.target;
+    if (el.type === 'range') {
+      reglerSetzen(el.dataset.k, +el.value);
+      const feld = reglerBox.querySelector('input[data-zahl="' + el.dataset.k + '"]');
+      feld.value = zahl(reglerWert(el.dataset.k));
+    } else if (el.dataset.zahl) {
+      const n = leseZahl(el.value);
+      el.style.borderColor = Number.isNaN(n) ? 'var(--rot)' : '';
+      if (!Number.isNaN(n)) reglerSetzen(el.dataset.zahl, n);
+    }
+  });
+  reglerBox.addEventListener('change', ev => {
+    const el = ev.target;
+    if (el.dataset.zahl) { el.style.borderColor = ''; el.value = zahl(reglerWert(el.dataset.zahl)); }
+  });
+  $('#sz-name').addEventListener('input', ev => {
+    const v = ev.target.value.trim();
+    aktivSz().name = v ? v.slice(0, 40) : null;
+    aktualisieren();
+  });
+  $('#btn-reset').addEventListener('click', () => {
+    if (!window.confirm(t('resetFrage'))) return;
+    state.szenarien = startSzenarien();
+    neuAufbauen();
+    toast(t('resetOk'));
+  });
+
+  // ================================================================
+  // Kennzahlen und Ampel
+  // ================================================================
+  // besser: 'hoch' | 'niedrig' | null (keine Ampel); richtwert: Ziel (optional)
+  const KPI = [
+    { k: 'deltaV', label: 'kDeltaV', einheit: 'm³', d: 0, vz: true, besser: 'hoch', richtwert: CFG.richtwerte.deltaV_m3, op: '≥', breite: 'gross' },
+    { k: 'niederschlag', label: 'kNiederschlag', einheit: 'm³', d: 0 },
+    { k: 'abfluss', label: 'kAbfluss', einheit: 'm³', d: 0, besser: 'niedrig' },
+    { k: 'speicher', label: 'kSpeicher', einheit: 'm³', d: 0, besser: 'hoch' },
+    { k: 'psiM', label: 'kPsiM', einheit: '', d: 2, besser: 'niedrig' },
+    { k: 'kroneAnteil', label: 'kKrone', einheit: '%', d: 1, faktor: 100, besser: 'hoch', richtwert: CFG.richtwerte.baumkronen_prozent, op: '≥' },
+    { k: 'versiegelung', label: 'kVersiegelung', einheit: '%', d: 1, faktor: 100, besser: 'niedrig' },
+    { k: 'bgf', label: 'kBgf', einheit: 'm²', d: 0, breite: 'drittel' },
+    { k: 'gfz', label: 'kGfz', einheit: '', d: 2, breite: 'drittel' },
+    { k: 'we', label: 'kWe', einheit: '', d: 0, breite: 'drittel' }
+  ];
+  const kpiWert = (kpi, e) => e[kpi.k] * (kpi.faktor || 1);
+
+  // Ampel: Vergleich mit dem Bestand (auf Anzeigegenauigkeit gerundet) und dem Richtwert
+  function ampel(kpi, i) {
+    if (!kpi.besser) return null;
+    const v = runden(kpiWert(kpi, erg[i]), kpi.d);
+    const ref = runden(kpiWert(kpi, erg[REFERENZ]), kpi.d);
+    const hoch = kpi.besser === 'hoch';
+    const rw = kpi.richtwert == null ? null : (hoch ? v >= kpi.richtwert : v <= kpi.richtwert);
+    if (istReferenz(i)) {
+      if (rw === null) return { farbe: 'grau', text: t('aReferenz'), kachel: 'neutral' };
+      return rw ? { farbe: 'gruen', text: t('aZiel') } : { farbe: 'rot', text: t('aZielNicht') };
+    }
+    const vgl = v === ref ? 0 : ((hoch ? v > ref : v < ref) ? 1 : -1);
+    if (vgl < 0) return { farbe: 'rot', text: rw ? t('aSchlechter') + ' · ' + t('aZiel') : t('aSchlechter') };
+    if (rw === true) return { farbe: 'gruen', text: t('aZiel') };
+    if (rw === null && vgl > 0) return { farbe: 'gruen', text: t('aBesser') };
+    if (rw === false && vgl > 0) return { farbe: 'gelb', text: t('aBesserZiel') };
+    return { farbe: 'gelb', text: t('aGleich') };
+  }
+
+  function kpiTitel(kpi) {
+    return t(kpi.label, { mm: CFG.regen.mm, h: CFG.regen.dauer_h, m: zahl(H_REGEN, 2) });
+  }
+  function kpiFormat(kpi, v) { return kpi.vz ? zahlVz(v, kpi.d) : zahl(v, kpi.d); }
+
+  UPDATE.push(function kennzahlen() {
+    const i = state.aktiv, e = erg[i];
+    $('#kacheln').innerHTML = KPI.map(kpi => {
+      const v = kpiWert(kpi, e);
+      const a = ampel(kpi, i);
+      let vergleich = '';
+      if (a) vergleich += '<span class="pill ' + a.farbe + '">' + esc(a.text) + '</span>';
+      if (!istReferenz(i)) {
+        const diff = runden(v, kpi.d) - runden(kpiWert(kpi, erg[REFERENZ]), kpi.d);
+        const einheit = kpi.einheit === '%' ? t('pp') : kpi.einheit;
+        vergleich += '<span>' + esc(t('ggBestand', { diff: zahlVz(diff, kpi.d) + (einheit ? ' ' + einheit : '') })) + '</span>';
+      }
+      if (kpi.richtwert != null) {
+        vergleich += '<span>' + esc(t('ziel', { op: kpi.op, wert: zahl(kpi.richtwert) + (kpi.einheit ? ' ' + kpi.einheit : '') })) + '</span>';
+      }
+      const klasse = 'kachel ' + (kpi.breite || '') + ' ' + (a ? (a.kachel || a.farbe) : 'neutral');
+      return '<div class="' + klasse + '"><div class="k-titel">' + esc(kpiTitel(kpi)) + '</div>' +
+        '<div class="k-wert">' + esc(kpiFormat(kpi, v)) + (kpi.einheit ? ' <span class="einheit">' + esc(kpi.einheit) + '</span>' : '') + '</div>' +
+        (vergleich ? '<div class="k-vergleich">' + vergleich + '</div>' : '') + '</div>';
+    }).join('');
+    let w = warnungenHtml(i);
+    if (!istReferenz(i) && !erg[REFERENZ].summeOk) w += '<div class="warnung">⚠ ' + esc(t('warnRefSumme')) + '</div>';
+    $('#kz-warnung').innerHTML = w;
+    const c = CFG.szenarien[i];
+    $('#kz-unter').innerHTML = esc(szName(i)) + (c.platzhalter ? ' <span class="badge platzhalter">' + esc(t('platzhalter')) + '</span>' : '');
+    $('#ampel-legende').textContent = t('ampelLegende');
+
+    // Kurzanzeige (Handy)
+    const kurz = [['deltaV', 'kurzDeltaV'], ['versiegelung', 'kurzVers'], ['psiM', 'kurzPsi'], ['kroneAnteil', 'kurzKrone']];
+    $('#kurz').innerHTML = kurz.map(([k, l]) => {
+      const kpi = KPI.find(x => x.k === k), a = ampel(kpi, i), v = kpiWert(kpi, e);
+      const farbe = a ? ({ gruen: 'var(--gruen)', gelb: '#f08c00', rot: 'var(--rot)' }[a.farbe] || 'var(--grau)') : 'var(--grau)';
+      return '<div style="border-left-color:' + farbe + '">' + esc(t(l)) + '<b>' + esc(kpiFormat(kpi, v)) + (kpi.einheit ? ' ' + esc(kpi.einheit) : '') + '</b></div>';
+    }).join('');
   });
 
   // ================================================================

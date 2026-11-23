@@ -133,17 +133,19 @@ button, input, select { font: inherit; color: inherit; }
 .warnung strong { display: block; }
 
 /* ---------- Kennzahlen ---------- */
-.kacheln { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-@media (min-width: 520px) and (max-width: 759px) { .kacheln { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.kacheln { display: grid; gap: 8px; grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .kachel {
+  grid-column: span 3;
   border: 1px solid var(--line); border-left: 6px solid var(--grau);
   border-radius: 10px; padding: 7px 9px; min-width: 0;
 }
+.kachel.drittel { grid-column: span 2; }
+.kachel.drittel .k-wert { font-size: 1.25rem; }
 .kachel.gruen { border-left-color: var(--gruen); }
 .kachel.gelb { border-left-color: #f08c00; }
 .kachel.rot { border-left-color: var(--rot); }
 .kachel.neutral { border-left-color: var(--line); }
-.kachel.gross { grid-column: 1 / -1; }
+.kachel.gross { grid-column: span 6; }
 .k-titel { font-size: .8rem; color: var(--muted); line-height: 1.2; }
 .k-wert { font-size: 1.55rem; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .kachel.gross .k-wert { font-size: 1.9rem; }
