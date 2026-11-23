@@ -172,6 +172,8 @@ main { position: relative; flex: 1 1 auto; min-height: 0; }
   box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
 }
 body.drawing .legende, body.drawing .basemap-switch { display: none; }
+/* beim Zeichnen gehen Tipps auf Schilder an die Karte durch (sonst entsteht kein Eckpunkt) */
+body.drawing .leaflet-marker-icon.beispiel-label { pointer-events: none; }
 body.drawing .draw-hint { top: 10px; }
 
 /* ---------- Toast ---------- */
