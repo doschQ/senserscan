@@ -1,10 +1,12 @@
-# SenserScan
+# Klima Chancen
+
+*(Repository und Web-Adresse heißen weiterhin `senserscan`.)*
 
 Mobile Web-App (PWA) zur Masterthesis **„Klimaresilient und wassersensibel: Vaals am Senserbach“** (Stadtplanung, RWTH Aachen).
 Im Kernbereich von Vaals werden Potenzialflächen für **doppelte Innenentwicklung** erfasst und bewertet: bauliche Verdichtung bei gleichzeitiger Sicherung und Aufwertung von Grün. Für jede Fläche zeigt ein Steckbrief („Klimacheck“) Anforderungen und Maßnahmen.
 
 > **Prototyp, KI-generiert.** Erstellt mit Claude Code, Modell Claude Opus 5.5 (`claude-opus-5-5`), am 23.11.2026.
-> Welche Teile KI-generiert sind, steht [unten](#ki-generierte-teile) und in der App unter „i“.
+> Welche Teile KI-generiert sind, steht [unten](#ki-generierte-teile).
 
 ---
 
@@ -44,15 +46,17 @@ python -m http.server 8080 --bind 0.0.0.0
 | Formular | Typ, Baupotenzial, Grünpotenzial, Risiko Wasser, Risiko Hitze (je 1–5), Notiz, Foto. Die Klasse wird live berechnet. |
 | Fläche antippen | Öffnet den **Steckbrief** mit Klasse, Bewertung und **Klimacheck** (Richtwerte, Anforderungen, Maßnahmen je Ebene). Dort auch **Bearbeiten** und **Löschen**. |
 | **Liste** | Alle Flächen, Filter nach Klasse, Anzahl und m² je Klasse, Export und Import |
+| **Beispiele** | Sechs fiktive Beispielflächen einblenden bzw. wieder entfernen. Die App startet ohne Beispiele. |
 | **Gebiet** | Zoomt auf das Planungsgebiet Selzerbeek |
-| **Karte / Luftbild** | OpenStreetMap oder PDOK-Luftbild. Ist PDOK nicht erreichbar, schaltet die App automatisch auf die Karte zurück. |
+| **Karte / Luftbild** | OpenStreetMap oder PDOK-Luftbild, auch während des Zeichnens umschaltbar. Ist PDOK nicht erreichbar, schaltet die App automatisch auf die Karte zurück. |
 | **NL / DE** | Sprache umschalten |
-| **i** | Info-Seite mit KI-Kennzeichnung und Quellen |
+| **Einstellungen** (Regler-Symbol) | Klassen (Name, Farbe, Beschreibung), Schwellenwerte der Regeln, Menüfarbe (Standard Vaals-Rot). Gilt sofort und wird nur in diesem Browser gespeichert; „Standard wiederherstellen“ setzt alles zurück. |
+| **i** | Quellen und Versionsnummer |
 
 ### Daten speichern, exportieren, in QGIS öffnen
 
 - Alle Flächen werden **nur lokal im Browser** gespeichert (IndexedDB). Wer die Browserdaten löscht, verliert sie. **Regelmäßig exportieren.**
-- **Export GeoJSON:** `senserscan_flaechen_JJJJ-MM-TT.geojson`, WGS84 (EPSG:4326) nach RFC 7946, eine Spalte je Attribut.
+- **Export GeoJSON:** `klimachancen_flaechen_JJJJ-MM-TT.geojson`, WGS84 (EPSG:4326) nach RFC 7946, eine Spalte je Attribut.
   In QGIS die Datei ins Kartenfenster ziehen. Sind Polygone **und** Punkte enthalten, fragt QGIS, welche Teil-Layer geladen werden sollen; beide auswählen.
 - **Export CSV:** gleiche Attribute plus Spalte `wkt` mit der Geometrie. QGIS: *Layer → Layer hinzufügen → Getrennte Texte*, Geometrie „Well-Known Text (WKT)“, Feld `wkt`, KBS EPSG:4326.
 - **Import GeoJSON:** Punkte und (Multi-)Polygone in WGS84. Eigene Exporte werden anhand der `id` aktualisiert statt verdoppelt. Features in anderen Koordinatensystemen (z. B. RD New) werden übersprungen.
@@ -64,21 +68,27 @@ python -m http.server 8080 --bind 0.0.0.0
 
 ## Anpassen
 
+### In der App: Einstellungen
+
+Name, Farbe und Beschreibung jeder Klasse, die Schwellenwerte („hoch ab“) für Baupotenzial, Risiko Wasser und Risiko Hitze sowie die Menüfarbe lassen sich direkt in der App ändern (Regler-Symbol oben).
+Die Änderungen gelten nur im jeweiligen Browser. Die Werte in `config.js` sind der Standard.
+
 ### Regeln, Klassen, Farben, Typen → `config.js`
 
-Die Regeln werden **von oben nach unten** geprüft; die erste zutreffende bestimmt die Klasse:
+Die Regeln werden **von oben nach unten** geprüft; die erste zutreffende bestimmt die Klasse.
+`s` sind die Schwellenwerte (`schwellen: { bau: 4, wasser: 4, hitze: 4 }`):
 
 ```js
 regeln: [
-  { klasse: 'gruen_sichern',       wenn: f => f.typ === 'gruenflaeche' },
-  { klasse: 'verdichten_auflagen', wenn: f => f.bau >= 4 && (f.wasser >= 4 || f.hitze >= 4) },
-  { klasse: 'bauen_entsiegeln',    wenn: f => f.bau >= 4 },
-  { klasse: 'gruen_aufwerten',     wenn: f => true }   // sonst
+  { klasse: 'gruen_sichern',       wenn: (f, s) => f.typ === 'gruenflaeche' },
+  { klasse: 'verdichten_auflagen', wenn: (f, s) => f.bau >= s.bau && (f.wasser >= s.wasser || f.hitze >= s.hitze) },
+  { klasse: 'bauen_entsiegeln',    wenn: (f, s) => f.bau >= s.bau },
+  { klasse: 'gruen_aufwerten',     wenn: (f, s) => true }   // sonst
 ]
 ```
 
-Verfügbar sind `f.typ`, `f.bau`, `f.gruen`, `f.wasser`, `f.hitze`.
-Namen, Farben und Kurzbeschreibungen der Klassen stehen unter `klassen`, die Flächentypen unter `typen`.
+Verfügbar sind `f.typ`, `f.bau`, `f.gruen`, `f.wasser`, `f.hitze`. Jede Regel hat zusätzlich einen `text`, der in den Einstellungen angezeigt wird.
+Namen, Farben und Kurzbeschreibungen der Klassen stehen unter `klassen`, die Flächentypen unter `typen`, die Menüfarbe unter `menuFarbe`.
 Nach dem Speichern die Seite neu laden.
 
 ### Maßnahmenkatalog → `data/massnahmen.json` (Entwurf)
@@ -102,7 +112,7 @@ Der Katalog ist ein **KI-generierter Entwurf** und muss fachlich überarbeitet w
 ### Weitere Dateien
 
 - **Oberflächentexte DE/NL:** `i18n.js`
-- **Beispielflächen:** `data/beispielflaechen.geojson`. Sie werden nur beim allerersten Start geladen; gelöschte Beispiele kommen nicht zurück.
+- **Beispielflächen:** `data/beispielflaechen.geojson`. Sie werden über den Menüpunkt „Beispiele“ geladen und wieder entfernt.
 - **Gebiete:** `data/vaals_gebiete_wgs84.geojson`; Name, Stil und Planungsgebiet-ID in `config.js` unter `gebiete`
 - **Offline-Cache:** `sw.js`. Wenn neue Dateien hinzukommen, in die Liste eintragen und `VERSION` erhöhen.
 
@@ -139,7 +149,7 @@ KI-generiert (Claude Code, Claude Opus 5.5, 23.11.2026):
 - gesamter Programmcode: `index.html`, `app.js`, `style.css`, `config.js`, `i18n.js`, `sw.js`, `manifest.json`
 - Umsetzung der Klassifikationsregeln in `config.js` (die Regeln selbst stammen aus der Aufgabenstellung)
 - Maßnahmenkatalog und Anforderungen in `data/massnahmen.json` (**Entwurf**)
-- sechs Beispielflächen in `data/beispielflaechen.geojson` (Lage und Bewertung fiktiv, als „Beispiel – ersetzen“ gekennzeichnet)
+- sechs Beispielflächen in `data/beispielflaechen.geojson` (Lage und Bewertung fiktiv, als „Beispiel“ gekennzeichnet)
 - niederländische Übersetzung aller Texte
 - App-Icons in `icons/`
 - diese README
