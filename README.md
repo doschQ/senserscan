@@ -48,7 +48,7 @@ python -m http.server 8080 --bind 0.0.0.0
 | **Liste** | Alle Flächen, Filter nach Klasse, Anzahl und m² je Klasse, Export und Import |
 | **Beispiele** | Sechs fiktive Beispielflächen einblenden bzw. wieder entfernen. Die App startet ohne Beispiele. |
 | **Gebiet** | Zoomt auf das Planungsgebiet Selzerbeek |
-| **Karte / Luftbild** | OpenStreetMap oder PDOK-Luftbild, auch während des Zeichnens umschaltbar. Ist PDOK nicht erreichbar, schaltet die App automatisch auf die Karte zurück. |
+| **Karte / Luftbild** | Amtliche Karte (NL: PDOK, DE: basemap.de) oder PDOK-Luftbild, auch während des Zeichnens umschaltbar. Lädt das Luftbild nicht, schaltet die App automatisch auf die Karte zurück. |
 | **NL / DE** | Sprache umschalten |
 | **Einstellungen** (Regler-Symbol) | Klassen (Name, Farbe, Beschreibung), Schwellenwerte der Regeln, Menüfarbe (Standard Vaals-Rot). Gilt sofort und wird nur in diesem Browser gespeichert; „Standard wiederherstellen“ setzt alles zurück. |
 | **i** | Quellen und Versionsnummer |
@@ -123,12 +123,16 @@ Der Katalog ist ein **KI-generierter Entwurf** und muss fachlich überarbeitet w
 
 - Kein Build-Schritt: `index.html`, `app.js`, `style.css`, `config.js`, `i18n.js`, `sw.js`, `manifest.json`, `data/`, `icons/`
 - [Leaflet](https://leafletjs.com) 1.9.4 und [Leaflet-Geoman free](https://geoman.io) 2.17.0, per jsDelivr-CDN mit fester Version und Subresource Integrity
+- **Karte:** zwei amtliche Karten übereinander. Jede ist außerhalb ihres Landes durchsichtig, zusammen decken sie beide Seiten der Grenze ab.
+  - NL: BRT-Achtergrondkaart des Kadaster, laut WMTS-GetCapabilities (`https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0`, abgerufen 23.11.2026): Layer `standaard`, TileMatrixSet `EPSG:3857`, TileMatrix-IDs `00`–`19`, `image/png`
+  - DE: basemap.de Web Raster des BKG, laut WMTS-GetCapabilities (`https://sgx.geodatenzentrum.de/wmts_basemapde/1.0.0/WMTSCapabilities.xml`, abgerufen 23.11.2026): Layer `de_basemapde_web_raster_farbe`, TileMatrixSet `GLOBAL_WEBMERCATOR`, TileMatrix-IDs `00`–`19`, `image/png`, Lizenz CC BY 4.0
+  - OpenStreetMap wird nicht genutzt: Dessen Server zeigen „Access blocked“, wenn der Browser keinen Referer mitschickt (z. B. bei strengen Datenschutz-Einstellungen).
 - **PDOK-Luftbild:** Die Einstellungen stammen aus der WMTS-GetCapabilities (`https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0`, abgerufen 23.11.2026):
   - Layer `Actueel_orthoHR` (Luchtfoto Actueel Ortho 8 cm RGB)
   - TileMatrixSet `EPSG:3857`
   - TileMatrix-IDs `00`–`21`, zweistellig
   - Format `image/jpeg`
-  - Das Luftbild deckt nur niederländisches Gebiet ab; östlich der Grenze erscheinen weiße Kacheln.
+- Das Luftbild deckt nur niederländisches Gebiet ab; östlich der Grenze (auch im Norden des Planungsgebiets) bleibt es weiß.
 - **Flächenberechnung** auf der Kugel (WGS84-Radius, wie Turf.js). Abweichung zu QGIS (Ellipsoid) unter 0,5 %.
 - **Offline:**
   - Der Service Worker speichert App-Dateien und Bibliotheken. Eigene Dateien holt er zuerst vom Server und greift nur ohne Netz auf den Cache zurück.
@@ -159,4 +163,4 @@ KI-generiert (Claude Code, Claude Opus 5.5, 23.11.2026):
 
 - Gebietsgrenzen in `data/vaals_gebiete_wgs84.geojson` (Shapefile Lehrstuhl, EPSG:25832, umprojiziert nach WGS84)
 - Klassifikationsregeln a–d und Richtwerte (Vorgabe aus der Aufgabenstellung)
-- Kartengrundlagen: © OpenStreetMap-Mitwirkende; Luftbild: PDOK / Beeldmateriaal Nederland
+- Kartengrundlagen: Karte PDOK / © Kadaster (NL) und © GeoBasis-DE / BKG (2026), CC BY 4.0 (DE); Luftbild: PDOK / Beeldmateriaal Nederland

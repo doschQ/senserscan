@@ -94,7 +94,7 @@ window.SENSERSCAN_I18N = {
       'Gebietsgrenzen Analyseraum und Planungsgebiet: Shapefile Lehrstuhl (EPSG:25832), umprojiziert nach WGS84',
       'Klassifikationsregeln a–d: Vorgabe aus der Aufgabenstellung',
       'Richtwerte (70 mm in 1 h, 40 mm, 0,20 m, 300 m): Vorgabe aus der Aufgabenstellung',
-      'Hintergrundkarten: © OpenStreetMap-Mitwirkende; Luftbild: PDOK / Beeldmateriaal Nederland',
+      'Karte: PDOK / © Kadaster (NL) und © GeoBasis-DE / BKG (2026), CC BY 4.0 (DE); Luftbild: PDOK / Beeldmateriaal Nederland',
       'Bibliotheken: Leaflet 1.9.4, Leaflet-Geoman free 2.17.0 (MIT-Lizenz)'
     ],
     version: 'Version {v}',
@@ -202,7 +202,7 @@ window.SENSERSCAN_I18N = {
       'Gebiedsgrenzen analysegebied en plangebied: shapefile leerstoel (EPSG:25832), omgezet naar WGS84',
       'Classificatieregels a–d: uit de opdracht',
       'Richtwaarden (70 mm in 1 uur, 40 mm, 0,20 m, 300 m): uit de opdracht',
-      'Achtergrondkaarten: © OpenStreetMap-bijdragers; luchtfoto: PDOK / Beeldmateriaal Nederland',
+      'Kaart: PDOK / © Kadaster (NL) en © GeoBasis-DE / BKG (2026), CC BY 4.0 (DE); luchtfoto: PDOK / Beeldmateriaal Nederland',
       'Bibliotheken: Leaflet 1.9.4, Leaflet-Geoman free 2.17.0 (MIT-licentie)'
     ],
     version: 'Versie {v}',

@@ -3,20 +3,20 @@
  * Hält die App-Oberfläche offline verfügbar.
  *  - eigene Dateien: erst Netz (damit Änderungen sofort ankommen), sonst Cache
  *  - Leaflet/Geoman vom CDN (feste Versionen): erst Cache, sonst Netz
- *  - Kartenkacheln (OSM, PDOK) werden nicht abgefangen und nicht gespeichert
+ *  - Kartenkacheln (PDOK) werden nicht abgefangen und nicht gespeichert
  * Wenn sich die Liste unten ändert, VERSION erhöhen.
  * Bei einer neuen App-Version die Endung ?v=… hier UND in index.html anpassen,
  * damit Seite und Skripte immer zur selben Version gehören.
  */
-const VERSION = 'senserscan-v3';
+const VERSION = 'senserscan-v4';
 
 const LOKAL = [
   './',
   'index.html',
-  'style.css?v=0.2.0',
-  'config.js?v=0.2.0',
-  'i18n.js?v=0.2.0',
-  'app.js?v=0.2.0',
+  'style.css?v=0.2.1',
+  'config.js?v=0.2.1',
+  'i18n.js?v=0.2.1',
+  'app.js?v=0.2.1',
   'manifest.json',
   'data/vaals_gebiete_wgs84.geojson',
   'data/massnahmen.json',

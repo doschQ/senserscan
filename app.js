@@ -78,11 +78,14 @@
   L.control.scale({ position: 'bottomright', imperial: false }).addTo(map);
 
   const basemaps = {
-    osm: L.tileLayer(CFG.karten.osm.url, {
+    // Karte: NL (PDOK) und DE (basemap.de) übereinander
+    karte: L.featureGroup(CFG.karten.karte.map(k => L.tileLayer(k.url, {
       maxZoom: 21,
-      maxNativeZoom: CFG.karten.osm.maxNativeZoom,
-      attribution: CFG.karten.osm.attribution
-    }),
+      maxNativeZoom: k.maxNativeZoom,
+      attribution: k.attribution,
+      // TileMatrix-IDs sind zweistellig: 00 … 19
+      tm: data => String(data.z).padStart(2, '0')
+    }))),
     luftbild: L.tileLayer(CFG.karten.luftbild.url, {
       maxZoom: 21,
       maxNativeZoom: CFG.karten.luftbild.maxNativeZoom,
@@ -93,7 +96,7 @@
   };
   let basemapAktiv = null;
 
-  // Wenn das Luftbild nicht lädt, zurück zu OSM – die App läuft weiter.
+  // Wenn das Luftbild nicht lädt, zurück zur Karte – die App läuft weiter.
   const lbStatus = { ok: 0, err: 0, gewarnt: false };
   basemaps.luftbild.on('tileload', () => { lbStatus.ok++; });
   basemaps.luftbild.on('tileerror', () => {
@@ -101,7 +104,7 @@
     if (!lbStatus.gewarnt && lbStatus.ok === 0 && lbStatus.err >= 3 && basemapAktiv === 'luftbild') {
       lbStatus.gewarnt = true;
       toast(t('luftbildFehler'), 5000);
-      setBasemap('osm');
+      setBasemap('karte');
     }
   });
 
@@ -1129,7 +1132,7 @@
   function init() {
     einstellungenAnwenden();
     applyStaticTexts();
-    setBasemap(storageGet('basemap') === 'luftbild' ? 'luftbild' : 'osm', true);
+    setBasemap(storageGet('basemap') === 'luftbild' ? 'luftbild' : 'karte', true);
     renderLegende();
 
     $$('.basemap-switch button').forEach(b => b.addEventListener('click', () => setBasemap(b.dataset.basemap)));

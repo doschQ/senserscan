@@ -17,7 +17,7 @@
  * hier sind dann der Standard ("Standard wiederherstellen").
  */
 window.SENSERSCAN_CONFIG = {
-  version: '0.2.0',
+  version: '0.2.1',
 
   // Farbe von Kopfzeile und Bedienelementen (Vaals-Rot, wie vaals.nl)
   menuFarbe: '#e10a17',
@@ -118,15 +118,36 @@ window.SENSERSCAN_CONFIG = {
   },
 
   // Hintergrundkarten.
+  // Karte: zwei amtliche Karten übereinander, jede ist außerhalb ihres Landes
+  //   durchsichtig – zusammen decken sie beide Seiten der Grenze ab.
+  //   OpenStreetMap (tile.openstreetmap.org) wird nicht genutzt: Die Server
+  //   liefern "Access blocked", wenn der Browser keinen Referer mitschickt.
+  //   NL: BRT-Achtergrondkaart (Kadaster), laut GetCapabilities
+  //     (https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0, abgerufen 23.11.2026):
+  //     Layer "standaard" (auch "grijs", "pastel"), TileMatrixSet "EPSG:3857",
+  //     TileMatrix-IDs "00"–"19" (zweistellig, daher {tm}), image/png.
+  //   DE: basemap.de Web Raster (BKG), laut GetCapabilities
+  //     (https://sgx.geodatenzentrum.de/wmts_basemapde/1.0.0/WMTSCapabilities.xml,
+  //     abgerufen 23.11.2026): Layer "de_basemapde_web_raster_farbe" (auch "_grau"),
+  //     TileMatrixSet "GLOBAL_WEBMERCATOR", TileMatrix-IDs "00"–"19", image/png,
+  //     Reihenfolge {TileMatrix}/{TileRow}/{TileCol} = {tm}/{y}/{x}, Lizenz CC BY 4.0.
   // Luftbild: PDOK WMTS, laut GetCapabilities (abgerufen 23.11.2026):
   //   Layer "Actueel_orthoHR", TileMatrixSet "EPSG:3857",
   //   TileMatrix-IDs "00"–"21" (zweistellig, daher {tm}), image/jpeg.
+  //   Deckt nur die Niederlande ab; östlich der Grenze bleibt es weiß.
   karten: {
-    osm: {
-      url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      maxNativeZoom: 19,
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende'
-    },
+    karte: [
+      {
+        url: 'https://service.pdok.nl/kadaster/brt-achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{tm}/{x}/{y}.png',
+        maxNativeZoom: 19,
+        attribution: 'Kaart: <a href="https://www.pdok.nl/">PDOK</a> / © Kadaster'
+      },
+      {
+        url: 'https://sgx.geodatenzentrum.de/wmts_basemapde/tile/1.0.0/de_basemapde_web_raster_farbe/default/GLOBAL_WEBMERCATOR/{tm}/{y}/{x}.png',
+        maxNativeZoom: 19,
+        attribution: 'Karte: © <a href="https://basemap.de/">GeoBasis-DE / BKG</a> (2026) CC BY 4.0'
+      }
+    ],
     luftbild: {
       url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{tm}/{x}/{y}.jpeg',
       maxNativeZoom: 21,
