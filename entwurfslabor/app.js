@@ -98,7 +98,7 @@
       infoZweck: 'Szenario-Rechner zur Masterthesis „Klimaresilient und wassersensibel: Vaals am Senserbach“ (Stadtplanung, RWTH Aachen). Er zeigt, wie ein städtebaulich-freiraumplanerischer Entwurf für das Planungsgebiet Selzerbeek die Wasser- und Hitzeresilienz gegenüber dem Bestand verändert.',
       infoKiTitel: 'KI-Kennzeichnung',
       infoKi: 'Prototyp, erstellt mit <b>{werkzeug}</b>, Modell <b>{modell}</b>, am <b>{datum}</b>.',
-      infoKiListe: '<ul><li><b>KI-generiert:</b> gesamter Programmcode; Startwerte für ψ, Speichervermögen und Versiegelungsfaktoren (aus dem Gedächtnis gesetzt, Normtexte nicht eingesehen); Platzhalter-Flächenbilanzen; Startwerte der Regler; niederländische Übersetzung (ungeprüft).</li><li><b>Nicht KI-generiert:</b> Gebietsgrenze und Gebietsfläche, Formel der Retentionsbilanz, Richtwerte 70 mm in 1 h und 30 % Baumkronenanteil (Vorgaben); Kartengrundlage © OpenStreetMap-Mitwirkende.</li></ul>',
+      infoKiListe: '<ul><li><b>KI-generiert:</b> gesamter Programmcode; Startwerte für ψ, Speichervermögen und Versiegelungsfaktoren (aus dem Gedächtnis gesetzt, Normtexte nicht eingesehen); Platzhalter-Flächenbilanzen; Startwerte der Regler; niederländische Übersetzung (ungeprüft).</li><li><b>Nicht KI-generiert:</b> Gebietsgrenze und Gebietsfläche, Formel der Retentionsbilanz, Richtwerte 70 mm in 1 h und 30 % Baumkronenanteil (Vorgaben); Kartengrundlage: PDOK / © Kadaster (NL) und © GeoBasis-DE / BKG, basemap.de (DE).</li></ul>',
       infoFormelnTitel: 'Formeln',
       infoFormeln: '<div class="formel">A = {a} m² (Gebietsfläche) · h = {h} m ({mm} mm in {std} h)</div>' +
         '<div class="formel">Niederschlag N = A · h = {n} m³</div>' +
@@ -126,7 +126,7 @@
         '<li>Regler und Flächenbilanz sind nicht gekoppelt: Neue Gebäude müssen in der Flächenbilanz der Variante stehen.</li>' +
         '<li>Baumkronen gehen nicht in die Wasserbilanz ein. Bestands-BGF ist nicht enthalten.</li></ul>',
       infoTechnikTitel: 'Daten und Technik',
-      infoTechnik: '<p>Alle fachlichen Werte stehen in <code>config.js</code>. Eingaben in der App merkt sich nur dieser Browser; ändert sich <code>config.js</code> unter „szenarien“, startet die App wieder mit den Werten der Datei. Bibliotheken: Chart.js 4.5.1, Leaflet 1.9.4 (jsDelivr, feste Versionen). Karte © OpenStreetMap-Mitwirkende.</p>'
+      infoTechnik: '<p>Alle fachlichen Werte stehen in <code>config.js</code>. Eingaben in der App merkt sich nur dieser Browser; ändert sich <code>config.js</code> unter „szenarien“, startet die App wieder mit den Werten der Datei. Bibliotheken: Chart.js 4.5.1, Leaflet 1.9.4 (jsDelivr, feste Versionen). Karte: BRT-Achtergrondkaart (PDOK / © Kadaster) für die Niederlande und basemap.de (© GeoBasis-DE / BKG, CC BY 4.0) für Deutschland.</p>'
     },
     nl: {
       untertitel: '{gebiet} · {ha} ha · scenariorekentool',
@@ -205,7 +205,7 @@
       infoZweck: 'Scenariorekentool bij de masterthesis „Klimaresilient und wassersensibel: Vaals am Senserbach” (stedenbouw, RWTH Aachen). Het laat zien hoe een stedenbouwkundig en landschappelijk ontwerp voor het plangebied Selzerbeek de water- en hitterobuustheid verandert ten opzichte van de bestaande situatie.',
       infoKiTitel: 'AI-vermelding',
       infoKi: 'Prototype, gemaakt met <b>{werkzeug}</b>, model <b>{modell}</b>, op <b>{datum}</b>.',
-      infoKiListe: '<ul><li><b>AI-gegenereerd:</b> alle programmacode; startwaarden voor ψ, bergingsvermogen en verhardingsfactoren (uit het geheugen, normteksten niet ingezien); plaatshouder-oppervlaktebalansen; startwaarden van de schuifregelaars; Nederlandse vertaling (niet gecontroleerd).</li><li><b>Niet AI-gegenereerd:</b> gebiedsgrens en oppervlakte, formule van de retentiebalans, richtwaarden 70 mm in 1 uur en 30 % boomkroonbedekking (opdracht); kaart © OpenStreetMap-bijdragers.</li></ul>',
+      infoKiListe: '<ul><li><b>AI-gegenereerd:</b> alle programmacode; startwaarden voor ψ, bergingsvermogen en verhardingsfactoren (uit het geheugen, normteksten niet ingezien); plaatshouder-oppervlaktebalansen; startwaarden van de schuifregelaars; Nederlandse vertaling (niet gecontroleerd).</li><li><b>Niet AI-gegenereerd:</b> gebiedsgrens en oppervlakte, formule van de retentiebalans, richtwaarden 70 mm in 1 uur en 30 % boomkroonbedekking (opdracht); kaart: PDOK / © Kadaster (NL) en © GeoBasis-DE / BKG, basemap.de (DE).</li></ul>',
       infoFormelnTitel: 'Formules',
       infoFormeln: '<div class="formel">A = {a} m² (oppervlakte plangebied) · h = {h} m ({mm} mm in {std} uur)</div>' +
         '<div class="formel">Neerslag N = A · h = {n} m³</div>' +
@@ -233,7 +233,7 @@
         '<li>Schuifregelaars en oppervlaktebalans zijn niet gekoppeld: nieuwe gebouwen moeten in de oppervlaktebalans van de variant staan.</li>' +
         '<li>Boomkronen tellen niet mee in de waterbalans. Bestaande BVO is niet opgenomen.</li></ul>',
       infoTechnikTitel: 'Gegevens en techniek',
-      infoTechnik: '<p>Alle vakinhoudelijke waarden staan in <code>config.js</code>. Invoer in de app wordt alleen in deze browser onthouden; verandert <code>config.js</code> onder „szenarien”, dan start de app weer met de waarden uit het bestand. Bibliotheken: Chart.js 4.5.1, Leaflet 1.9.4 (jsDelivr, vaste versies). Kaart © OpenStreetMap-bijdragers.</p>'
+      infoTechnik: '<p>Alle vakinhoudelijke waarden staan in <code>config.js</code>. Invoer in de app wordt alleen in deze browser onthouden; verandert <code>config.js</code> onder „szenarien”, dan start de app weer met de waarden uit het bestand. Bibliotheken: Chart.js 4.5.1, Leaflet 1.9.4 (jsDelivr, vaste versies). Kaart: BRT-Achtergrondkaart (PDOK / © Kadaster) voor Nederland en basemap.de (© GeoBasis-DE / BKG, CC BY 4.0) voor Duitsland.</p>'
     }
   };
 
@@ -1024,13 +1024,16 @@
   });
 
   // ================================================================
-  // Übersichtskarte (Leaflet, OpenStreetMap)
+  // Übersichtskarte (Leaflet, Hintergrund laut config.js)
   // ================================================================
   let karte = null, importLayer = null;
   function karteStart() {
     if (!window.L) { $('#map').innerHTML = '<p class="warnung">' + esc(t('karteFehlt')) + '</p>'; return; }
     karte = L.map('map', { scrollWheelZoom: false });
-    L.tileLayer(CFG.karte.url, { maxZoom: CFG.karte.maxZoom, attribution: CFG.karte.attribution }).addTo(karte);
+    CFG.karte.ebenen.forEach(e => L.tileLayer(e.url, {
+      maxZoom: CFG.karte.maxZoom, attribution: e.attribution,
+      tm: d => String(d.z).padStart(2, '0') // zweistellige Zoomstufe ({tm}) für PDOK und basemap.de
+    }).addTo(karte));
     const gebiet = L.polygon(CFG.gebiet.polygon.map(p => [p[1], p[0]]),
       { color: '#0b5563', weight: 3, fillColor: '#0b5563', fillOpacity: 0.08 }).addTo(karte);
     gebiet.bindTooltip(() => tx(CFG.gebiet.name) + ' · ' + zahl(A_GEBIET) + ' m²', { sticky: true });

@@ -218,10 +218,29 @@ window.ENTWURFSLABOR_CONFIG = {
     typFlachdach: 'flachdach'  // Typ-Schlüssel für den Hinweis am Dach-Regler
   },
 
-  // Übersichtskarte
+  // Übersichtskarte aus zwei amtlichen Hintergrundkarten, übereinander gelegt.
+  // Jede ist außerhalb ihres Landes durchsichtig; so ist auch der Teil jenseits
+  // des Senserbachs (Deutschland) zu sehen.
+  //  1. NL: BRT-Achtergrondkaart (PDOK/Kadaster). GetCapabilities
+  //     https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0 (abgerufen 23.11.2026):
+  //     TileMatrixSet "EPSG:3857", TileMatrix "00"–"19" (zweistellig, daher {tm}), URL .../{tm}/{x}/{y}.png
+  //  2. DE: basemap.de Web Raster (BKG), CC BY 4.0. GetCapabilities
+  //     https://sgx.geodatenzentrum.de/wmts_basemapde/1.0.0/WMTSCapabilities.xml (abgerufen 23.11.2026):
+  //     TileMatrixSet "GLOBAL_WEBMERCATOR", TileMatrix "00"–"19", URL .../{tm}/{y}/{x}.png (erst Zeile, dann Spalte)
+  // Alternative OpenStreetMap (in manchen Browsern/Netzen mit "Access blocked" gesperrt):
+  //   { url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  //     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende' }
   karte: {
-    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     maxZoom: 19,
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende'
+    ebenen: [
+      {
+        url: 'https://service.pdok.nl/kadaster/brt-achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{tm}/{x}/{y}.png',
+        attribution: 'Kaart: <a href="https://www.pdok.nl/">PDOK</a> / © Kadaster'
+      },
+      {
+        url: 'https://sgx.geodatenzentrum.de/wmts_basemapde/tile/1.0.0/de_basemapde_web_raster_farbe/default/GLOBAL_WEBMERCATOR/{tm}/{y}/{x}.png',
+        attribution: '© <a href="https://basemap.de/">GeoBasis-DE / BKG</a> (2026) CC BY 4.0'
+      }
+    ]
   }
 };

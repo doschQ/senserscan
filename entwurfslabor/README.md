@@ -18,7 +18,7 @@ python -m http.server 8081 --bind 0.0.0.0
 
 - Laptop/Beamer: <http://localhost:8081/> (bzw. <http://localhost:8081/entwurfslabor/>, wenn der Server in `STB_M` läuft)
 - Handy im selben WLAN: `http://<IP-des-Laptops>:8081/…` (IP mit `ipconfig`, „IPv4-Adresse“). Die Windows-Firewall muss Python im privaten Netzwerk erlauben.
-- **Internet nötig** für Chart.js, Leaflet und die OSM-Karte (per CDN). Ohne Netz erscheint statt Diagramm und Karte ein Hinweis; Bilanz, Regler und Kennzahlen funktionieren weiter.
+- **Internet nötig** für Chart.js, Leaflet (per CDN) und die Hintergrundkarten (PDOK, basemap.de). Ohne Netz erscheint statt Diagramm und Karte ein Hinweis; Bilanz, Regler und Kennzahlen funktionieren weiter.
 - `index.html` lädt `config.js` und `app.js` bei jedem Aufruf frisch. Änderungen an `config.js` wirken nach einem einfachen Neuladen.
 
 ---
@@ -34,7 +34,7 @@ python -m http.server 8081 --bind 0.0.0.0
 | **PNG für Folien** | aktuelle Diagrammansicht als PNG, 1920 × 1080, weißer Hintergrund, mit Titel und Platzhalter-/Annahmen-Hinweis |
 | **CSV-Bilanz** | Flächenbilanz, Regler, Kennzahlen und Quellen aller Szenarien. Semikolon und Dezimalkomma (Excel DE/NL), UTF-8. |
 | **Flächenbilanz** | Grundbilanz je Belagsart (m², eintippbar, auch `18.000`), Fläche nach Maßnahmen, Abfluss und Speicher je Belagsart. **Summenprüfung:** weicht die Summe mehr als 1 m² von 203.454 m² ab, erscheint eine rote Warnung (auch im Umschalter ⚠). |
-| **Planungsgebiet** | OSM-Karte mit der Gebietsgrenze und den importierten SenserScan-Flächen |
+| **Planungsgebiet** | Karte (PDOK für NL, basemap.de für DE) mit der Gebietsgrenze und den importierten SenserScan-Flächen |
 | **SenserScan-Datei laden** | siehe [Import](#import-aus-senserscan) |
 | **NL / DE** | Sprache umschalten |
 | **i** | Info-Seite: Formeln, Kennwerte mit Quellen, Modellgrenzen, KI-Kennzeichnung |
@@ -164,7 +164,7 @@ Getestet mit den sechs Beispielflächen aus SenserScan im Exportformat (alle sec
 
 - `index.html`, `app.js`, `config.js`, `style.css` – kein Build-Schritt
 - [Chart.js](https://www.chartjs.org) 4.5.1 und [Leaflet](https://leafletjs.com) 1.9.4 per jsDelivr mit fester Version und Subresource Integrity
-- Karte: © OpenStreetMap-Mitwirkende
+- Karte: zwei amtliche Hintergrundkarten übereinander, jede außerhalb ihres Landes durchsichtig: BRT-Achtergrondkaart (PDOK / © Kadaster) für die Niederlande und basemap.de Web Raster (© GeoBasis-DE / BKG 2026, CC BY 4.0) für Deutschland, damit auch der Teil jenseits des Senserbachs zu sehen ist. Vorher war OpenStreetMap eingestellt; das wurde in einem Browser mit „Access blocked“ gesperrt. OSM steht als Alternative in `config.js`.
 - Getestet im Chromium-Browser bei 375 × 812 (Handy) und 1280 × 720 (Beamer): Summenprüfung, Regler → Kennzahlen, Ampel, PNG (1920 × 1080), CSV (UTF-8 mit BOM), Import, DE/NL. Safari/iOS und Excel selbst sind nicht getestet.
 
 ## KI-generierte Teile
@@ -184,4 +184,4 @@ KI-generiert (Claude Code, Claude Opus 5.5, 23.11.2026):
 - Gebietsgrenze (Shapefile Lehrstuhl, EPSG 25832, umprojiziert nach WGS84) und Gebietsfläche 203.454 m²
 - Formel der Retentionsbilanz ΔV = Speicher − Σ (Fläche · ψ · 0,07 m), Kennzahlenliste
 - Richtwerte 70 mm in 1 h und 30 % Baumkronenanteil (Vorgaben – Quelle in der Thesis ergänzen)
-- Kartengrundlage © OpenStreetMap-Mitwirkende
+- Kartengrundlagen: PDOK / © Kadaster (NL), © GeoBasis-DE / BKG (DE)
