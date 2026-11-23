@@ -511,9 +511,9 @@
       '<tr class="summe"><th>' + esc(t('zeileSumme')) + '</th><td class="summe-grund" data-z="summeGrund"></td><td data-z="summeWirksam"></td>' +
       '<td data-z="summeAnteil"></td><td data-z="psiM"></td><td></td><td data-z="summeQ"></td><td data-z="summeS"></td></tr>' +
       '<tr class="extra"><th>' + esc(t('zeilePark')) + '</th><td>' + feld('parkplaetze_m2', sz.parkplaetze_m2) + '</td>' +
-      '<td data-z="parkRest"></td><td colspan="5" style="text-align:left" data-z="parkInfo"></td></tr>' +
+      '<td data-z="parkRest"></td><td colspan="5" class="zeilen-info" data-z="parkInfo"></td></tr>' +
       '<tr class="extra"><th>' + esc(t('zeileKrone')) + '</th><td>' + feld('baumkronen_m2', sz.baumkronen_m2) + '</td>' +
-      '<td data-z="krone"></td><td data-z="kroneAnteil"></td><td colspan="4" style="text-align:left">' + esc(t('zeileKroneInfo')) + '</td></tr>' +
+      '<td data-z="krone"></td><td data-z="kroneAnteil"></td><td colspan="4" class="zeilen-info">' + esc(t('zeileKroneInfo')) + '</td></tr>' +
       '</tfoot>';
     tabelle.innerHTML = h;
     $('#bilanz-quelle').textContent = t('quelle') + ': ' + (c.quelle || '');
