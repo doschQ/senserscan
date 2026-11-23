@@ -1,7 +1,6 @@
 /*
  * Vaals Entwurfslabor – Programmlogik
  * Fachliche Werte (Belagsarten, Szenarien, Regler) stehen in config.js.
- * Prototyp, KI-generiert (Claude Code, Claude Opus 5.5, 23.11.2026).
  */
 (function () {
   'use strict';
@@ -17,15 +16,23 @@
   // ================================================================
   const TEXTE = {
     de: {
-      untertitel: '{gebiet} · {ha} ha · Szenario-Rechner',
+      untertitel: 'Vaals · Senserbach',
       kennzahlen: 'Kennzahlen', regler: 'Regler', vergleich: 'Vergleich der Szenarien',
       bilanz: 'Flächenbilanz', karteTitel: 'Planungsgebiet',
       szenarioName: 'Name des Szenarios',
-      pngExport: 'PNG für Folien', csvExport: 'CSV-Bilanz',
+      pngExport: 'PNG für Folien (1920 × 1080)', csvExport: 'CSV-Bilanz',
       platzhalter: 'Platzhalter', annahme: 'Annahme – prüfen',
-      hinweisPlatzhalter: '<b>Platzhalter:</b> Die Flächenbilanzen sind keine Messwerte. Bestandswerte aus QGIS in config.js eintragen.',
-      hinweisAnnahme: '<b>Annahme – prüfen:</b> ψ- und Speicherwerte sind Literatur-Startwerte (KI), nicht geprüft.',
-      fuss: 'Prototyp · KI-generiert mit {werkzeug} ({modell}), {datum} · Platzhalter und Annahmen prüfen · Formeln unter „i“',
+      platzhalterSchalter: 'Platzhalter', platzhalterTitel: 'Werte dieses Szenarios als Platzhalter markieren',
+      // Einstellungen
+      einstellungen: 'Einstellungen', menuFarbe: 'Menüfarbe', eigeneFarbe: 'Eigene Farbe',
+      kennwerteTitel: 'Kennwerte je Belagsart',
+      kennwerteInfo: 'ψ: Abflussbeiwert (0–1) · Speicher: zusätzlicher Rückhalteraum in mm · Versiegelung: Faktor für den Versiegelungsgrad (0–1). Ist „geprüft“ aus, steht „Annahme – prüfen“ an den Werten.',
+      thVersFaktor: 'Versiegelung', thGeprueft: 'geprüft',
+      standard: 'Standard wiederherstellen', standardFrage: 'Menüfarbe und Kennwerte auf die Werte aus config.js zurücksetzen?',
+      datenTitel: 'Daten speichern',
+      datenInfo: 'Flächenbilanzen, Regler, Namen, Kennwerte und Menüfarbe speichert dieser Browser automatisch. Als Datei sichern oder auf ein anderes Gerät übertragen:',
+      datenExport: 'Exportieren (.json)', datenImport: 'Importieren',
+      datenImportOk: 'Daten importiert.', datenImportFehler: 'Datei nicht lesbar: keine Daten des Vaals Entwurfslabors.',
       thBelag: 'Belagsart', thGrund: 'Grundbilanz m²', thWirksam: 'nach Maßnahmen m²', thAnteil: 'Anteil',
       thPsi: 'ψ', thSpeicherMm: 'Speicher mm', thAbfluss: 'Abfluss m³ ({mm} mm)', thSpeicherM3: 'Speicher m³',
       zeileAue: 'Retentionsvolumen der Aue (Regler)',
@@ -95,10 +102,7 @@
       // Info-Seite
       sprache: 'Sprache: Niederländisch', info: 'Info, Formeln, Annahmen', schliessen: 'Schließen',
       infoTitel: 'Über das Vaals Entwurfslabor',
-      infoZweck: 'Szenario-Rechner zur Masterthesis „Klimaresilient und wassersensibel: Vaals am Senserbach“ (Stadtplanung, RWTH Aachen). Er zeigt, wie ein städtebaulich-freiraumplanerischer Entwurf für das Planungsgebiet Selzerbeek die Wasser- und Hitzeresilienz gegenüber dem Bestand verändert.',
-      infoKiTitel: 'KI-Kennzeichnung',
-      infoKi: 'Prototyp, erstellt mit <b>{werkzeug}</b>, Modell <b>{modell}</b>, am <b>{datum}</b>.',
-      infoKiListe: '<ul><li><b>KI-generiert:</b> gesamter Programmcode; Startwerte für ψ, Speichervermögen und Versiegelungsfaktoren (aus dem Gedächtnis gesetzt, Normtexte nicht eingesehen); Platzhalter-Flächenbilanzen; Startwerte der Regler; niederländische Übersetzung (ungeprüft).</li><li><b>Nicht KI-generiert:</b> Gebietsgrenze und Gebietsfläche, Formel der Retentionsbilanz, Richtwerte 70 mm in 1 h und 30 % Baumkronenanteil (Vorgaben); Kartengrundlage: PDOK / © Kadaster (NL) und © GeoBasis-DE / BKG, basemap.de (DE).</li></ul>',
+      infoZweck: 'Szenario-Rechner für das Planungsgebiet Selzerbeek: Optimierung der Wasser- und Hitzeresilienz gegenüber dem Bestand.',
       infoFormelnTitel: 'Formeln',
       infoFormeln: '<div class="formel">A = {a} m² (Gebietsfläche) · h = {h} m ({mm} mm in {std} h)</div>' +
         '<div class="formel">Niederschlag N = A · h = {n} m³</div>' +
@@ -117,7 +121,7 @@
         '<li><b>Retentionsvolumen der Aue:</b> wird direkt zum Speicher addiert.</li>' +
         '<li><b>Neubau-BGF, Anteil Wohnen, BGF je WE:</b> ergeben GFZ und Wohneinheiten. Sie ändern die Flächenbilanz nicht.</li></ul>' +
         '<p>Die Regler buchen nur um; die Summe der Flächenbilanz bleibt gleich. Im Bestand sind sie gesperrt.</p>',
-      infoAnnahmenTitel: 'Kennwerte je Belagsart (config.js)',
+      infoAnnahmenTitel: 'Kennwerte je Belagsart (änderbar unter Einstellungen)',
       infoAnnahmen: 'ψ enthält bereits den Rückhalt der Fläche selbst. Speichervermögen haben deshalb nur Flächen mit zusätzlichem Rückhalteraum (Mulde, Retentionsdach), sonst würde doppelt gezählt.',
       thStatus: 'Status', geprueft: 'geprüft',
       infoGrenzenTitel: 'Grenzen des Modells',
@@ -125,19 +129,26 @@
         '<li>Die ψ-Werte sind mittlere Abflussbeiwerte. Bei einem Starkregen von 70 mm in 1 h kann der Abfluss höher liegen, vor allem auf Rasen und in Hanglage.</li>' +
         '<li>Regler und Flächenbilanz sind nicht gekoppelt: Neue Gebäude müssen in der Flächenbilanz der Variante stehen.</li>' +
         '<li>Baumkronen gehen nicht in die Wasserbilanz ein. Bestands-BGF ist nicht enthalten.</li></ul>',
-      infoTechnikTitel: 'Daten und Technik',
-      infoTechnik: '<p>Alle fachlichen Werte stehen in <code>config.js</code>. Eingaben in der App merkt sich nur dieser Browser; ändert sich <code>config.js</code> unter „szenarien“, startet die App wieder mit den Werten der Datei. Bibliotheken: Chart.js 4.5.1, Leaflet 1.9.4 (jsDelivr, feste Versionen). Karte: BRT-Achtergrondkaart (PDOK / © Kadaster) für die Niederlande und basemap.de (© GeoBasis-DE / BKG, CC BY 4.0) für Deutschland.</p>'
+      infoQuellenTitel: 'Quellen',
+      infoQuellen: '<p>BRT-Achtergrondkaart (PDOK / © Kadaster) für die Niederlande und basemap.de (© GeoBasis-DE / BKG, CC BY 4.0) für Deutschland.</p>'
     },
     nl: {
-      untertitel: '{gebiet} · {ha} ha · scenariorekentool',
+      untertitel: 'Vaals · Senserbach',
       kennzahlen: 'Kengetallen', regler: 'Schuifregelaars', vergleich: 'Vergelijking van de scenario’s',
       bilanz: 'Oppervlaktebalans', karteTitel: 'Plangebied',
       szenarioName: 'Naam van het scenario',
-      pngExport: 'PNG voor dia’s', csvExport: 'CSV-balans',
+      pngExport: 'PNG voor dia’s (1920 × 1080)', csvExport: 'CSV-balans',
       platzhalter: 'Plaatshouder', annahme: 'Aanname – controleren',
-      hinweisPlatzhalter: '<b>Plaatshouder:</b> de oppervlaktebalansen zijn geen meetwaarden. Waarden van de bestaande situatie uit QGIS in config.js invullen.',
-      hinweisAnnahme: '<b>Aanname – controleren:</b> ψ- en bergingswaarden zijn startwaarden uit de literatuur (AI), niet gecontroleerd.',
-      fuss: 'Prototype · AI-gegenereerd met {werkzeug} ({modell}), {datum} · plaatshouders en aannames controleren · formules onder „i”',
+      platzhalterSchalter: 'Plaatshouder', platzhalterTitel: 'Waarden van dit scenario als plaatshouder markeren',
+      einstellungen: 'Instellingen', menuFarbe: 'Menukleur', eigeneFarbe: 'Eigen kleur',
+      kennwerteTitel: 'Kengetallen per oppervlaktetype',
+      kennwerteInfo: 'ψ: afvoercoëfficiënt (0–1) · berging: extra bergingsruimte in mm · verharding: factor voor de verhardingsgraad (0–1). Staat „gecontroleerd” uit, dan staat „Aanname – controleren” bij de waarden.',
+      thVersFaktor: 'Verharding', thGeprueft: 'gecontroleerd',
+      standard: 'Standaard herstellen', standardFrage: 'Menukleur en kengetallen terugzetten naar de waarden uit config.js?',
+      datenTitel: 'Gegevens opslaan',
+      datenInfo: 'Oppervlaktebalansen, schuifregelaars, namen, kengetallen en menukleur worden automatisch in deze browser bewaard. Als bestand opslaan of naar een ander apparaat overzetten:',
+      datenExport: 'Exporteren (.json)', datenImport: 'Importeren',
+      datenImportOk: 'Gegevens geïmporteerd.', datenImportFehler: 'Bestand niet leesbaar: geen gegevens van het Vaals Entwurfslabor.',
       thBelag: 'Oppervlaktetype', thGrund: 'Basisbalans m²', thWirksam: 'na maatregelen m²', thAnteil: 'Aandeel',
       thPsi: 'ψ', thSpeicherMm: 'Berging mm', thAbfluss: 'Afvoer m³ ({mm} mm)', thSpeicherM3: 'Berging m³',
       zeileAue: 'Retentievolume beekdal (schuifregelaar)',
@@ -202,10 +213,7 @@
       hDachSenser: 'SenserScan: platte daken in het gebied {m2} m²', nr: 'Nr.',
       sprache: 'Taal: Duits', info: 'Info, formules, aannames', schliessen: 'Sluiten',
       infoTitel: 'Over het Vaals Entwurfslabor',
-      infoZweck: 'Scenariorekentool bij de masterthesis „Klimaresilient und wassersensibel: Vaals am Senserbach” (stedenbouw, RWTH Aachen). Het laat zien hoe een stedenbouwkundig en landschappelijk ontwerp voor het plangebied Selzerbeek de water- en hitterobuustheid verandert ten opzichte van de bestaande situatie.',
-      infoKiTitel: 'AI-vermelding',
-      infoKi: 'Prototype, gemaakt met <b>{werkzeug}</b>, model <b>{modell}</b>, op <b>{datum}</b>.',
-      infoKiListe: '<ul><li><b>AI-gegenereerd:</b> alle programmacode; startwaarden voor ψ, bergingsvermogen en verhardingsfactoren (uit het geheugen, normteksten niet ingezien); plaatshouder-oppervlaktebalansen; startwaarden van de schuifregelaars; Nederlandse vertaling (niet gecontroleerd).</li><li><b>Niet AI-gegenereerd:</b> gebiedsgrens en oppervlakte, formule van de retentiebalans, richtwaarden 70 mm in 1 uur en 30 % boomkroonbedekking (opdracht); kaart: PDOK / © Kadaster (NL) en © GeoBasis-DE / BKG, basemap.de (DE).</li></ul>',
+      infoZweck: 'Scenariorekentool voor het plangebied Selzerbeek: optimalisatie van de water- en hitterobuustheid ten opzichte van de bestaande situatie.',
       infoFormelnTitel: 'Formules',
       infoFormeln: '<div class="formel">A = {a} m² (oppervlakte plangebied) · h = {h} m ({mm} mm in {std} uur)</div>' +
         '<div class="formel">Neerslag N = A · h = {n} m³</div>' +
@@ -224,7 +232,7 @@
         '<li><b>Retentievolume beekdal:</b> telt direct mee als berging.</li>' +
         '<li><b>Nieuwbouw-BVO, aandeel wonen, BVO per woning:</b> geven FSI en woningen. Ze veranderen de oppervlaktebalans niet.</li></ul>' +
         '<p>De schuifregelaars verschuiven alleen oppervlak; het totaal blijft gelijk. In de bestaande situatie zijn ze vergrendeld.</p>',
-      infoAnnahmenTitel: 'Kengetallen per oppervlaktetype (config.js)',
+      infoAnnahmenTitel: 'Kengetallen per oppervlaktetype (aan te passen onder Instellingen)',
       infoAnnahmen: 'ψ bevat al de berging van het oppervlak zelf. Alleen oppervlakken met extra bergingsruimte (wadi, retentiedak) hebben daarom een bergingsvermogen; anders telt het dubbel. Bronvermelding in het Duits.',
       thStatus: 'Status', geprueft: 'gecontroleerd',
       infoGrenzenTitel: 'Grenzen van het model',
@@ -232,8 +240,8 @@
         '<li>De ψ-waarden zijn gemiddelde afvoercoëfficiënten. Bij een bui van 70 mm in 1 uur kan de afvoer hoger zijn, vooral op gazon en op hellingen.</li>' +
         '<li>Schuifregelaars en oppervlaktebalans zijn niet gekoppeld: nieuwe gebouwen moeten in de oppervlaktebalans van de variant staan.</li>' +
         '<li>Boomkronen tellen niet mee in de waterbalans. Bestaande BVO is niet opgenomen.</li></ul>',
-      infoTechnikTitel: 'Gegevens en techniek',
-      infoTechnik: '<p>Alle vakinhoudelijke waarden staan in <code>config.js</code>. Invoer in de app wordt alleen in deze browser onthouden; verandert <code>config.js</code> onder „szenarien”, dan start de app weer met de waarden uit het bestand. Bibliotheken: Chart.js 4.5.1, Leaflet 1.9.4 (jsDelivr, vaste versies). Kaart: BRT-Achtergrondkaart (PDOK / © Kadaster) voor Nederland en basemap.de (© GeoBasis-DE / BKG, CC BY 4.0) voor Duitsland.</p>'
+      infoQuellenTitel: 'Bronnen',
+      infoQuellen: '<p>BRT-Achtergrondkaart (PDOK / © Kadaster) voor Nederland en basemap.de (© GeoBasis-DE / BKG, CC BY 4.0) voor Duitsland.</p>'
     }
   };
 
@@ -300,6 +308,7 @@
       const r = Object.assign({}, s.regler);
       return {
         name: null,
+        platzhalter: !!s.platzhalter,
         flaechen: flaechen,
         parkplaetze_m2: +(s.parkplaetze_m2 != null ? s.parkplaetze_m2 : (basis.parkplaetze_m2 || 0)),
         baumkronen_m2: +(s.baumkronen_m2 != null ? s.baumkronen_m2 : (basis.baumkronen_m2 || 0)),
@@ -312,6 +321,7 @@
     if (!g || typeof g !== 'object') return start;
     const m = JSON.parse(JSON.stringify(start));
     if (typeof g.name === 'string' && g.name.trim()) m.name = g.name.slice(0, 40);
+    if (typeof g.platzhalter === 'boolean') m.platzhalter = g.platzhalter;
     if (g.flaechen) BK.forEach(k => { if (istZahl(g.flaechen[k]) && g.flaechen[k] >= 0) m.flaechen[k] = g.flaechen[k]; });
     ['parkplaetze_m2', 'baumkronen_m2'].forEach(k => { if (istZahl(g[k]) && g[k] >= 0) m[k] = g[k]; });
     if (g.regler) Object.keys(m.regler).forEach(k => {
@@ -319,12 +329,39 @@
     });
     return m;
   }
+  // Kennwerte je Belagsart: Standard aus config.js, Änderungen aus den Einstellungen
+  const STANDARD_KW = {};
+  BK.forEach(k => {
+    const b = BELAEGE[k];
+    STANDARD_KW[k] = { psi: b.psi, speicher_mm: b.speicher_mm, versiegelung: b.versiegelung, geprueft: !!b.geprueft };
+  });
+  function kennwerteLesen(g) {
+    const o = {};
+    if (!g || typeof g !== 'object') return o;
+    BK.forEach(k => {
+      const x = g[k], y = {};
+      if (!x || typeof x !== 'object') return;
+      if (istZahl(x.psi) && x.psi >= 0 && x.psi <= 1) y.psi = x.psi;
+      if (istZahl(x.speicher_mm) && x.speicher_mm >= 0) y.speicher_mm = x.speicher_mm;
+      if (istZahl(x.versiegelung) && x.versiegelung >= 0 && x.versiegelung <= 1) y.versiegelung = x.versiegelung;
+      if (typeof x.geprueft === 'boolean') y.geprueft = x.geprueft;
+      if (Object.keys(y).length) o[k] = y;
+    });
+    return o;
+  }
+  const istFarbe = c => typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c);
+
   function laden() {
     let g = null;
     try { g = JSON.parse(localStorage.getItem(SPEICHER) || 'null'); } catch (e) { g = null; }
-    const s = { fp: FP, aktiv: 0, sprache: 'de', ansicht: 'wasser', szenarien: startSzenarien(), import: null, configNeu: false };
+    const s = {
+      fp: FP, aktiv: 0, sprache: 'de', ansicht: 'wasser', szenarien: startSzenarien(), import: null,
+      menuFarbe: null, kennwerte: {}, configNeu: false
+    };
     if (g && typeof g === 'object') {
       if (g.sprache === 'nl') s.sprache = 'nl';
+      if (istFarbe(g.menuFarbe)) s.menuFarbe = g.menuFarbe;
+      s.kennwerte = kennwerteLesen(g.kennwerte);
       if (typeof g.ansicht === 'string') s.ansicht = g.ansicht;
       if (g.import && Array.isArray(g.import.flaechen)) s.import = g.import;
       if (g.fp === FP && Array.isArray(g.szenarien) && g.szenarien.length === s.szenarien.length) {
@@ -344,10 +381,30 @@
       try {
         localStorage.setItem(SPEICHER, JSON.stringify({
           fp: state.fp, aktiv: state.aktiv, sprache: state.sprache, ansicht: state.ansicht,
-          szenarien: state.szenarien, import: state.import
+          szenarien: state.szenarien, import: state.import, menuFarbe: state.menuFarbe, kennwerte: state.kennwerte
         }));
       } catch (e) { /* privater Modus o. Ä. – dann eben ohne Speichern */ }
     }, 300);
+  }
+
+  function kennwerteAnwenden() {
+    BK.forEach(k => Object.assign(BELAEGE[k], STANDARD_KW[k], state.kennwerte[k] || {}));
+  }
+  kennwerteAnwenden();
+
+  // Menüfarbe (Kopfzeile, Knöpfe) – wie in Klima Chancen
+  const MENUFARBEN = ['#e10a17', '#0b5563', '#1d4e89', '#2b7a3d', '#343a40'];
+  const menuFarbe = () => state.menuFarbe || CFG.menuFarbe || MENUFARBEN[0];
+  function rgb(hex) { const n = parseInt(hex.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
+  const schriftAuf = hex => { const c = rgb(hex); return 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2] > 165 ? '#17201c' : '#ffffff'; };
+  const mitWeiss = (hex, a) => 'rgb(' + rgb(hex).map(v => Math.round(255 - (255 - v) * a)).join(',') + ')';
+  function farbeAnwenden() {
+    const c = menuFarbe(), st = document.documentElement.style;
+    st.setProperty('--primary', c);
+    st.setProperty('--primary-soft', mitWeiss(c, 0.12));
+    st.setProperty('--on-primary', schriftAuf(c));
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', c);
   }
 
   const szName = i => state.szenarien[i].name || tx(CFG.szenarien[i].name);
@@ -440,18 +497,23 @@
   }
 
   // ================================================================
-  // Kopf, Szenario-Umschalter, Hinweisband, Fuß
+  // Kopf, Szenario-Umschalter
   // ================================================================
   AUFBAU.push(function kopf() {
     document.documentElement.lang = state.sprache;
-    $('#untertitel').textContent = t('untertitel', { gebiet: tx(CFG.gebiet.name), ha: zahl(A_GEBIET / 10000, 2) });
+    farbeAnwenden();
     document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
-    const teile = [];
-    if (CFG.szenarien.some(s => s.platzhalter)) teile.push(t('hinweisPlatzhalter'));
-    if (BK.some(k => !BELAEGE[k].geprueft)) teile.push(t('hinweisAnnahme'));
-    $('#hinweis').innerHTML = teile.join(' ');
-    $('#fuss').textContent = t('fuss', CFG.info);
+    [['#btn-einst', 'einstellungen'], ['#btn-png', 'pngExport'], ['#btn-csv', 'csvExport']].forEach(([s, k]) => {
+      $(s).title = t(k);
+      $(s).setAttribute('aria-label', t(k));
+    });
   });
+
+  // Höhe der Kopfzeile für die feste Regler-Leiste
+  const kopfEl = $('#kopf');
+  const kopfHoehe = () => document.documentElement.style.setProperty('--kopf-h', kopfEl.offsetHeight + 'px');
+  if (window.ResizeObserver) new ResizeObserver(kopfHoehe).observe(kopfEl);
+  window.addEventListener('resize', kopfHoehe);
 
   const nav = $('#szenarien');
   nav.addEventListener('click', e => {
@@ -489,12 +551,11 @@
   const tabelle = $('#bilanz');
   AUFBAU.push(function bilanzAufbau() {
     const sz = aktivSz(), c = aktivCfg();
-    const ph = c.platzhalter ? ' class="platzhalter"' : '';
-    const phBadge = c.platzhalter ? ' <span class="badge platzhalter">' + esc(t('platzhalter')) + '</span>' : '';
+    const ph = sz.platzhalter ? ' class="platzhalter"' : '';
     const anBadge = BK.some(k => !BELAEGE[k].geprueft) ? ' <span class="badge annahme">' + esc(t('annahme')) + '</span>' : '';
     const feld = (name, wert) => '<input type="text" inputmode="decimal" autocomplete="off"' + ph +
       ' data-feld="' + name + '" value="' + esc(zahl(wert)) + '">';
-    let h = '<thead><tr><th>' + esc(t('thBelag')) + '</th><th>' + esc(t('thGrund')) + phBadge + '</th><th>' +
+    let h = '<thead><tr><th>' + esc(t('thBelag')) + '</th><th>' + esc(t('thGrund')) + '</th><th>' +
       esc(t('thWirksam')) + '</th><th>' + esc(t('thAnteil')) + '</th><th>' + esc(t('thPsi')) + anBadge + '</th><th>' +
       esc(t('thSpeicherMm')) + '</th><th>' + esc(t('thAbfluss', { mm: CFG.regen.mm })) + '</th><th>' + esc(t('thSpeicherM3')) + '</th></tr></thead><tbody>';
     BK.forEach(k => {
@@ -516,7 +577,11 @@
       '<td data-z="krone"></td><td data-z="kroneAnteil"></td><td colspan="4" class="zeilen-info">' + esc(t('zeileKroneInfo')) + '</td></tr>' +
       '</tfoot>';
     tabelle.innerHTML = h;
-    $('#bilanz-quelle').textContent = t('quelle') + ': ' + (c.quelle || '');
+    // Quelle aus config.js nur zeigen, solange der Platzhalter-Status dem der Datei entspricht
+    $('#bilanz-quelle').textContent = c.quelle && sz.platzhalter === !!c.platzhalter ? t('quelle') + ': ' + c.quelle : '';
+    const schalter = $('#ph-schalter');
+    schalter.checked = sz.platzhalter;
+    schalter.closest('label').title = t('platzhalterTitel');
   });
 
   UPDATE.push(function bilanzUpdate() {
@@ -730,8 +795,7 @@
     let w = warnungenHtml(i);
     if (!istReferenz(i) && !erg[REFERENZ].summeOk) w += '<div class="warnung">⚠ ' + esc(t('warnRefSumme')) + '</div>';
     $('#kz-warnung').innerHTML = w;
-    const c = CFG.szenarien[i];
-    $('#kz-unter').innerHTML = esc(szName(i)) + (c.platzhalter ? ' <span class="badge platzhalter">' + esc(t('platzhalter')) + '</span>' : '');
+    $('#kz-unter').textContent = szName(i);
     $('#ampel-legende').textContent = t('ampelLegende');
 
     // Kurzanzeige (Handy)
@@ -845,7 +909,7 @@
       yAchse = t('achseFlaeche');
     }
 
-    const platzhalter = CFG.szenarien.some(s => s.platzhalter);
+    const platzhalter = state.szenarien.some(s => s.platzhalter);
     const annahmen = BK.some(k => !BELAEGE[k].geprueft);
     const unter = [t('exportUnter', { gebiet: tx(CFG.gebiet.name), flaeche: zahl(A_GEBIET), datum: heute() })];
     if (platzhalter) unter.push(t('exportPlatzhalter')); else if (annahmen) unter.push(t('exportAnnahme'));
@@ -967,7 +1031,7 @@
     const q = s => { s = String(s == null ? '' : s); return /[;"\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
     const n = state.szenarien.length, idx = [...Array(n).keys()];
     const rows = [];
-    const platzhalter = CFG.szenarien.some(s => s.platzhalter);
+    const platzhalter = state.szenarien.some(s => s.platzhalter);
     rows.push([t('csvTitel'), tx(CFG.gebiet.name)]);
     rows.push([t('csvStand'), datumStempel()]);
     rows.push([t('csvGebiet'), zc(A_GEBIET)]);
@@ -994,7 +1058,7 @@
     zeile(t('zeileSumme'), i => zc(erg[i].summeGrund), i => zc(erg[i].summeWirksam));
     zeile(t('zeilePark'), i => zc(state.szenarien[i].parkplaetze_m2), i => zc(state.szenarien[i].parkplaetze_m2 - erg[i].entsiegelt));
     zeile(t('zeileKrone'), i => zc(state.szenarien[i].baumkronen_m2), i => zc(erg[i].krone));
-    zeile(t('csvStatusSz'), i => (CFG.szenarien[i].platzhalter ? t('platzhalter') : t('csvWerte')), i => (erg[i].summeOk ? t('summeOk') : '⚠ ' + t('tabWarn')));
+    zeile(t('csvStatusSz'), i => (state.szenarien[i].platzhalter ? t('platzhalter') : t('csvWerte')), i => (erg[i].summeOk ? t('summeOk') : '⚠ ' + t('tabWarn')));
     rows.push([]);
 
     // Regler
@@ -1039,6 +1103,8 @@
     gebiet.bindTooltip(() => tx(CFG.gebiet.name) + ' · ' + zahl(A_GEBIET) + ' m²', { sticky: true });
     karte.fitBounds(gebiet.getBounds(), { padding: [12, 12] });
     importLayer = L.featureGroup().addTo(karte);
+    // die Kartenhöhe folgt dem Layout (Zeile mit der Flächenbilanz)
+    if (window.ResizeObserver) new ResizeObserver(() => karte.invalidateSize()).observe($('#map'));
   }
   function importKarte() {
     if (!importLayer) return;
@@ -1182,7 +1248,24 @@
     neuAufbauen();
   });
 
-  const dialog = $('#info');
+  const dialog = $('#dialog');
+  let dialogInhalt = null; // Funktion, die den offenen Dialog neu zeichnet
+  function dialogKopf(titel) {
+    return '<div class="dialog-kopf"><h2>' + esc(titel) + '</h2>' +
+      '<form method="dialog"><button class="rund" type="submit" aria-label="' + esc(t('schliessen')) + '">✕</button></form></div>';
+  }
+  function dialogOeffnen(fn) {
+    dialogInhalt = fn;
+    dialog.innerHTML = fn();
+    if (!dialog.open) { if (dialog.showModal) dialog.showModal(); else dialog.setAttribute('open', ''); }
+  }
+  function dialogNeu() {
+    if (!dialog.open || !dialogInhalt) return;
+    const y = dialog.scrollTop;
+    dialog.innerHTML = dialogInhalt();
+    dialog.scrollTop = y;
+  }
+  dialog.addEventListener('close', () => { if (!dialog.open) dialogInhalt = null; });
   function infoHtml() {
     const M = CFG.massnahmen;
     const zeilen = BK.map(k => {
@@ -1193,12 +1276,9 @@
         '<td>' + zahl(b.versiegelung, 1) + '</td>' +
         '<td>' + (b.geprueft ? esc(t('geprueft')) : '<span class="badge annahme">' + esc(t('annahme')) + '</span>') + '</td></tr>';
     }).join('');
-    return '<div class="info-kopf"><h2>' + esc(t('infoTitel')) + '</h2>' +
-      '<form method="dialog"><button class="rund" type="submit" aria-label="' + esc(t('schliessen')) + '">✕</button></form></div>' +
-      '<div class="info-inhalt">' +
+    return dialogKopf(t('infoTitel')) +
+      '<div class="dialog-inhalt">' +
       '<p>' + esc(t('infoZweck')) + '</p>' +
-      '<h3>' + esc(t('infoKiTitel')) + '</h3>' +
-      '<p>' + t('infoKi', { werkzeug: esc(CFG.info.werkzeug), modell: esc(CFG.info.modell), datum: esc(CFG.info.datum) }) + '</p>' + t('infoKiListe') +
       '<h3>' + esc(t('infoFormelnTitel')) + '</h3>' +
       t('infoFormeln', { a: zahl(A_GEBIET), h: zahl(H_REGEN, 3), mm: CFG.regen.mm, std: CFG.regen.dauer_h, n: zahl(A_GEBIET * H_REGEN), ziel: CFG.richtwerte.baumkronen_prozent }) +
       '<p class="fussnote">' + esc(CFG.regen.quelle) + ' · ' + esc(CFG.richtwerte.quelle) + '</p>' +
@@ -1211,14 +1291,135 @@
       '<tbody>' + zeilen + '</tbody></table></div>' +
       '<p class="fussnote">' + esc(CFG.regler.kronenflaeche.quelle || '') + '</p>' +
       '<h3>' + esc(t('infoGrenzenTitel')) + '</h3>' + t('infoGrenzen') +
-      '<h3>' + esc(t('infoTechnikTitel')) + '</h3>' + t('infoTechnik') +
+      '<h3>' + esc(t('infoQuellenTitel')) + '</h3>' + t('infoQuellen') +
       '</div>';
   }
-  $('#btn-info').addEventListener('click', () => {
-    dialog.innerHTML = infoHtml();
-    if (dialog.showModal) dialog.showModal(); else dialog.setAttribute('open', '');
+  $('#btn-info').addEventListener('click', () => dialogOeffnen(infoHtml));
+
+  // ================================================================
+  // Einstellungen: Menüfarbe, Kennwerte, Daten exportieren/importieren
+  // ================================================================
+  function einstellungenHtml() {
+    const zahlFeld = (k, f, wert, max, step) => '<input type="number" min="0"' + (max != null ? ' max="' + max + '"' : '') +
+      ' step="' + step + '" data-kw="' + k + '" data-f="' + f + '" value="' + wert + '" aria-label="' + esc(tx(BELAEGE[k].name)) + ' ' + f + '">';
+    const zeilen = BK.map(k => {
+      const b = BELAEGE[k];
+      return '<tr><td><span class="swatch" style="background:' + esc(b.farbe) + '"></span>' + esc(tx(b.name)) + '</td>' +
+        '<td>' + zahlFeld(k, 'psi', b.psi, 1, 0.05) + '</td>' +
+        '<td>' + zahlFeld(k, 'speicher_mm', b.speicher_mm, null, 5) + '</td>' +
+        '<td>' + zahlFeld(k, 'versiegelung', b.versiegelung, 1, 0.1) + '</td>' +
+        '<td class="mitte"><input type="checkbox" data-kw="' + k + '" data-f="geprueft"' + (b.geprueft ? ' checked' : '') +
+        ' aria-label="' + esc(tx(b.name)) + ' ' + esc(t('thGeprueft')) + '"></td></tr>';
+    }).join('');
+    return dialogKopf(t('einstellungen')) + '<div class="dialog-inhalt">' +
+      '<h3>' + esc(t('menuFarbe')) + '</h3><div class="farben">' +
+      MENUFARBEN.map(c => '<button type="button" class="farbwahl" data-menufarbe="' + c + '" style="--c:' + c +
+        '" aria-pressed="' + (c === menuFarbe()) + '" aria-label="' + c + '"></button>').join('') +
+      '<input type="color" id="menu-eigen" value="' + esc(menuFarbe()) + '" aria-label="' + esc(t('eigeneFarbe')) + '" title="' + esc(t('eigeneFarbe')) + '"></div>' +
+      '<h3>' + esc(t('kennwerteTitel')) + '</h3>' +
+      '<p class="fussnote">' + esc(t('kennwerteInfo')) + '</p>' +
+      '<div class="tabelle-scroll"><table class="kennwerte"><thead><tr><th>' + esc(t('thBelag')) + '</th><th>ψ</th><th>' +
+      esc(t('thSpeicherMm')) + '</th><th>' + esc(t('thVersFaktor')) + '</th><th>' + esc(t('thGeprueft')) + '</th></tr></thead>' +
+      '<tbody>' + zeilen + '</tbody></table></div>' +
+      '<div class="btn-reihe"><button type="button" class="btn klein" id="einst-standard">' + esc(t('standard')) + '</button></div>' +
+      '<h3>' + esc(t('datenTitel')) + '</h3><p>' + esc(t('datenInfo')) + '</p>' +
+      '<div class="btn-reihe"><button type="button" class="btn" id="daten-export">' + esc(t('datenExport')) + '</button>' +
+      '<label class="btn hell datei-knopf">' + esc(t('datenImport')) +
+      '<input type="file" accept=".json,application/json" id="daten-import"></label></div>' +
+      '</div>';
+  }
+  $('#btn-einst').addEventListener('click', () => dialogOeffnen(einstellungenHtml));
+
+  function kennwertSetzen(k, f, wert) {
+    const o = Object.assign({}, state.kennwerte[k], { [f]: wert });
+    const gueltig = kennwerteLesen({ [k]: o })[k] || {};
+    state.kennwerte[k] = gueltig;
+    kennwerteAnwenden();
+    neuAufbauen();
+  }
+
+  function datenJson() {
+    const kennwerte = {};
+    BK.forEach(k => {
+      const b = BELAEGE[k];
+      kennwerte[k] = { psi: b.psi, speicher_mm: b.speicher_mm, versiegelung: b.versiegelung, geprueft: !!b.geprueft };
+    });
+    return JSON.stringify({
+      typ: 'vaals-entwurfslabor', version: 1, stand: new Date().toISOString(),
+      menuFarbe: state.menuFarbe, kennwerte: kennwerte,
+      szenarien: state.szenarien.map((s, i) => Object.assign({ id: CFG.szenarien[i].id }, s))
+    }, null, 1);
+  }
+  function datenImportieren(text) {
+    let g = null;
+    try { g = JSON.parse(text); } catch (e) { g = null; }
+    if (!g || g.typ !== 'vaals-entwurfslabor' || !Array.isArray(g.szenarien)) { toast(t('datenImportFehler')); return; }
+    state.szenarien = startSzenarien().map((st, i) => {
+      const quelle = g.szenarien.find(x => x && x.id === CFG.szenarien[i].id) || g.szenarien[i];
+      return mischen(st, quelle);
+    });
+    state.menuFarbe = istFarbe(g.menuFarbe) ? g.menuFarbe : null;
+    state.kennwerte = kennwerteLesen(g.kennwerte);
+    kennwerteAnwenden();
+    neuAufbauen();
+    dialogNeu();
+    toast(t('datenImportOk'));
+  }
+
+  dialog.addEventListener('click', ev => {
+    if (ev.target === dialog) {
+      // nur Klicks neben dem Dialog schließen (nicht die Bildlaufleiste)
+      const r = dialog.getBoundingClientRect();
+      if (ev.clientX < r.left || ev.clientX > r.right || ev.clientY < r.top || ev.clientY > r.bottom) dialog.close();
+      return;
+    }
+    const b = ev.target.closest('button');
+    if (!b) return;
+    if (b.dataset.menufarbe) {
+      state.menuFarbe = b.dataset.menufarbe;
+      farbeAnwenden();
+      speichernSpaeter();
+      dialogNeu();
+    } else if (b.id === 'einst-standard') {
+      if (!window.confirm(t('standardFrage'))) return;
+      state.menuFarbe = null;
+      state.kennwerte = {};
+      kennwerteAnwenden();
+      neuAufbauen();
+      dialogNeu();
+    } else if (b.id === 'daten-export') {
+      herunterladen(new Blob([datenJson()], { type: 'application/json' }), 'vaals_entwurfslabor_daten_' + datumStempel() + '.json');
+    }
   });
-  dialog.addEventListener('click', ev => { if (ev.target === dialog) dialog.close(); });
+  dialog.addEventListener('input', ev => {
+    const el = ev.target;
+    if (el.id === 'menu-eigen') {
+      state.menuFarbe = el.value;
+      farbeAnwenden();
+      speichernSpaeter();
+      dialog.querySelectorAll('.farbwahl').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.menufarbe === el.value)));
+    } else if (el.dataset.kw && el.type === 'number') {
+      const n = parseFloat(String(el.value).replace(',', '.'));
+      const max = el.max === '' ? Infinity : +el.max;
+      const ok = Number.isFinite(n) && n >= 0 && n <= max;
+      el.style.borderColor = ok ? '' : 'var(--rot)';
+      if (ok) kennwertSetzen(el.dataset.kw, el.dataset.f, n);
+    }
+  });
+  dialog.addEventListener('change', ev => {
+    const el = ev.target;
+    if (el.dataset.kw && el.type === 'checkbox') {
+      kennwertSetzen(el.dataset.kw, 'geprueft', el.checked);
+    } else if (el.id === 'daten-import' && el.files && el.files[0]) {
+      el.files[0].text().then(datenImportieren, () => toast(t('datenImportFehler')));
+    }
+  });
+
+  // Platzhalter-Schalter in der Flächenbilanz
+  $('#ph-schalter').addEventListener('change', ev => {
+    aktivSz().platzhalter = ev.target.checked;
+    neuAufbauen();
+  });
 
   // ================================================================
   // Start

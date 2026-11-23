@@ -31,14 +31,17 @@ python -m http.server 8081 --bind 0.0.0.0
 | **Regler** | Anteil begrünter Dachflächen, Anteil entsiegelter Parkplätze, neue Bäume × Kronenfläche, Retentionsvolumen der Aue, Neubau-BGF, Anteil Wohnen, BGF je Wohneinheit. Zahl auch direkt eintippen. Im Bestand gesperrt (Referenz). |
 | **Kennzahlen** | Niederschlag, Abfluss, Speicher, Retentionsbilanz ΔV, ψm, Versiegelungsgrad, Baumkronenanteil, BGF, GFZ, Wohneinheiten – mit Ampel und Differenz zum Bestand |
 | **Vergleich der Szenarien** | Balkendiagramm aller drei Szenarien: **Wasser** (N, Q, S, ΔV), **Hitze** (Versiegelung, ψm, Baumkronen mit Ziellinie 30 %), **Flächen** (gestapelte Flächenbilanz) |
-| **PNG für Folien** | aktuelle Diagrammansicht als PNG, 1920 × 1080, weißer Hintergrund, mit Titel und Platzhalter-/Annahmen-Hinweis |
-| **CSV-Bilanz** | Flächenbilanz, Regler, Kennzahlen und Quellen aller Szenarien. Semikolon und Dezimalkomma (Excel DE/NL), UTF-8. |
-| **Flächenbilanz** | Grundbilanz je Belagsart (m², eintippbar, auch `18.000`), Fläche nach Maßnahmen, Abfluss und Speicher je Belagsart. **Summenprüfung:** weicht die Summe mehr als 1 m² von 203.454 m² ab, erscheint eine rote Warnung (auch im Umschalter ⚠). |
+| Bild-Symbol | aktuelle Diagrammansicht als PNG für Folien, 1920 × 1080, weißer Hintergrund, mit Titel; solange Platzhalter oder ungeprüfte Kennwerte im Spiel sind, mit Hinweis im Untertitel |
+| Tabellen-Symbol | CSV-Bilanz: Flächenbilanz, Regler, Kennzahlen und Quellen aller Szenarien. Semikolon und Dezimalkomma (Excel DE/NL), UTF-8. |
+| **Flächenbilanz** | Grundbilanz je Belagsart (m², eintippbar, auch `18.000`), Fläche nach Maßnahmen, Abfluss und Speicher je Belagsart. **Summenprüfung:** weicht die Summe mehr als 1 m² von 203.454 m² ab, erscheint eine rote Warnung (auch im Umschalter ⚠). Haken **Platzhalter**: markiert die Werte dieses Szenarios schraffiert als Platzhalter. |
 | **Planungsgebiet** | Karte (PDOK für NL, basemap.de für DE) mit der Gebietsgrenze und den importierten SenserScan-Flächen |
 | **SenserScan-Datei laden** | siehe [Import](#import-aus-senserscan) |
 | **NL / DE** | Sprache umschalten |
-| **i** | Info-Seite: Formeln, Kennwerte mit Quellen, Modellgrenzen, KI-Kennzeichnung |
-| **Eingaben zurücksetzen** | alle Eingaben auf die Werte aus `config.js` |
+| Regler-Symbol (**Einstellungen**) | Menüfarbe (wie Klima Chancen), **Kennwerte je Belagsart** (ψ, Speicher mm, Versiegelungsfaktor, „geprüft“), **Daten exportieren/importieren** (.json), „Standard wiederherstellen“ |
+| **i** | Info-Seite: Formeln, Wirkung der Regler, Kennwerte mit Quellen, Modellgrenzen, Quellen der Karten |
+| **Eingaben zurücksetzen** | Flächenbilanzen, Regler und Namen auf die Werte aus `config.js` |
+
+**Layout:** Ab 900 px Breite stehen die Regler als feste Leiste links (eigener Bildlauf); rechts Kennzahlen und Diagramm nebeneinander, darunter Flächenbilanz und Karte (ab 1500 px nebeneinander). Auf dem Handy liegt alles untereinander, die Kennzahlen als Zeilen (Titel links, Wert rechts); oben bleibt eine Kurzanzeige mit ΔV, Versiegelung, ψm und Baumkronen stehen.
 
 Eingaben merkt sich nur der jeweilige Browser (localStorage). Ändert sich in `config.js` etwas unter `szenarien`, startet die App wieder mit den Werten der Datei.
 
@@ -54,9 +57,15 @@ Im Bestand selbst: nur Abgleich mit dem Ziel. Ohne Ampel: Niederschlag, BGF, GFZ
 
 ---
 
-## Werte eintragen → `config.js`
+## Werte eintragen
 
-### Bestand aus QGIS
+### In der App (Bestand und Varianten)
+
+1. Szenario wählen, in der **Flächenbilanz** die m² eintippen (auch Parkplätze und Baumkronen). Die Summenprüfung zeigt, ob 203.454 m² erreicht sind.
+2. Haken **Platzhalter** entfernen, sobald es echte Werte sind.
+3. **Einstellungen → Exportieren (.json)** sichert alles (Flächenbilanzen, Regler, Namen, Platzhalter-Status, Kennwerte, Menüfarbe) als Datei. **Importieren** lädt sie wieder, z. B. auf dem Handy oder dem Beamer-Laptop.
+
+### Dauerhaft in `config.js` (gilt dann auf allen Geräten)
 
 Unter `szenarien`, Eintrag `id: 'bestand'`:
 
@@ -76,7 +85,7 @@ baumkronen_m2: …     // Baumkronen (Überlagerung, nicht in der Summe)
 
 ### Kennwerte je Belagsart
 
-Unter `belaege` je Belagsart `psi`, `speicher_mm`, `versiegelung` mit Quellenfeldern. Nach der Prüfung `geprueft: true` setzen; dann verschwindet „Annahme – prüfen“. Weitere Einstellungen: `richtwerte`, `regen`, `massnahmen` (wohin die Regler umbuchen), `regler` (Bereiche).
+In der App unter **Einstellungen** änderbar (gilt dann in diesem Browser und wandert mit dem Export). Dauerhaft in `config.js` unter `belaege`: je Belagsart `psi`, `speicher_mm`, `versiegelung` mit Quellenfeldern. Nach der Prüfung `geprueft: true` setzen (oder in den Einstellungen den Haken „geprüft“); dann verschwindet „Annahme – prüfen“. Menüfarbe: `menuFarbe`. Weitere Einstellungen: `richtwerte`, `regen`, `massnahmen` (wohin die Regler umbuchen), `regler` (Bereiche).
 
 ---
 
@@ -132,7 +141,7 @@ Weitere Annahmen: Kronenfläche je neuem Baum 50 m² (Baum 2. Ordnung, Ø etwa 8
 
 **Doppelzählung vermeiden:** ψ enthält bereits den Rückhalt der Fläche selbst (Benetzung, Substrat, Boden). Speichervermögen haben deshalb nur Flächen mit *zusätzlichem* Rückhalteraum (Mulde, Retentionsdach).
 
-**Platzhalter:** Bestand (runde Zahlen, Rest in Bachaue/Natur) sowie Varianten A/B (Kopie des Bestands). Sie erscheinen in der App schraffiert mit dem Etikett „Platzhalter“ und im PNG- und CSV-Export mit Hinweis.
+**Platzhalter:** Bestand (runde Zahlen, Rest in Bachaue/Natur) sowie Varianten A/B (Kopie des Bestands). Sie erscheinen in der App schraffiert (Haken „Platzhalter“ in der Flächenbilanz) und im PNG- und CSV-Export mit Hinweis. Ohne Haken entfällt beides.
 
 ---
 
@@ -165,9 +174,11 @@ Getestet mit den sechs Beispielflächen aus SenserScan im Exportformat (alle sec
 - `index.html`, `app.js`, `config.js`, `style.css` – kein Build-Schritt
 - [Chart.js](https://www.chartjs.org) 4.5.1 und [Leaflet](https://leafletjs.com) 1.9.4 per jsDelivr mit fester Version und Subresource Integrity
 - Karte: zwei amtliche Hintergrundkarten übereinander, jede außerhalb ihres Landes durchsichtig: BRT-Achtergrondkaart (PDOK / © Kadaster) für die Niederlande und basemap.de Web Raster (© GeoBasis-DE / BKG 2026, CC BY 4.0) für Deutschland, damit auch der Teil jenseits des Senserbachs zu sehen ist. Vorher war OpenStreetMap eingestellt; das wurde in einem Browser mit „Access blocked“ gesperrt. OSM steht als Alternative in `config.js`.
-- Getestet im Chromium-Browser bei 375 × 812 (Handy) und 1280 × 720 (Beamer): Summenprüfung, Regler → Kennzahlen, Ampel, PNG (1920 × 1080), CSV (UTF-8 mit BOM), Import, DE/NL. Safari/iOS und Excel selbst sind nicht getestet.
+- Getestet im Chromium-Browser bei 375 × 812 (Handy) und 1280 × 720 (Beamer): Summenprüfung, Regler → Kennzahlen, Ampel, PNG (1920 × 1080), CSV (UTF-8 mit BOM), SenserScan-Import, DE/NL, Einstellungen (Menüfarbe, Kennwerte, Export/Import .json). Safari/iOS und Excel selbst sind nicht getestet.
 
 ## KI-generierte Teile
+
+In der App selbst steht keine KI-Kennzeichnung (auf Wunsch, wie in Klima Chancen); diese Liste dokumentiert sie.
 
 KI-generiert (Claude Code, Claude Opus 5.5, 23.11.2026):
 
@@ -176,6 +187,7 @@ KI-generiert (Claude Code, Claude Opus 5.5, 23.11.2026):
 - Platzhalter-Flächenbilanzen (Bestand, Varianten A/B) und Startwerte der Regler
 - Kronenfläche 50 m² je Baum
 - Rechenregeln der Regler (Umbuchung der Flächen) und die Ampel-Logik
+- Linien-Logo (Tropfen, Balken, Wellen; im Stil des Klima-Chancen-Logos)
 - niederländische Übersetzung
 - diese README
 

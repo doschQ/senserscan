@@ -13,19 +13,17 @@
  *                Werte als "Platzhalter". Echte Werte aus QGIS
  *                eintragen, "quelle" ergänzen, "platzhalter: false".
  *
- * Hinweis: Was in der App geändert wird, merkt sich der Browser.
- * Sobald sich hier etwas unter "szenarien" ändert, startet die App
- * wieder mit den Werten aus dieser Datei.
+ * Hinweis: Was in der App geändert wird (Flächenbilanz, Regler, Namen,
+ * Platzhalter, unter "Einstellungen" auch Menüfarbe und Kennwerte),
+ * merkt sich der Browser und lässt sich dort als .json exportieren und
+ * wieder importieren. Sobald sich hier etwas unter "szenarien" ändert,
+ * startet die App wieder mit den Werten aus dieser Datei.
  */
 window.ENTWURFSLABOR_CONFIG = {
-  version: '0.1.0',
+  version: '0.2.0',
 
-  // Angaben für die Info-Seite (KI-Kennzeichnung)
-  info: {
-    werkzeug: 'Claude Code',
-    modell: 'Claude Opus 5.5 (claude-opus-5-5)',
-    datum: '23.11.2026'
-  },
+  // Farbe von Kopfzeile und Bedienelementen (Vaals-Rot, wie Klima Chancen)
+  menuFarbe: '#e10a17',
 
   // Planungsgebiet Selzerbeek
   gebiet: {
@@ -59,8 +57,8 @@ window.ENTWURFSLABOR_CONFIG = {
   //                schon im psi steckt – sonst zählt er doppelt
   //   versiegelung Faktor für den Versiegelungsgrad (1 = voll, 0 = offen)
   //   dach / gruendach  Zuordnung für den Regler "Anteil begrünter Dachflächen"
-  // Startwerte von Claude (KI) aus dem Gedächtnis gesetzt, Normtexte nicht
-  // eingesehen. Vor Verwendung prüfen, auch gegen die Neufassung DWA-A 138-1.
+  // Startwerte nicht an den Normtexten geprüft. Vor Verwendung prüfen, auch
+  // gegen die Neufassung DWA-A 138-1. In der App unter "Einstellungen" änderbar.
   belaege: {
     dach_konv: {
       name: { de: 'Dach konventionell', nl: 'Dak conventioneel' },

@@ -3,44 +3,33 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b5563">
-  <meta name="description" content="Vaals Entwurfslabor – Szenario-Rechner für Wasser- und Hitzeresilienz im Planungsgebiet Selzerbeek (Prototyp, KI-generiert)">
+  <meta name="theme-color" content="#e10a17">
+  <meta name="description" content="Vaals Entwurfslabor – Szenario-Rechner für Wasser- und Hitzeresilienz im Planungsgebiet Selzerbeek">
   <title>Vaals Entwurfslabor</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b5563'/%3E%3Cpath d='M16 6c4 6 7 9.5 7 13a7 7 0 0 1-14 0c0-3.5 3-7 7-13z' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='30 30 454 454'%3E%3Crect x='30' y='30' width='454' height='454' rx='90' fill='%23e10a17'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='30' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M166 98q-62 84-62 128a62 62 0 0 0 124 0q0-44-62-128zM290 294v-70M350 294v-150M410 294v-100M80 354q29.5-24 59 0t59 0 59 0 59 0 59 0 59 0M80 406q29.5-24 59 0t59 0 59 0 59 0 59 0 59 0'/%3E%3C/g%3E%3C/svg%3E">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
-  <link rel="stylesheet" href="style.css?v=0.1.6">
+  <link rel="stylesheet" href="style.css?v=0.2.2">
 </head>
 <body>
-  <header class="kopf">
+  <header class="kopf" id="kopf">
     <div class="kopf-zeile">
       <div class="marke">
-        <strong>Vaals Entwurfslabor</strong>
-        <span id="untertitel">Selzerbeek</span>
+        <svg class="logo" viewBox="62 63 390 390" aria-hidden="true"><path d="M166 98q-62 84-62 128a62 62 0 0 0 124 0q0-44-62-128zM290 294v-70M350 294v-150M410 294v-100M80 354q29.5-24 59 0t59 0 59 0 59 0 59 0 59 0M80 406q29.5-24 59 0t59 0 59 0 59 0 59 0 59 0"/></svg>
+        <div><strong>Vaals Entwurfslabor</strong><span data-i18n="untertitel">Vaals · Senserbach</span></div>
       </div>
       <nav class="szenarien" id="szenarien" role="tablist"></nav>
       <div class="aktionen">
         <button id="btn-sprache" class="rund" type="button">NL</button>
+        <button id="btn-einst" class="rund" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button>
         <button id="btn-info" class="rund" type="button">i</button>
       </div>
     </div>
     <div class="kurz" id="kurz" aria-hidden="true"></div>
   </header>
 
-  <div id="hinweis" class="hinweis-band"></div>
-
-  <main class="raster">
-    <section class="panel" id="p-kennzahlen">
-      <div class="panel-kopf">
-        <h2 data-i18n="kennzahlen">Kennzahlen</h2>
-        <span class="unter" id="kz-unter"></span>
-      </div>
-      <div id="kz-warnung"></div>
-      <div class="kacheln" id="kacheln"></div>
-      <p class="fussnote" id="ampel-legende"></p>
-    </section>
-
-    <section class="panel" id="p-regler">
+  <div class="rahmen">
+    <aside class="panel leiste" id="p-regler">
       <div class="panel-kopf">
         <h2 data-i18n="regler">Regler</h2>
       </div>
@@ -51,43 +40,54 @@
       <p id="regler-gesperrt" class="info-zeile" hidden></p>
       <div id="regler"></div>
       <p class="fussnote" id="regler-fuss"></p>
-      <button id="btn-reset" class="btn klein" type="button" data-i18n="zuruecksetzen">Alles zurücksetzen</button>
-    </section>
+      <button id="btn-reset" class="btn klein" type="button" data-i18n="zuruecksetzen">Eingaben zurücksetzen</button>
+    </aside>
 
-    <section class="panel" id="p-diagramm">
-      <div class="panel-kopf">
-        <h2 data-i18n="vergleich">Vergleich der Szenarien</h2>
-        <div class="segment" id="ansicht" role="group"></div>
-      </div>
-      <div class="chart-box"><canvas id="chart"></canvas></div>
-      <div class="btn-reihe">
-        <button id="btn-png" class="btn" type="button" data-i18n="pngExport">PNG für Folien</button>
-        <button id="btn-csv" class="btn" type="button" data-i18n="csvExport">CSV-Bilanz</button>
-      </div>
-    </section>
+    <main class="raster">
+      <section class="panel" id="p-kennzahlen">
+        <div class="panel-kopf">
+          <h2 data-i18n="kennzahlen">Kennzahlen</h2>
+          <span class="unter" id="kz-unter"></span>
+        </div>
+        <div id="kz-warnung"></div>
+        <div class="kacheln" id="kacheln"></div>
+        <p class="fussnote" id="ampel-legende"></p>
+      </section>
 
-    <section class="panel" id="p-bilanz">
-      <div class="panel-kopf">
-        <h2 data-i18n="bilanz">Flächenbilanz</h2>
-        <span class="unter" id="bilanz-unter"></span>
-      </div>
-      <div id="bilanz-warnung"></div>
-      <div class="tabelle-scroll"><table class="bilanz" id="bilanz"></table></div>
-      <p class="fussnote" id="bilanz-quelle"></p>
-    </section>
+      <section class="panel" id="p-diagramm">
+        <div class="panel-kopf">
+          <h2 data-i18n="vergleich">Vergleich der Szenarien</h2>
+          <div class="segment" id="ansicht" role="group"></div>
+          <div class="icon-reihe">
+            <button id="btn-png" class="icon-btn" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/></svg></button>
+            <button id="btn-csv" class="icon-btn" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M10 4v16"/></svg></button>
+          </div>
+        </div>
+        <div class="chart-box"><canvas id="chart"></canvas></div>
+      </section>
 
-    <section class="panel" id="p-karte">
-      <div class="panel-kopf">
-        <h2 data-i18n="karteTitel">Planungsgebiet</h2>
-      </div>
-      <div id="map"></div>
-      <div id="import" class="import"></div>
-    </section>
-  </main>
+      <section class="panel" id="p-bilanz">
+        <div class="panel-kopf">
+          <h2 data-i18n="bilanz">Flächenbilanz</h2>
+          <span class="unter" id="bilanz-unter"></span>
+          <label class="ph-schalter"><input type="checkbox" id="ph-schalter"> <span data-i18n="platzhalterSchalter">Platzhalter</span></label>
+        </div>
+        <div id="bilanz-warnung"></div>
+        <div class="tabelle-scroll"><table class="bilanz" id="bilanz"></table></div>
+        <p class="fussnote" id="bilanz-quelle"></p>
+      </section>
 
-  <footer class="fuss" id="fuss"></footer>
+      <section class="panel" id="p-karte">
+        <div class="panel-kopf">
+          <h2 data-i18n="karteTitel">Planungsgebiet</h2>
+        </div>
+        <div id="map"></div>
+        <div id="import" class="import"></div>
+      </section>
+    </main>
+  </div>
 
-  <dialog id="info"></dialog>
+  <dialog id="dialog"></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <noscript>Vaals Entwurfslabor benötigt JavaScript.</noscript>
