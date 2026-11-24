@@ -16,7 +16,7 @@ if exist "%ZIEL%" rmdir /s /q "%ZIEL%"
 robocopy "startseite" "%ZIEL%" /E /XF *.md /NFL /NDL /NJH /NJS /NP >nul
 if errorlevel 8 goto fehler
 
-robocopy "." "%ZIEL%\klima-chancen" /E /XD .git .claude startseite entwurfslabor strato-upload /XF *.md .gitignore .gitattributes *.cmd Thumbs.db .DS_Store /NFL /NDL /NJH /NJS /NP >nul
+robocopy "." "%ZIEL%\klima-chancen" /E /XD .git .claude startseite entwurfslabor strato-upload praesi-bilder /XF *.md .gitignore .gitattributes *.cmd *.zip Thumbs.db .DS_Store /NFL /NDL /NJH /NJS /NP >nul
 if errorlevel 8 goto fehler
 
 robocopy "entwurfslabor" "%ZIEL%\entwurfslabor" /E /XF *.md Thumbs.db .DS_Store /NFL /NDL /NJH /NJS /NP >nul
