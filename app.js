@@ -361,7 +361,7 @@
   }
 
   // ================================================================
-  // Analyse des Plangebiets (data/analyse.js): lückenlose Kartierung,
+  // Analyse des Plangebiets (data/plangebiet.js): lückenlose Kartierung,
   // über den Menüpunkt "Analyse" ein- und ausblenden. Einmal geladen,
   // bleiben die Flächen gespeichert (auch Änderungen daran); ausblenden
   // versteckt sie nur.

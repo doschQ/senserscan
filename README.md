@@ -123,7 +123,7 @@ Der Katalog ist ein **KI-generierter Entwurf** und muss fachlich überarbeitet w
 ### Weitere Dateien
 
 - **Oberflächentexte DE/NL:** `i18n.js`
-- **Analyse des Plangebiets:** `data/analyse.js` (GeoJSON hinter `window.SENSERSCAN_ANALYSE =`), 69 Flächen, die das Plangebiet lückenlos abdecken (Abdeckung 99,98 %; Rest sind Zentimeter-Säume durch das Vereinfachen der Umrisse).
+- **Analyse des Plangebiets:** `data/plangebiet.js` (GeoJSON hinter `window.SENSERSCAN_ANALYSE =`). Die Datei heißt bewusst nicht `analyse.js`: Diesen Namen sperren Werbe- und Trackingblocker (EasyPrivacy-Regel `/analyse.js`), dann fehlte die Analyse z. B. auf Strato, 69 Flächen, die das Plangebiet lückenlos abdecken (Abdeckung 99,98 %; Rest sind Zentimeter-Säume durch das Vereinfachen der Umrisse).
   - Umrisse: NL aus BGT (Straßen, Grün, Wasser, Höfe), BAG (Gebäude) und BRK (Flurstücke, für die Zusammenfassung von Haus und Garten); DE aus ALKIS NRW (tatsächliche Nutzung, Flurstücke). Abgerufen über PDOK und Geobasis NRW am 23.11.2026.
   - Wohngrundstücke sind zu Baublöcken zusammengefasst, Straßenbegleitgrün und kleine Restflächen dem Nachbarn zugeschlagen.
   - Bewertung (KI-Ersteinschätzung, vor Ort zu prüfen): Risiko Hitze aus dem Versiegelungsgrad (BGT-/ALKIS-Art), Risiko Wasser aus dem Abstand zum Senserbach (≤ 10 m: 5, ≤ 40 m: 4, ≤ 90 m: 3, sonst 2; Straßen +1 als Notwasserweg), Baupotenzial nach Typ. Die Werte stehen in der Notiz jeder Fläche.
@@ -175,7 +175,7 @@ KI-generiert (Claude Code, Claude Opus 5.5, 23.11.2026):
 - gesamter Programmcode: `index.html`, `app.js`, `style.css`, `config.js`, `i18n.js`, `sw.js`, `manifest.json`
 - Umsetzung der Klassifikationsregeln in `config.js` (die Regeln selbst stammen aus der Aufgabenstellung)
 - Maßnahmenkatalog und Anforderungen in `data/massnahmen.js` (**Entwurf**)
-- Analyse des Plangebiets in `data/analyse.js`: Abgrenzung und Zusammenfassung der Flächen, Namen, Typen, Notizen und Bewertungen (**Ersteinschätzung, vor Ort zu prüfen**); die Umrisse sind aus BGT/BAG/BRK und ALKIS übernommen bzw. abgeleitet
+- Analyse des Plangebiets in `data/plangebiet.js`: Abgrenzung und Zusammenfassung der Flächen, Namen, Typen, Notizen und Bewertungen (**Ersteinschätzung, vor Ort zu prüfen**); die Umrisse sind aus BGT/BAG/BRK und ALKIS übernommen bzw. abgeleitet
 - niederländische Übersetzung aller Texte
 - App-Icons in `icons/`
 - diese README

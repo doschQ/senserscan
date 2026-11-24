@@ -11,7 +11,7 @@
  * Nach einer Änderung die Seite neu laden. Läuft die App als
  * installierte PWA, ggf. zweimal neu laden (Offline-Cache).
  * Der Maßnahmenkatalog steht in data/massnahmen.js, die Analyse
- * des Plangebiets in data/analyse.js.
+ * des Plangebiets in data/plangebiet.js.
  *
  * Menüfarbe, Klassen (Name, Farbe, Beschreibung) und Schwellenwerte
  * lassen sich auch in der App unter "Einstellungen" ändern, dort können
@@ -19,7 +19,7 @@
  * Standard ("Standard wiederherstellen").
  */
 window.SENSERSCAN_CONFIG = {
-  version: '0.4.1',
+  version: '0.4.2',
 
   // Farbe von Kopfzeile und Bedienelementen (Vaals-Rot, wie vaals.nl)
   menuFarbe: '#e10a17',

@@ -95,11 +95,21 @@ main { position: relative; flex: 1 1 auto; min-height: 0; }
 .leaflet-container { font: inherit; }
 .leaflet-bar a { width: 40px !important; height: 40px !important; line-height: 40px !important; font-size: 20px !important; }
 
-.basemap-switch {
+/* Kopfbereich auf der Karte: Zeichenhinweis (nur beim Zeichnen) über dem Kartenumschalter */
+.karten-kopf {
   position: absolute;
   top: 10px;
+  left: 10px;
   right: 10px;
   z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;   /* Karte zwischen den Elementen bleibt bedienbar */
+}
+.karten-kopf > * { pointer-events: auto; }
+.basemap-switch {
   display: flex;
   background: var(--surface);
   border-radius: 24px;
@@ -167,11 +177,7 @@ main { position: relative; flex: 1 1 auto; min-height: 0; }
 
 /* ---------- Zeichenmodus ---------- */
 .draw-hint {
-  position: absolute;
-  top: 64px;
-  left: 10px;
-  right: 10px;
-  z-index: 1000;
+  align-self: stretch;
   padding: 10px 14px;
   border-radius: 12px;
   background: rgba(232, 89, 12, .95);
@@ -280,7 +286,7 @@ body.drawing .legende { display: none; }
 }
 @media (min-width: 768px) {
   .panel { left: auto; top: 12px; right: 12px; bottom: 12px; width: 420px; max-height: none; border-radius: 16px; }
-  body.panel-open .basemap-switch { right: 444px; }
+  body.panel-open .karten-kopf { right: 444px; }
   body.panel-open .leaflet-bottom.leaflet-right { right: 432px; }
 }
 
